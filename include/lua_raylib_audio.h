@@ -3,6 +3,11 @@
 
 #include "lua_raylib.h"
 
+extern lua_State *globalLuaState;
+void audioStreamProcessorWrapper(void *buffer, unsigned int frames);
+void audioMixedProcessorWrapper(void *buffer, unsigned int frames);
+void audioStreamCallbackWrapper(void *buffer, unsigned int frames);
+
 int lua_LoadSound(lua_State *L);
 int lua_PlaySound(lua_State *L);
 int lua_StopSound(lua_State *L);

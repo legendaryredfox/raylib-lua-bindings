@@ -29,18 +29,6 @@ int lua_DrawRectangle(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawRectangle
-int lua_DrawRectangle(lua_State *L) {
-    int x = luaL_checkinteger(L, 1);
-    int y = luaL_checkinteger(L, 2);
-    int width = luaL_checkinteger(L, 3);
-    int height = luaL_checkinteger(L, 4);
-    Color color = get_color_from_table(L, 5);
-    DrawRectangle(x, y, width, height, color);
-    return 0;
-}
-
-// Binding for DrawCircle
 int lua_DrawCircle(lua_State *L) {
     int centerX = luaL_checkinteger(L, 1);
     int centerY = luaL_checkinteger(L, 2);
@@ -50,7 +38,6 @@ int lua_DrawCircle(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawLineEx
 int lua_DrawLineEx(lua_State *L) {
     Vector2 startPos = get_vector2_from_table(L, 1);
     Vector2 endPos = get_vector2_from_table(L, 2);
@@ -60,7 +47,6 @@ int lua_DrawLineEx(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawEllipse
 int lua_DrawEllipse(lua_State *L) {
     int centerX = luaL_checkinteger(L, 1);
     int centerY = luaL_checkinteger(L, 2);
@@ -71,7 +57,6 @@ int lua_DrawEllipse(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawRectangleLines
 int lua_DrawRectangleLines(lua_State *L) {
     int x = luaL_checkinteger(L, 1);
     int y = luaL_checkinteger(L, 2);
@@ -83,7 +68,6 @@ int lua_DrawRectangleLines(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawRectangleGradient
 int lua_DrawRectangleGradient(lua_State *L) {
     int x = luaL_checkinteger(L, 1);
     int y = luaL_checkinteger(L, 2);
@@ -95,7 +79,6 @@ int lua_DrawRectangleGradient(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawRectangleRounded
 int lua_DrawRectangleRounded(lua_State *L) {
     Rectangle rect = {
         luaL_checknumber(L, 1),
@@ -110,7 +93,6 @@ int lua_DrawRectangleRounded(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawLineStrip
 int lua_DrawLineStrip(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     int pointsCount = lua_rawlen(L, 1);
@@ -131,7 +113,6 @@ int lua_DrawLineStrip(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawPoly
 int lua_DrawPoly(lua_State *L) {
     Vector2 center = get_vector2_from_table(L, 1);
     int sides = luaL_checkinteger(L, 2);
@@ -142,7 +123,6 @@ int lua_DrawPoly(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawPolyLines
 int lua_DrawPolyLines(lua_State *L) {
     Vector2 center = get_vector2_from_table(L, 1);
     int sides = luaL_checkinteger(L, 2);
@@ -153,7 +133,6 @@ int lua_DrawPolyLines(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawPolyLinesEx
 int lua_DrawPolyLinesEx(lua_State *L) {
     Vector2 center = get_vector2_from_table(L, 1);
     int sides = luaL_checkinteger(L, 2);
@@ -183,7 +162,6 @@ int lua_DrawText(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawCircleSector
 int lua_DrawCircleSector(lua_State *L) {
     Vector2 center = get_vector2_from_table(L, 1);
     float radius = luaL_checknumber(L, 2);
@@ -195,7 +173,6 @@ int lua_DrawCircleSector(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawCircleSectorLines
 int lua_DrawCircleSectorLines(lua_State *L) {
     Vector2 center = get_vector2_from_table(L, 1);
     float radius = luaL_checknumber(L, 2);
@@ -207,7 +184,6 @@ int lua_DrawCircleSectorLines(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawRectangleGradientV
 int lua_DrawRectangleGradientV(lua_State *L) {
     int x = luaL_checkinteger(L, 1);
     int y = luaL_checkinteger(L, 2);
@@ -219,7 +195,6 @@ int lua_DrawRectangleGradientV(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawRectangleGradientEx
 int lua_DrawRectangleGradientEx(lua_State *L) {
     Rectangle rect = {
         luaL_checknumber(L, 1),
@@ -235,7 +210,6 @@ int lua_DrawRectangleGradientEx(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawCircleGradient
 int lua_DrawCircleGradient(lua_State *L) {
     int centerX = luaL_checkinteger(L, 1);
     int centerY = luaL_checkinteger(L, 2);
@@ -246,7 +220,6 @@ int lua_DrawCircleGradient(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawLine
 int lua_DrawLine(lua_State *L) {
     int startX = luaL_checkinteger(L, 1);
     int startY = luaL_checkinteger(L, 2);
@@ -257,7 +230,6 @@ int lua_DrawLine(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawLineBezier
 int lua_DrawLineBezier(lua_State *L) {
     Vector2 startPos = get_vector2_from_table(L, 1);
     Vector2 endPos = get_vector2_from_table(L, 2);
@@ -267,7 +239,6 @@ int lua_DrawLineBezier(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawTriangle
 int lua_DrawTriangle(lua_State *L) {
     Vector2 v1 = get_vector2_from_table(L, 1);
     Vector2 v2 = get_vector2_from_table(L, 2);
@@ -277,7 +248,6 @@ int lua_DrawTriangle(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawTriangleLines
 int lua_DrawTriangleLines(lua_State *L) {
     Vector2 v1 = get_vector2_from_table(L, 1);
     Vector2 v2 = get_vector2_from_table(L, 2);
@@ -287,9 +257,8 @@ int lua_DrawTriangleLines(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawTriangleStrip
 int lua_DrawTriangleStrip(lua_State *L) {
-    luaL_checktype(L, 1, LUA_TTABLE); // Array of Vector2
+    luaL_checktype(L, 1, LUA_TTABLE);
     int pointsCount = lua_rawlen(L, 1);
     Vector2 *points = malloc(pointsCount * sizeof(Vector2));
     if (!points) {
@@ -308,7 +277,6 @@ int lua_DrawTriangleStrip(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawRing
 int lua_DrawRing(lua_State *L) {
     Vector2 center = get_vector2_from_table(L, 1);
     float innerRadius = luaL_checknumber(L, 2);
@@ -321,7 +289,6 @@ int lua_DrawRing(lua_State *L) {
     return 0;
 }
 
-// Binding for DrawRingLines
 int lua_DrawRingLines(lua_State *L) {
     Vector2 center = get_vector2_from_table(L, 1);
     float innerRadius = luaL_checknumber(L, 2);

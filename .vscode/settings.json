@@ -9,5 +9,6 @@
     "lua_raylib_core.h": "c",
     "lua_raylib_audio.h": "c",
     "raylib.h": "c"
-  }
+  },
+  "cmake.sourceDirectory": "C:/Users/Rômulo/Documents/desenvolvimento/jogos/raylib-lua-bindings/raylib/projects/CMake"
 }

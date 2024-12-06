@@ -273,13 +273,6 @@ int lua_DrawRay(lua_State *L) {
     return 0;
 }
 
-int lua_DrawGrid(lua_State *L) {
-    int slices = luaL_checkinteger(L, 1);
-    float spacing = luaL_checknumber(L, 2);
-    DrawGrid(slices, spacing);
-    return 0;
-}
-
 int lua_LoadModelFromMesh(lua_State *L) {
     Mesh *mesh = luaL_checkudata(L, 1, "Mesh");
     Model model = LoadModelFromMesh(*mesh);

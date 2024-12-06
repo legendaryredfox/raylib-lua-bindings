@@ -113,6 +113,7 @@ static const luaL_Reg raylib_functions[] = {
     {"DrawLineStrip", lua_DrawLineStrip},
     {"DrawEllipse", lua_DrawEllipse},
     {"DrawRingLines", lua_DrawRingLines},
+    {"DrawGrid", lua_DrawGrid},
 
     //Audio
     {"LoadSound", lua_LoadSound},
@@ -224,7 +225,6 @@ static const luaL_Reg raylib_functions[] = {
     {"DrawCapsuleWires", lua_DrawCapsuleWires},
     {"DrawPlane", lua_DrawPlane},
     {"DrawRay", lua_DrawRay},
-    {"DrawGrid", lua_DrawGrid},
     {"LoadModelFromMesh", lua_LoadModelFromMesh},
     {"IsModelValid", lua_IsModelValid},
     {"GetModelBoundingBox", lua_GetModelBoundingBox},

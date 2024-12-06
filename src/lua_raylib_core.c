@@ -1,4 +1,5 @@
 #include "lua_raylib_core.h"
+#include "raylib_wrappers.h"
 
 int lua_InitWindow(lua_State *L) {
     int width = luaL_checkinteger(L, 1);
@@ -19,9 +20,20 @@ int lua_WindowShouldClose(lua_State *L) {
 }
 
 int lua_GetClipboardImage(lua_State *L) {
-    Image image = GetClipboardImage(); 
-    push_image_to_lua(L, image);        
-    return 1;                          
+    if (luaL_getmetatable(L, "Image") == LUA_TNIL) {
+        return luaL_error(L, "Image metatable not registered");
+    }
+    lua_pop(L, 1);  
+
+    Image image = GetClipboardImage();
+    Image *userdata = (Image *)lua_newuserdata(L, sizeof(Image));
+    
+    *userdata = image;
+    
+    luaL_getmetatable(L, "Image");
+    lua_setmetatable(L, -2);
+    
+    return 1;                      
 }
 
 
@@ -420,23 +432,6 @@ int lua_GetWindowScaleDPI(lua_State *L) {
     lua_setfield(L, -2, "x");
     lua_pushnumber(L, scale.y);
     lua_setfield(L, -2, "y");
-    return 1;
-}
-
-int lua_GetClipboardImage(lua_State *L) {
-    if (luaL_getmetatable(L, "Image") == LUA_TNIL) {
-        return luaL_error(L, "Image metatable not registered");
-    }
-    lua_pop(L, 1);  
-
-    Image image = GetClipboardImage();
-    Image *userdata = (Image *)lua_newuserdata(L, sizeof(Image));
-    
-    *userdata = image;
-    
-    luaL_getmetatable(L, "Image");
-    lua_setmetatable(L, -2);
-    
     return 1;
 }
 

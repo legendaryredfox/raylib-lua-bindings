@@ -1,4 +1,5 @@
 #include "raylib_wrappers.h"
+#include "lauxlib.h"
 
 Color convert_color(int color) {
     return (Color){
@@ -188,4 +189,25 @@ Rectangle get_rectangle_from_table(lua_State *L, int index) {
     lua_pop(L, 1);
 
     return rect;
+}
+
+void push_vector3_to_table(lua_State *L, Vector3 vector) {
+    lua_newtable(L);
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, vector.x);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, vector.y);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "z");
+    lua_pushnumber(L, vector.z);
+    lua_settable(L, -3);
+}
+
+void UnloadMaterials(Material *materials, int count) {
+    for (int i = 0; i < count; i++) {
+        UnloadMaterial(materials[i]);
+    }
 }
