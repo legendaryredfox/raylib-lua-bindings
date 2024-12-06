@@ -12,8 +12,12 @@ Matrix get_matrix_from_table(lua_State *L, int index);
 Ray get_ray_from_table(lua_State *L, int index);
 BoundingBox get_bounding_box_from_table(lua_State *L, int index);
 Rectangle get_rectangle_from_table(lua_State *L, int index);
+
 void push_image_to_lua(lua_State *L, Image image);
 void push_vector3_to_table(lua_State *L, Vector3 vector);
 void UnloadMaterials(Material *materials, int count);
+void push_vector2_to_table(lua_State *L, Vector2 vec);
+void push_rectangle_to_table(lua_State *L, Rectangle rect);
+void push_image_to_table(lua_State *L, Image image);
 
 #endif

@@ -152,16 +152,6 @@ int lua_DrawGrid(lua_State *L) {
     return 0;
 }
 
-int lua_DrawText(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-    int posX = luaL_checkinteger(L, 2);      
-    int posY = luaL_checkinteger(L, 3);      
-    int fontSize = luaL_checkinteger(L, 4);  
-    Color color = get_color_from_table(L, 5);
-    DrawText(text, posX, posY, fontSize, color);
-    return 0;
-}
-
 int lua_DrawCircleSector(lua_State *L) {
     Vector2 center = get_vector2_from_table(L, 1);
     float radius = luaL_checknumber(L, 2);

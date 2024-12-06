@@ -211,3 +211,49 @@ void UnloadMaterials(Material *materials, int count) {
         UnloadMaterial(materials[i]);
     }
 }
+
+void push_vector2_to_table(lua_State *L, Vector2 vec) {
+    lua_newtable(L);
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, vec.x);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, vec.y);
+    lua_settable(L, -3);
+}
+
+void push_rectangle_to_table(lua_State *L, Rectangle rect) {
+    lua_newtable(L);
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, rect.x);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, rect.y);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "width");
+    lua_pushnumber(L, rect.width);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "height");
+    lua_pushnumber(L, rect.height);
+    lua_settable(L, -3);
+}
+
+void push_image_to_table(lua_State *L, Image image) {
+    lua_newtable(L);
+
+    lua_pushinteger(L, image.width);
+    lua_setfield(L, -2, "width");
+
+    lua_pushinteger(L, image.height);
+    lua_setfield(L, -2, "height");
+
+    lua_pushinteger(L, image.mipmaps);
+    lua_setfield(L, -2, "mipmaps");
+
+    lua_pushinteger(L, image.format);
+    lua_setfield(L, -2, "format");
+}

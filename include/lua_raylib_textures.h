@@ -23,5 +23,15 @@ int lua_ImageColorContrast(lua_State *L);
 int lua_ImageColorReplace(lua_State *L);
 int lua_LoadTextureCubemap(lua_State *L);
 int lua_UpdateTextureRec(lua_State *L);
+int lua_LoadImageRaw(lua_State *L);
+int lua_LoadImageAnim(lua_State *L);
+int lua_LoadImageAnimFromMemory(lua_State *L);
+int lua_LoadImageFromMemory(lua_State *L);
+int lua_LoadImageFromTexture(lua_State *L);
+int lua_LoadImageFromScreen(lua_State *L);
+int lua_IsImageValid(lua_State *L);
+int lua_ExportImage(lua_State *L);
+int lua_ExportImageToMemory(lua_State *L);
+int lua_ExportImageAsCode(lua_State *L);
 
 #endif

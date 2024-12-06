@@ -157,3 +157,110 @@ int lua_UpdateTextureRec(lua_State *L) {
     UpdateTextureRec(*texture, rec, pixels);
     return 0;
 }
+
+#include <raylib.h>
+#include "lua_raylib_textures.h"
+#include "raylib_wrappers.h"
+
+int lua_LoadImageRaw(lua_State *L) {
+    const char *fileName = luaL_checkstring(L, 1);
+    int width = luaL_checkinteger(L, 2);
+    int height = luaL_checkinteger(L, 3);
+    int format = luaL_checkinteger(L, 4);
+    int headerSize = luaL_checkinteger(L, 5);
+
+    Image image = LoadImageRaw(fileName, width, height, format, headerSize);
+    push_image_to_table(L, image);
+    return 1;
+}
+
+int lua_LoadImageAnim(lua_State *L) {
+    const char *fileName = luaL_checkstring(L, 1);
+    int frames;
+    Image image = LoadImageAnim(fileName, &frames);
+
+    lua_newtable(L);
+    push_image_to_table(L, image);
+    lua_pushinteger(L, frames);
+    lua_setfield(L, -2, "frames");
+    return 1;
+}
+
+int lua_LoadImageAnimFromMemory(lua_State *L) {
+    const char *fileType = luaL_checkstring(L, 1);
+    const unsigned char *fileData = (unsigned char *)luaL_checkstring(L, 2);
+    int dataSize = luaL_checkinteger(L, 3);
+    int frames;
+
+    Image image = LoadImageAnimFromMemory(fileType, fileData, dataSize, &frames);
+
+    lua_newtable(L);
+    push_image_to_table(L, image);
+    lua_pushinteger(L, frames);
+    lua_setfield(L, -2, "frames");
+    return 1;
+}
+
+int lua_LoadImageFromMemory(lua_State *L) {
+    const char *fileType = luaL_checkstring(L, 1);
+    const unsigned char *fileData = (unsigned char *)luaL_checkstring(L, 2);
+    int dataSize = luaL_checkinteger(L, 3);
+
+    Image image = LoadImageFromMemory(fileType, fileData, dataSize);
+    push_image_to_table(L, image);
+    return 1;
+}
+
+int lua_LoadImageFromTexture(lua_State *L) {
+    Texture2D *texture = luaL_checkudata(L, 1, "Texture2D");
+
+    Image image = LoadImageFromTexture(*texture);
+    push_image_to_table(L, image);
+    return 1;
+}
+
+int lua_LoadImageFromScreen(lua_State *L) {
+    Image image = LoadImageFromScreen();
+    push_image_to_table(L, image);
+    return 1;
+}
+
+int lua_IsImageValid(lua_State *L) {
+    Image *image = luaL_checkudata(L, 1, "Image");
+    lua_pushboolean(L, IsImageValid(*image));
+    return 1;
+}
+
+int lua_ExportImage(lua_State *L) {
+    Image *image = luaL_checkudata(L, 1, "Image");
+    const char *fileName = luaL_checkstring(L, 2);
+
+    bool result = ExportImage(*image, fileName);
+    lua_pushboolean(L, result);
+    return 1;
+}
+
+int lua_ExportImageToMemory(lua_State *L) {
+    Image *image = luaL_checkudata(L, 1, "Image");
+    const char *fileType = luaL_checkstring(L, 2);
+    int fileSize;
+
+    unsigned char *fileData = ExportImageToMemory(*image, fileType, &fileSize);
+
+    if (fileData) {
+        lua_pushlstring(L, (const char *)fileData, fileSize);
+        UnloadImageColors((Color *)fileData);
+    } else {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+int lua_ExportImageAsCode(lua_State *L) {
+    Image *image = luaL_checkudata(L, 1, "Image");
+    const char *fileName = luaL_checkstring(L, 2);
+
+    bool result = ExportImageAsCode(*image, fileName);
+    lua_pushboolean(L, result);
+    return 1;
+}

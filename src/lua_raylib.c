@@ -6,6 +6,7 @@
 #include "lua_raylib_audio.h"
 #include "lua_raylib_textures.h"
 #include "lua_raylib_models.h"
+#include "lua_raylib_text.h"
 
 // Register bindings
 static const luaL_Reg raylib_functions[] = {
@@ -15,7 +16,6 @@ static const luaL_Reg raylib_functions[] = {
     {"CloseWindow", lua_CloseWindow},
     {"WindowShouldClose", lua_WindowShouldClose},
     {"GetClipboardImage", lua_GetClipboardImage},
-
     {"SetWindowIcon", lua_SetWindowIcon},
     {"TakeScreenshot", lua_TakeScreenshot},
     {"GetFPS", lua_GetFPS},
@@ -195,6 +195,16 @@ static const luaL_Reg raylib_functions[] = {
     {"ImageColorReplace", lua_ImageColorReplace},
     {"LoadTextureCubemap", lua_LoadTextureCubemap},
     {"UpdateTextureRec", lua_UpdateTextureRec},
+    {"LoadImageRaw", lua_LoadImageRaw},
+    {"LoadImageAnim", lua_LoadImageAnim},
+    {"LoadImageAnimFromMemory", lua_LoadImageAnimFromMemory},
+    {"LoadImageFromMemory", lua_LoadImageFromMemory},
+    {"LoadImageFromTexture", lua_LoadImageFromTexture},
+    {"LoadImageFromScreen", lua_LoadImageFromScreen},
+    {"IsImageValid", lua_IsImageValid},
+    {"ExportImage", lua_ExportImage},
+    {"ExportImageToMemory", lua_ExportImageToMemory},
+    {"ExportImageAsCode", lua_ExportImageAsCode},
 
     //Models
     {"LoadModel", lua_LoadModel},
@@ -262,6 +272,55 @@ static const luaL_Reg raylib_functions[] = {
     {"GetRayCollisionMesh", lua_GetRayCollisionMesh},
     {"GetRayCollisionTriangle", lua_GetRayCollisionTriangle},
     {"GetRayCollisionQuad", lua_GetRayCollisionQuad},
+
+    //Text
+    {"GetFontDefault", lua_GetFontDefault},
+    {"LoadFont", lua_LoadFont},
+    {"LoadFontEx", lua_LoadFontEx},
+    {"LoadFontFromImage", lua_LoadFontFromImage},
+    {"LoadFontFromMemory", lua_LoadFontFromMemory},
+    {"IsFontValid", lua_IsFontValid},
+    {"UnloadFont", lua_UnloadFont},
+    {"ExportFontAsCode", lua_ExportFontAsCode},
+    {"DrawFPS", lua_DrawFPS},
+    {"DrawText", lua_DrawText},
+    {"DrawTextEx", lua_DrawTextEx},
+    {"DrawTextPro", lua_DrawTextPro},
+    {"DrawTextCodepoint", lua_DrawTextCodepoint},
+    {"DrawTextCodepoints", lua_DrawTextCodepoints},
+    {"SetTextLineSpacing", lua_SetTextLineSpacing},
+    {"MeasureText", lua_MeasureText},
+    {"MeasureTextEx", lua_MeasureTextEx},
+    {"GetGlyphIndex", lua_GetGlyphIndex},
+    {"GetGlyphInfo", lua_GetGlyphInfo},
+    {"GetGlyphAtlasRec", lua_GetGlyphAtlasRec},
+    {"LoadUTF8", lua_LoadUTF8},
+    {"UnloadUTF8", lua_UnloadUTF8},
+    {"LoadCodepoints", lua_LoadCodepoints},
+    {"UnloadCodepoints", lua_UnloadCodepoints},
+    {"GetCodepointCount", lua_GetCodepointCount},
+    {"GetCodepoint", lua_GetCodepoint},
+    {"GetCodepointNext", lua_GetCodepointNext},
+    {"GetCodepointPrevious", lua_GetCodepointPrevious},
+    {"CodepointToUTF8", lua_CodepointToUTF8},
+    {"TextCopy", lua_TextCopy},
+    {"TextIsEqual", lua_TextIsEqual},
+    {"TextLength", lua_TextLength},
+    {"TextFormat", lua_TextFormat},
+    {"TextSubtext", lua_TextSubtext},
+    {"TextReplace", lua_TextReplace},
+    {"TextInsert", lua_TextInsert},
+    {"TextJoin", lua_TextJoin},
+    {"TextSplit", lua_TextSplit},
+    {"TextAppend", lua_TextAppend},
+    {"TextFindIndex", lua_TextFindIndex},
+    {"TextToUpper", lua_TextToUpper},
+    {"TextToLower", lua_TextToLower},
+    {"TextToPascal", lua_TextToPascal},
+    {"TextToSnake", lua_TextToSnake},
+    {"TextToCamel", lua_TextToCamel},
+    {"TextToInteger", lua_TextToInteger},
+    {"TextToFloat", lua_TextToFloat},
     
     {NULL, NULL} 
 };
