@@ -4,6 +4,7 @@
 #include "lua_raylib_core.h"
 #include "lua_raylib_draw.h"
 #include "lua_raylib_audio.h"
+#include "lua_raylib_textures.h"
 
 // Register bindings
 static const luaL_Reg raylib_functions[] = {
@@ -124,6 +125,28 @@ static const luaL_Reg raylib_functions[] = {
     {"SetMusicVolume", lua_SetMusicVolume},
     {"SetSoundVolume", lua_SetSoundVolume},
     {"IsSoundPlaying", lua_IsSoundPlaying},
+
+    //Textures
+    {"LoadImage", lua_LoadImage},
+    {"UnloadImage", lua_UnloadImage},
+    {"LoadTexture", lua_LoadTexture},
+    {"LoadTextureFromImage", lua_LoadTextureFromImage},
+    {"UnloadTexture", lua_UnloadTexture},
+    {"UpdateTexture", lua_UpdateTexture},
+    {"GenTextureMipmaps", lua_GenTextureMipmaps},
+    {"ImageResize", lua_ImageResize},
+    {"ImageFlipHorizontal", lua_ImageFlipHorizontal},
+    {"ImageFlipVertical", lua_ImageFlipVertical},
+    {"ImageCopy", lua_ImageCopy},
+    {"ImageCrop", lua_ImageCrop},
+    {"ImageColorTint", lua_ImageColorTint},
+    {"ImageColorInvert", lua_ImageColorInvert},
+    {"ImageColorGrayscale", lua_ImageColorGrayscale},
+    {"ImageColorBrightness", lua_ImageColorBrightness},
+    {"ImageColorContrast", lua_ImageColorContrast},
+    {"ImageColorReplace", lua_ImageColorReplace},
+    {"LoadTextureCubemap", lua_LoadTextureCubemap},
+    {"UpdateTextureRec", lua_UpdateTextureRec},
     
     {NULL, NULL} 
 };

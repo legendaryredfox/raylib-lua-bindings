@@ -1,5 +1,5 @@
-#ifndef RAYLIB55_AUDIO_H
-#define RAYLIB55_AUDIO_H
+#ifndef LUA_RAYLIB_AUDIO_H
+#define LUA_RAYLIB_AUDIO_H
 
 #include "lua_raylib.h"
 
