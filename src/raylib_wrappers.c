@@ -62,3 +62,75 @@ Vector2 get_vector2_from_table(lua_State *L, int index) {
     lua_pop(L, 1);
     return vec;
 }
+
+
+Vector3 get_vector3_from_table(lua_State *L, int index) {
+    luaL_checktype(L, index, LUA_TTABLE);
+    Vector3 vec;
+    lua_getfield(L, index, "x");
+    vec.x = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "y");
+    vec.y = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "z");
+    vec.z = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    return vec;
+}
+
+Matrix get_matrix_from_table(lua_State *L, int index) {
+    luaL_checktype(L, index, LUA_TTABLE);
+    Matrix mat;
+
+    lua_getfield(L, index, "m0");
+    mat.m0 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m1");
+    mat.m1 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m2");
+    mat.m2 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m3");
+    mat.m3 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m4");
+    mat.m4 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m5");
+    mat.m5 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m6");
+    mat.m6 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m7");
+    mat.m7 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m8");
+    mat.m8 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m9");
+    mat.m9 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m10");
+    mat.m10 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m11");
+    mat.m11 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m12");
+    mat.m12 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m13");
+    mat.m13 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m14");
+    mat.m14 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+    lua_getfield(L, index, "m15");
+    mat.m15 = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    return mat;
+}

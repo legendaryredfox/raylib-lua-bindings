@@ -5,6 +5,7 @@
 #include "lua_raylib_draw.h"
 #include "lua_raylib_audio.h"
 #include "lua_raylib_textures.h"
+#include "lua_raylib_models.h"
 
 // Register bindings
 static const luaL_Reg raylib_functions[] = {
@@ -147,6 +148,18 @@ static const luaL_Reg raylib_functions[] = {
     {"ImageColorReplace", lua_ImageColorReplace},
     {"LoadTextureCubemap", lua_LoadTextureCubemap},
     {"UpdateTextureRec", lua_UpdateTextureRec},
+
+    //Models
+    {"LoadModel", lua_LoadModel},
+    {"DrawModel", lua_DrawModel},
+    {"DrawModelEx", lua_DrawModelEx},
+    {"UnloadModel", lua_UnloadModel},
+    {"UpdateModelAnimation", lua_UpdateModelAnimation},
+    {"DrawMesh", lua_DrawMesh},
+    {"UnloadMesh", lua_UnloadMesh},
+    {"GenMeshCube", lua_GenMeshCube},
+    {"GenMeshSphere", lua_GenMeshSphere},
+    {"GenMeshPlane", lua_GenMeshPlane},
     
     {NULL, NULL} 
 };
