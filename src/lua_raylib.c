@@ -3,6 +3,7 @@
 #include "raylib_wrappers.h"
 #include "lua_raylib_core.h"
 #include "lua_raylib_draw.h"
+#include "lua_raylib_audio.h"
 
 // Register bindings
 static const luaL_Reg raylib_functions[] = {
@@ -88,8 +89,43 @@ static const luaL_Reg raylib_functions[] = {
     {"EndDrawing", lua_EndDrawing},
     {"ClearBackground", lua_ClearBackground},
     {"DrawRectangle", lua_DrawRectangle},
+    {"DrawRectangleLines", lua_DrawRectangleLines},
+    {"DrawRectangleGradientV", lua_DrawRectangleGradientV},
+    {"DrawRectangleGradientEx", lua_DrawRectangleGradientEx},
+    {"DrawRectangleRounded", lua_DrawRectangleRounded},
+    {"DrawTriangle", lua_DrawTriangle},
+    {"DrawTriangleLines", lua_DrawTriangleLines},
+    {"DrawTriangleStrip", lua_DrawTriangleStrip},
+    {"DrawPoly", lua_DrawPoly},
+    {"DrawPolyLines", lua_DrawPolyLines},
+    {"DrawPolyLinesEx", lua_DrawPolyLinesEx},
+    {"DrawCircle", lua_DrawCircle},
+    {"DrawCircleSector", lua_DrawCircleSector},
+    {"DrawCircleSectorLines", lua_DrawCircleSectorLines},
+    {"DrawCircleGradient", lua_DrawCircleGradient},
+    {"DrawRing", lua_DrawRing},
+    {"DrawRingLines", lua_DrawRingLines},
+    {"DrawLine", lua_DrawLine},
+    {"DrawLineEx", lua_DrawLineEx},
+    {"DrawLineBezier", lua_DrawLineBezier},
+    {"DrawLineStrip", lua_DrawLineStrip},
+    {"DrawEllipse", lua_DrawEllipse},
+    {"DrawRingLines", lua_DrawRingLines},
+
+    //Audio
+    {"LoadSound", lua_LoadSound},
+    {"PlaySound", lua_PlaySound},
+    {"StopSound", lua_StopSound},
+    {"UnloadSound", lua_UnloadSound},
+    {"LoadMusicStream", lua_LoadMusicStream},
+    {"PlayMusicStream", lua_PlayMusicStream},
+    {"StopMusicStream", lua_StopMusicStream},
+    {"UpdateMusicStream", lua_UpdateMusicStream},
+    {"SetMusicVolume", lua_SetMusicVolume},
+    {"SetSoundVolume", lua_SetSoundVolume},
+    {"IsSoundPlaying", lua_IsSoundPlaying},
     
-    {NULL, NULL} // Sentinel
+    {NULL, NULL} 
 };
 
 int luaopen_raylib(lua_State *L) {
