@@ -1,0 +1,46 @@
+# Ignore build artifacts
+*.o
+*.dll
+*.so
+*.dylib
+*.exe
+
+# Ignore log files and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.~*
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-workspace
+*.sublime-project
+*.DS_Store
+
+# Ignore system files
+Thumbs.db
+desktop.ini
+
+# Ignore backup and archive files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Ignore generated directories
+bin/
+build/
+
+# Specific directories for this project
+lua/src/*.o
+raylib/*.o
+include/*.o
+src/*.o
+
+# Generated executable and shared library
+raylib.dll
