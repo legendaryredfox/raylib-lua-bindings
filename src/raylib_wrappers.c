@@ -134,3 +134,58 @@ Matrix get_matrix_from_table(lua_State *L, int index) {
 
     return mat;
 }
+
+Ray get_ray_from_table(lua_State *L, int index) {
+    luaL_checktype(L, index, LUA_TTABLE);
+    Ray ray;
+
+
+    lua_getfield(L, index, "position");
+    ray.position = get_vector3_from_table(L, -1);
+    lua_pop(L, 1);
+
+
+    lua_getfield(L, index, "direction");
+    ray.direction = get_vector3_from_table(L, -1);
+    lua_pop(L, 1);
+
+    return ray;
+}
+
+BoundingBox get_bounding_box_from_table(lua_State *L, int index) {
+    luaL_checktype(L, index, LUA_TTABLE);
+    BoundingBox bbox;
+
+    lua_getfield(L, index, "min");
+    bbox.min = get_vector3_from_table(L, -1);
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "max");
+    bbox.max = get_vector3_from_table(L, -1);
+    lua_pop(L, 1);
+
+    return bbox;
+}
+
+Rectangle get_rectangle_from_table(lua_State *L, int index) {
+    luaL_checktype(L, index, LUA_TTABLE);
+    Rectangle rect;
+
+    lua_getfield(L, index, "x");
+    rect.x = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "y");
+    rect.y = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "width");
+    rect.width = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "height");
+    rect.height = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    return rect;
+}
