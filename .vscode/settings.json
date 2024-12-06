@@ -6,6 +6,7 @@
     "*.tsx": "typescriptreact",
     "lua.h": "c",
     "raylib_wrappers.h": "c",
-    "lua_raylib_core.h": "c"
+    "lua_raylib_core.h": "c",
+    "lua_raylib_audio.h": "c"
   }
 }
