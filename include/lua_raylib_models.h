@@ -660,312 +660,881 @@ int lua_DrawGrid(lua_State *L);
 /**
  * @brief Loads a model from a mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Model result)
+ * This function creates a 3D model from a mesh. The resulting model can be used in rendering.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `Mesh mesh`: The mesh to load as a model.
+ * 
+ * @return int Always returns 1 (Model result).
+ * 
+ * @usage
+ * ```lua
+ * local model = raylib.LoadModelFromMesh(mesh)
+ * print("Model loaded from mesh successfully")
+ * ```
+ * 
+ * @note This function allows you to convert a mesh to a model that can be rendered with materials.
  */
 int lua_LoadModelFromMesh(lua_State *L);
 
 /**
  * @brief Checks if a model is valid.
  * 
- * @param L Lua state
- * @return int Always returns 1 (boolean result)
+ * This function checks if a model is valid and usable.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `Model model`: The model to check for validity.
+ * 
+ * @return int Always returns 1 (boolean result).
+ * 
+ * @usage
+ * ```lua
+ * local isValid = raylib.IsModelValid(model)
+ * print("Is model valid?", isValid)
+ * ```
+ * 
+ * @note This function returns `true` if the model is valid and `false` otherwise.
  */
 int lua_IsModelValid(lua_State *L);
 
 /**
  * @brief Gets the bounding box of a model.
  * 
- * @param L Lua state
- * @return int Always returns 1 (BoundingBox result)
+ * This function calculates and returns the bounding box of a 3D model.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `Model model`: The model to get the bounding box for.
+ * 
+ * @return int Always returns 1 (BoundingBox result).
+ * 
+ * @usage
+ * ```lua
+ * local boundingBox = raylib.GetModelBoundingBox(model)
+ * print("Bounding box min:", boundingBox.min, "max:", boundingBox.max)
+ * ```
+ * 
+ * @note The bounding box is a rectangular box that encloses the entire 3D model.
  */
 int lua_GetModelBoundingBox(lua_State *L);
 
 /**
  * @brief Draws a bounding box with specified parameters.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function draws a bounding box with a given color.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `BoundingBox bbox`: The bounding box to draw.
+ *  - `Color color`: The color of the bounding box.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.DrawBoundingBox(boundingBox, {r=255, g=0, b=0, a=255})
+ * print("Bounding box drawn successfully")
+ * ```
+ * 
+ * @note This function draws the edges (wireframe) of the bounding box using the current active shader.
  */
 int lua_DrawBoundingBox(lua_State *L);
 
 /**
  * @brief Draws a billboard with specified parameters.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function draws a 2D image (billboard) that always faces the camera, commonly used to display 2D objects in 3D space.
+ * 
+ * @param L A pointer to the current Lua state. Expects 5 arguments:
+ *  - `Camera camera`: The camera to orient the billboard towards.
+ *  - `Texture2D texture`: The texture to use for the billboard.
+ *  - `Vector3 position`: The position in 3D space where the billboard is drawn.
+ *  - `float size`: The size of the billboard.
+ *  - `Color tint`: The color tint to apply to the billboard.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.DrawBillboard(camera, texture, {x=0, y=1, z=0}, 2.0, {r=255, g=255, b=255, a=255})
+ * print("Billboard drawn successfully")
+ * ```
+ * 
+ * @note The billboard will always face the camera, making it useful for sprites or icons in 3D worlds.
  */
 int lua_DrawBillboard(lua_State *L);
 
 /**
  * @brief Draws a billboard with a specified rectangle.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function draws a billboard using a specific region (rectangle) from a texture.
+ * 
+ * @param L A pointer to the current Lua state. Expects 6 arguments:
+ *  - `Camera camera`: The camera to orient the billboard towards.
+ *  - `Texture2D texture`: The texture to use for the billboard.
+ *  - `Rectangle sourceRect`: The source rectangle of the texture to draw.
+ *  - `Vector3 position`: The position in 3D space where the billboard is drawn.
+ *  - `Vector2 size`: The size of the billboard.
+ *  - `Color tint`: The color tint to apply to the billboard.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.DrawBillboardRec(camera, texture, {x=0, y=0, width=64, height=64}, {x=0, y=1, z=0}, {x=2, y=2}, {r=255, g=255, b=255, a=255})
+ * print("Billboard with rectangle drawn successfully")
+ * ```
+ * 
+ * @note This function allows you to draw a specific portion of the texture as a billboard.
  */
 int lua_DrawBillboardRec(lua_State *L);
 
 /**
  * @brief Draws a billboard with extended parameters.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function draws a billboard with options for scaling, rotation, and other extended parameters.
+ * 
+ * @param L A pointer to the current Lua state. Expects 9 arguments:
+ *  - `Camera camera`: The camera to orient the billboard towards.
+ *  - `Texture2D texture`: The texture to use for the billboard.
+ *  - `Rectangle sourceRect`: The source rectangle of the texture to draw.
+ *  - `Vector3 position`: The position in 3D space where the billboard is drawn.
+ *  - `Vector2 size`: The size of the billboard.
+ *  - `Vector2 origin`: The origin point of the billboard.
+ *  - `float rotation`: The rotation of the billboard in degrees.
+ *  - `Color tint`: The color tint to apply to the billboard.
+ *  - `bool drawCenter`: If `true`, the billboard is drawn centered on the position.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.DrawBillboardPro(camera, texture, {x=0, y=0, width=64, height=64}, {x=0, y=1, z=0}, {x=2, y=2}, {x=1, y=1}, 45.0, {r=255, g=255, b=255, a=255}, true)
+ * print("Pro billboard drawn successfully")
+ * ```
+ * 
+ * @note This function gives you full control over the size, rotation, origin, and source rectangle of the billboard.
  */
 int lua_DrawBillboardPro(lua_State *L);
 
 /**
  * @brief Uploads a mesh to the GPU.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function uploads mesh data to the GPU, enabling faster rendering.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `Mesh mesh`: The mesh to upload to the GPU.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.UploadMesh(mesh)
+ * print("Mesh uploaded to GPU successfully")
+ * ```
+ * 
+ * @note Once uploaded, the mesh resides in GPU memory, which improves rendering speed.
  */
 int lua_UploadMesh(lua_State *L);
 
 /**
  * @brief Updates a mesh buffer with new data.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function updates a specific buffer of the mesh with new data.
+ * 
+ * @param L A pointer to the current Lua state. Expects 5 arguments:
+ *  - `Mesh mesh`: The mesh to update.
+ *  - `int bufferIndex`: The index of the buffer to update.
+ *  - `void *data`: The pointer to the data to update the buffer with.
+ *  - `int dataSize`: The size of the data in bytes.
+ *  - `int offset`: The offset within the buffer to start updating from.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.UpdateMeshBuffer(mesh, 0, data, #data, 0)
+ * print("Mesh buffer updated successfully")
+ * ```
+ * 
+ * @note This function can be used to partially update vertex data, normals, or indices of the mesh.
  */
 int lua_UpdateMeshBuffer(lua_State *L);
 
 /**
  * @brief Gets the bounding box of a mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (BoundingBox result)
+ * This function returns the minimum and maximum 3D coordinates of the mesh as a BoundingBox.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `Mesh mesh`: The mesh to compute the bounding box for.
+ * 
+ * @return int Always returns 1 (BoundingBox result).
+ * 
+ * @usage
+ * ```lua
+ * local boundingBox = raylib.GetMeshBoundingBox(mesh)
+ * print("Bounding box:", boundingBox.min, boundingBox.max)
+ * ```
+ * 
+ * @note This function computes the bounding box of the mesh in world space, useful for collision detection or visibility checks.
  */
 int lua_GetMeshBoundingBox(lua_State *L);
 
 /**
  * @brief Generates tangents for a mesh.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function generates tangents for a mesh, which are necessary for normal mapping.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `Mesh mesh`: The mesh to generate tangents for.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.GenMeshTangents(mesh)
+ * print("Tangents generated for the mesh")
+ * ```
+ * 
+ * @note Tangents are vectors perpendicular to the normals, and they are required for proper lighting with normal maps.
  */
 int lua_GenMeshTangents(lua_State *L);
 
 /**
  * @brief Exports a mesh to a file.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function saves the mesh to a file in a specific format (e.g., OBJ or GLTF).
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `Mesh mesh`: The mesh to export.
+ *  - `string filename`: The path where the mesh will be saved.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.ExportMesh(mesh, "output.obj")
+ * print("Mesh exported to 'output.obj' successfully")
+ * ```
+ * 
+ * @note The export format is determined by the file extension (e.g., `.obj`, `.gltf`).
  */
 int lua_ExportMesh(lua_State *L);
 
 /**
- * @brief Exports a mesh as code.
+ * @brief Exports a mesh as C code.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function exports the mesh as C code, which can be included in a C/C++ project as a static resource.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `Mesh mesh`: The mesh to export.
+ *  - `string filename`: The path where the C code will be saved.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * raylib.ExportMeshAsCode(mesh, "mesh_code.c")
+ * print("Mesh exported as C code to 'mesh_code.c'")
+ * ```
+ * 
+ * @note The exported C code contains the vertex data, normals, and indices as C arrays.
  */
 int lua_ExportMeshAsCode(lua_State *L);
 
 /**
  * @brief Generates a polygon mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Mesh result)
+ * This function generates a mesh representing a polygon with a specified number of sides.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `int sides`: The number of sides of the polygon.
+ *  - `float radius`: The radius of the polygon.
+ * 
+ * @return int Always returns 1 (Mesh result).
+ * 
+ * @usage
+ * ```lua
+ * local polygonMesh = raylib.GenMeshPoly(6, 2.0)
+ * print("Generated hexagon mesh")
+ * ```
+ * 
+ * @note This function is useful for creating shapes like triangles, pentagons, hexagons, etc.
  */
 int lua_GenMeshPoly(lua_State *L);
 
 /**
  * @brief Generates a hemisphere mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Mesh result)
+ * This function generates a mesh representing a hemisphere.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `float radius`: The radius of the hemisphere.
+ *  - `int rings`: The number of horizontal slices in the hemisphere.
+ * 
+ * @return int Always returns 1 (Mesh result).
+ * 
+ * @usage
+ * ```lua
+ * local hemisphereMesh = raylib.GenMeshHemiSphere(2.0, 16)
+ * print("Generated hemisphere mesh")
+ * ```
+ * 
+ * @note The hemisphere is a half-sphere, often used for skyboxes or ground objects.
  */
 int lua_GenMeshHemiSphere(lua_State *L);
 
 /**
  * @brief Generates a cylinder mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Mesh result)
+ * This function generates a mesh representing a cylinder.
+ * 
+ * @param L A pointer to the current Lua state. Expects 4 arguments:
+ *  - `float radius`: The radius of the base of the cylinder.
+ *  - `float height`: The height of the cylinder.
+ *  - `int slices`: The number of vertical divisions of the cylinder.
+ *  - `int stacks`: The number of horizontal layers of the cylinder.
+ * 
+ * @return int Always returns 1 (Mesh result).
+ * 
+ * @usage
+ * ```lua
+ * local cylinderMesh = raylib.GenMeshCylinder(1.0, 3.0, 16, 4)
+ * print("Generated cylinder mesh")
+ * ```
+ * 
+ * @note This function generates a 3D mesh for cylindrical shapes. The slices determine the radial division, while stacks determine the vertical division.
  */
 int lua_GenMeshCylinder(lua_State *L);
 
 /**
  * @brief Generates a cone mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Mesh result)
+ * This function generates a mesh representing a 3D cone shape.
+ * 
+ * @param L A pointer to the current Lua state. Expects 4 arguments:
+ *  - `float radius`: The radius of the base of the cone.
+ *  - `float height`: The height of the cone.
+ *  - `int slices`: The number of vertical divisions of the cone.
+ *  - `int stacks`: The number of horizontal layers of the cone.
+ * 
+ * @return int Always returns 1 (Mesh result).
+ * 
+ * @usage
+ * ```lua
+ * local coneMesh = raylib.GenMeshCone(1.0, 3.0, 16, 4)
+ * print("Generated cone mesh")
+ * ```
+ * 
+ * @note This function generates a 3D mesh for conical shapes. The slices determine the radial division, while stacks determine the vertical division.
  */
 int lua_GenMeshCone(lua_State *L);
 
 /**
  * @brief Generates a torus mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Mesh result)
+ * This function generates a mesh representing a 3D torus (donut) shape.
+ * 
+ * @param L A pointer to the current Lua state. Expects 4 arguments:
+ *  - `float radius`: The radius of the torus.
+ *  - `float size`: The thickness of the torus.
+ *  - `int radialSegments`: The number of radial segments.
+ *  - `int sideSegments`: The number of sides for each segment.
+ * 
+ * @return int Always returns 1 (Mesh result).
+ * 
+ * @usage
+ * ```lua
+ * local torusMesh = raylib.GenMeshTorus(1.0, 0.5, 16, 16)
+ * print("Generated torus mesh")
+ * ```
+ * 
+ * @note The torus is a circular ring or donut-like shape. This function allows for control of radial and side segmentation.
  */
 int lua_GenMeshTorus(lua_State *L);
 
 /**
  * @brief Generates a knot mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Mesh result)
+ * This function generates a mesh representing a 3D knot shape.
+ * 
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `float radius`: The radius of the knot.
+ *  - `float size`: The thickness of the knot.
+ *  - `int radialSegments`: The number of radial segments.
+ *  - `int sideSegments`: The number of sides for each segment.
+ * 
+ * @return int Always returns 1 (Mesh result).
+ * 
+ * @usage
+ * ```lua
+ * local knotMesh = raylib.GenMeshKnot(1.0, 0.3, 16, 8)
+ * print("Generated knot mesh")
+ * ```
+ * 
+ * @note The knot is a 3D representation of a mathematical knot. This function allows control of the radius, size, and segmentation of the knot.
  */
 int lua_GenMeshKnot(lua_State *L);
 
 /**
  * @brief Generates a heightmap mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Mesh result)
+ * This function generates a mesh from a heightmap image, where the brightness of the image's pixels determines the height of the vertices.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `Image heightmap`: The heightmap image used to generate the mesh.
+ *  - `Vector3 size`: The size of the generated mesh.
+ * 
+ * @return int Always returns 1 (Mesh result).
+ * 
+ * @usage
+ * ```lua
+ * local heightmapImage = raylib.LoadImage("heightmap.png")
+ * local size = { x = 10.0, y = 2.0, z = 10.0 }
+ * local heightmapMesh = raylib.GenMeshHeightmap(heightmapImage, size)
+ * print("Generated heightmap mesh")
+ * ```
+ * 
+ * @note This function is useful for generating terrain from grayscale images. Higher brightness values in the image produce higher vertices on the mesh.
  */
 int lua_GenMeshHeightmap(lua_State *L);
 
 /**
  * @brief Generates a cubicmap mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Mesh result)
+ * This function generates a 3D mesh from a cubic map image where pixel colors represent the presence or absence of cubes.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `Image cubicmap`: The image used to generate the cubic map. White pixels are converted to cubes, and black pixels are left as empty space.
+ *  - `Vector3 cubeSize`: The size of the cubes in the generated map.
+ * 
+ * @return int Always returns 1 (Mesh result).
+ * 
+ * @usage
+ * ```lua
+ * local cubicmapImage = raylib.LoadImage("cubicmap.png")
+ * local cubeSize = { x = 1.0, y = 1.0, z = 1.0 }
+ * local cubicmapMesh = raylib.GenMeshCubicmap(cubicmapImage, cubeSize)
+ * print("Generated cubicmap mesh")
+ * ```
+ * 
+ * @note This function is useful for creating voxel-style worlds where each pixel in the image represents the presence of a cube in 3D space.
  */
 int lua_GenMeshCubicmap(lua_State *L);
 
 /**
  * @brief Loads materials from a file.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Materials result)
+ * This function loads materials from an external file (e.g., an MTL file) and returns them as an array of materials.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `string fileName`: The path to the file containing the material definitions.
+ * 
+ * @return int Always returns 1 (Materials result).
+ * 
+ * @usage
+ * ```lua
+ * local materials = raylib.LoadMaterials("materials.mtl")
+ * print("Loaded materials from file")
+ * ```
+ * 
+ * @note The materials are used to apply textures, shaders, and other properties to 3D objects. They are commonly used with 3D models.
  */
 int lua_LoadMaterials(lua_State *L);
 
 /**
  * @brief Loads the default material.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Material result)
+ * This function returns a default material that can be used for basic 3D rendering.
+ * 
+ * @param L A pointer to the current Lua state. No arguments are required.
+ * 
+ * @return int Always returns 1 (Material result).
+ * 
+ * @usage
+ * ```lua
+ * local defaultMaterial = raylib.LoadMaterialDefault()
+ * print("Loaded default material")
+ * ```
+ * 
+ * @note This is useful when you need a simple material to apply to meshes without loading custom textures or shaders.
  */
 int lua_LoadMaterialDefault(lua_State *L);
 
 /**
  * @brief Checks if a material is valid.
  * 
- * @param L Lua state
- * @return int Always returns 1 (boolean result)
+ * This function checks if a given material is valid.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `Material material`: The material to check for validity.
+ * 
+ * @return int Always returns 1 (boolean result).
+ * 
+ * @usage
+ * ```lua
+ * local material = raylib.LoadMaterialDefault()
+ * local isValid = raylib.IsMaterialValid(material)
+ * print("Is the material valid?", isValid)
+ * ```
+ * 
+ * @note This function verifies if the provided material has been loaded correctly and is safe to use for rendering.
  */
 int lua_IsMaterialValid(lua_State *L);
 
 /**
  * @brief Unloads a material from memory.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function releases the resources used by a material, including its textures and shaders.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `Material material`: The material to unload from memory.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * local material = raylib.LoadMaterialDefault()
+ * raylib.UnloadMaterial(material)
+ * print("Material unloaded")
+ * ```
+ * 
+ * @note After unloading a material, it is no longer valid for use in rendering. Ensure that no meshes are referencing it.
  */
 int lua_UnloadMaterial(lua_State *L);
 
 /**
  * @brief Sets a texture for a material.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function sets a texture for a material at the specified map index.
+ * 
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `Material material`: The material to modify.
+ *  - `int mapType`: The map type (e.g., diffuse, normal, specular) from `MaterialMapIndex`.
+ *  - `Texture2D texture`: The texture to apply to the material.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * local material = raylib.LoadMaterialDefault()
+ * local texture = raylib.LoadTexture("diffuse.png")
+ * raylib.SetMaterialTexture(material, raylib.MATERIAL_MAP_DIFFUSE, texture)
+ * print("Texture set for material")
+ * ```
+ * 
+ * @note This function allows you to change the appearance of a material by associating it with new textures.
  */
 int lua_SetMaterialTexture(lua_State *L);
 
 /**
  * @brief Sets the material for a model mesh.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function sets the material for a specific mesh within a model.
+ * 
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `Model model`: The model whose mesh material will be set.
+ *  - `int meshIndex`: The index of the mesh within the model.
+ *  - `int materialIndex`: The index of the material to use.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * local model = raylib.LoadModel("model.obj")
+ * local material = raylib.LoadMaterialDefault()
+ * raylib.SetModelMeshMaterial(model, 0, 0)
+ * print("Material set for model mesh")
+ * ```
+ * 
+ * @note This function allows you to specify which material is used for individual meshes within a model.
  */
 int lua_SetModelMeshMaterial(lua_State *L);
 
 /**
  * @brief Loads model animations from a file.
  * 
- * @param L Lua state
- * @return int Always returns 1 (ModelAnimations result)
+ * This function loads all animations for a model from a specified file.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `string fileName`: The path to the file containing the model animations.
+ * 
+ * @return int Always returns 1 (ModelAnimations result).
+ * 
+ * @usage
+ * ```lua
+ * local animations = raylib.LoadModelAnimations("animations.iqm")
+ * print("Loaded animations from file")
+ * ```
+ * 
+ * @note This function is used to load animations for 3D models. The animations can be played or applied to the model at runtime.
  */
 int lua_LoadModelAnimations(lua_State *L);
 
 /**
  * @brief Unloads a model animation from memory.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function releases the resources used by a single model animation.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `ModelAnimation animation`: The model animation to unload.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * local animations = raylib.LoadModelAnimations("animations.iqm")
+ * raylib.UnloadModelAnimation(animations[1])
+ * print("Model animation unloaded")
+ * ```
+ * 
+ * @note After unloading an animation, it is no longer valid for use. 
  */
 int lua_UnloadModelAnimation(lua_State *L);
 
 /**
  * @brief Unloads model animations from memory.
  * 
- * @param L Lua state
- * @return int Always returns 0
+ * This function releases the resources used by all loaded model animations.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `ModelAnimation[] animations`: The array of model animations to unload.
+ * 
+ * @return int Always returns 0.
+ * 
+ * @usage
+ * ```lua
+ * local animations = raylib.LoadModelAnimations("animations.iqm")
+ * raylib.UnloadModelAnimations(animations)
+ * print("All model animations unloaded")
+ * ```
+ * 
+ * @note This function is useful when you have loaded multiple animations and want to release all of them at once.
  */
 int lua_UnloadModelAnimations(lua_State *L);
 
 /**
  * @brief Checks if a model animation is valid.
  * 
- * @param L Lua state
- * @return int Always returns 1 (boolean result)
+ * This function verifies if the given model animation is valid.
+ * 
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `ModelAnimation animation`: The model animation to validate.
+ * 
+ * @return int Always returns 1 (boolean result).
+ * 
+ * @usage
+ * ```lua
+ * local animations = raylib.LoadModelAnimations("animations.iqm")
+ * local isValid = raylib.IsModelAnimationValid(animations[1])
+ * print("Is animation valid?", isValid)
+ * ```
+ * 
+ * @note This function helps to ensure that a model animation is valid before attempting to use it.
  */
 int lua_IsModelAnimationValid(lua_State *L);
 
 /**
  * @brief Checks collision between two spheres.
  * 
- * @param L Lua state
- * @return int Always returns 1 (boolean result)
+ * This function checks if two spheres collide.
+ * 
+ * @param L A pointer to the current Lua state. Expects 4 arguments:
+ *  - `Vector3 center1`: The center position of the first sphere.
+ *  - `float radius1`: The radius of the first sphere.
+ *  - `Vector3 center2`: The center position of the second sphere.
+ *  - `float radius2`: The radius of the second sphere.
+ * 
+ * @return int Always returns 1 (boolean result).
+ * 
+ * @usage
+ * ```lua
+ * local center1 = { x = 0, y = 0, z = 0 }
+ * local center2 = { x = 1, y = 1, z = 1 }
+ * local result = raylib.CheckCollisionSpheres(center1, 1.0, center2, 1.0)
+ * print("Do spheres collide?", result)
+ * ```
+ * 
+ * @note This function is useful for physics simulations and collision detection in 3D environments.
  */
 int lua_CheckCollisionSpheres(lua_State *L);
 
 /**
  * @brief Checks collision between two boxes.
  * 
- * @param L Lua state
- * @return int Always returns 1 (boolean result)
+ * This function checks if two 3D bounding boxes collide.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `BoundingBox box1`: The first bounding box.
+ *  - `BoundingBox box2`: The second bounding box.
+ * 
+ * @return int Always returns 1 (boolean result).
+ * 
+ * @usage
+ * ```lua
+ * local box1 = { min = {x = 0, y = 0, z = 0}, max = {x = 2, y = 2, z = 2} }
+ * local box2 = { min = {x = 1, y = 1, z = 1}, max = {x = 3, y = 3, z = 3} }
+ * local result = raylib.CheckCollisionBoxes(box1, box2)
+ * print("Do boxes collide?", result)
+ * ```
+ * 
+ * @note Useful for 3D collision detection in physics simulations.
  */
 int lua_CheckCollisionBoxes(lua_State *L);
 
 /**
  * @brief Checks collision between a box and a sphere.
  * 
- * @param L Lua state
- * @return int Always returns 1 (boolean result)
+ * This function checks if a 3D bounding box and a sphere collide.
+ * 
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `BoundingBox box`: The bounding box.
+ *  - `Vector3 center`: The center of the sphere.
+ *  - `float radius`: The radius of the sphere.
+ * 
+ * @return int Always returns 1 (boolean result).
+ * 
+ * @usage
+ * ```lua
+ * local box = { min = {x = 0, y = 0, z = 0}, max = {x = 2, y = 2, z = 2} }
+ * local center = { x = 1, y = 1, z = 1 }
+ * local radius = 1.5
+ * local result = raylib.CheckCollisionBoxSphere(box, center, radius)
+ * print("Do box and sphere collide?", result)
+ * ```
+ * 
+ * @note This function is useful for collision detection in 3D environments.
  */
 int lua_CheckCollisionBoxSphere(lua_State *L);
 
 /**
  * @brief Gets the collision information between a ray and a sphere.
  * 
- * @param L Lua state
- * @return int Always returns 1 (RayCollision result)
+ * This function checks if a ray intersects with a sphere and provides detailed collision information.
+ * 
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `Ray ray`: The ray to check for collision.
+ *  - `Vector3 center`: The center of the sphere.
+ *  - `float radius`: The radius of the sphere.
+ * 
+ * @return int Always returns 1 (RayCollision result).
+ * 
+ * @usage
+ * ```lua
+ * local ray = { position = {x = 0, y = 0, z = 0}, direction = {x = 1, y = 1, z = 1} }
+ * local center = { x = 3, y = 3, z = 3 }
+ * local radius = 1.0
+ * local collision = raylib.GetRayCollisionSphere(ray, center, radius)
+ * print("Ray collision point:", collision.point)
+ * print("Did ray hit sphere?", collision.hit)
+ * ```
+ * 
+ * @note This function provides collision point, distance, and whether the collision occurred.
  */
 int lua_GetRayCollisionSphere(lua_State *L);
 
 /**
  * @brief Gets the collision information between a ray and a box.
  * 
- * @param L Lua state
- * @return int Always returns 1 (RayCollision result)
+ * This function checks if a ray intersects with a 3D bounding box and provides detailed collision information.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `Ray ray`: The ray to check for collision.
+ *  - `BoundingBox box`: The 3D bounding box to check for collision.
+ * 
+ * @return int Always returns 1 (RayCollision result).
+ * 
+ * @usage
+ * ```lua
+ * local ray = { position = {x = 0, y = 0, z = 0}, direction = {x = 1, y = 1, z = 1} }
+ * local box = { min = {x = 2, y = 2, z = 2}, max = {x = 4, y = 4, z = 4} }
+ * local collision = raylib.GetRayCollisionBox(ray, box)
+ * print("Ray collision point:", collision.point)
+ * print("Did ray hit box?", collision.hit)
+ * ```
+ * 
+ * @note This function is useful for raycasting in 3D environments.
  */
 int lua_GetRayCollisionBox(lua_State *L);
 
 /**
  * @brief Gets the collision information between a ray and a mesh.
  * 
- * @param L Lua state
- * @return int Always returns 1 (RayCollision result)
+ * This function checks if a ray intersects with a mesh and provides detailed collision information.
+ * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `Ray ray`: The ray to check for collision.
+ *  - `Mesh mesh`: The mesh to check for collision.
+ * 
+ * @return int Always returns 1 (RayCollision result).
+ * 
+ * @usage
+ * ```lua
+ * local ray = { position = {x = 0, y = 0, z = 0}, direction = {x = 1, y = 1, z = 1} }
+ * local mesh = raylib.LoadMesh("path/to/mesh.obj")
+ * local collision = raylib.GetRayCollisionMesh(ray, mesh)
+ * print("Ray collision point:", collision.point)
+ * print("Did ray hit mesh?", collision.hit)
+ * ```
+ * 
+ * @note This function provides collision point, distance, and hit status. It's useful for raycasting against 3D meshes.
  */
 int lua_GetRayCollisionMesh(lua_State *L);
 
 /**
  * @brief Gets the collision information between a ray and a triangle.
  * 
- * @param L Lua state
- * @return int Always returns 1 (RayCollision result)
+ * This function checks if a ray intersects with a triangle and provides detailed collision information.
+ * 
+ * @param L A pointer to the current Lua state. Expects 4 arguments:
+ *  - `Ray ray`: The ray to check for collision.
+ *  - `Vector3 p1`: The first vertex of the triangle.
+ *  - `Vector3 p2`: The second vertex of the triangle.
+ *  - `Vector3 p3`: The third vertex of the triangle.
+ * 
+ * @return int Always returns 1 (RayCollision result).
+ * 
+ * @usage
+ * ```lua
+ * local ray = { position = {x = 0, y = 0, z = 0}, direction = {x = 1, y = 1, z = 1} }
+ * local p1 = { x = 0, y = 0, z = 0 }
+ * local p2 = { x = 1, y = 0, z = 0 }
+ * local p3 = { x = 0, y = 1, z = 0 }
+ * local collision = raylib.GetRayCollisionTriangle(ray, p1, p2, p3)
+ * print("Ray collision point:", collision.point)
+ * print("Did ray hit triangle?", collision.hit)
+ * ```
+ * 
+ * @note This function is useful for precise collision checks with individual triangles in a mesh.
  */
 int lua_GetRayCollisionTriangle(lua_State *L);
 
 /**
  * @brief Gets the collision information between a ray and a quad.
  * 
- * @param L Lua state
- * @return int Always returns 1 (RayCollision result)
+ * This function checks if a ray intersects with a quad (a four-sided polygon) and provides detailed collision information.
+ * 
+ * @param L A pointer to the current Lua state. Expects 5 arguments:
+ *  - `Ray ray`: The ray to check for collision.
+ *  - `Vector3 p1`: The first vertex of the quad.
+ *  - `Vector3 p2`: The second vertex of the quad.
+ *  - `Vector3 p3`: The third vertex of the quad.
+ *  - `Vector3 p4`: The fourth vertex of the quad.
+ * 
+ * @return int Always returns 1 (RayCollision result).
+ * 
+ * @usage
+ * ```lua
+ * local ray = { position = {x = 0, y = 0, z = 0}, direction = {x = 1, y = 1, z = 1} }
+ * local p1 = { x = 0, y = 0, z = 0 }
+ * local p2 = { x = 1, y = 0, z = 0 }
+ * local p3 = { x = 1, y = 1, z = 0 }
+ * local p4 = { x = 0, y = 1, z = 0 }
+ * local collision = raylib.GetRayCollisionQuad(ray, p1, p2, p3, p4)
+ * print("Ray collision point:", collision.point)
+ * print("Did ray hit quad?", collision.hit)
+ * ```
+ * 
+ * @note This function allows for collision detection against quads, useful for custom polygonal shapes.
  */
 int lua_GetRayCollisionQuad(lua_State *L);
 
