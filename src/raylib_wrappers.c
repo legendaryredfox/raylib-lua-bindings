@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "raylib_wrappers.h"
 #include "lauxlib.h"
 
@@ -354,10 +355,6 @@ Vector4 get_vector4_from_table(lua_State *L, int index) {
     return vec;
 }
 
-#include "raylib.h"
-#include "lua.h"
-#include "lauxlib.h"
-
 void push_vector4_to_table(lua_State *L, Vector4 vec) {
     lua_newtable(L);
 
@@ -376,4 +373,16 @@ void push_vector4_to_table(lua_State *L, Vector4 vec) {
     lua_pushstring(L, "w");
     lua_pushnumber(L, vec.w);
     lua_settable(L, -3);
+}
+
+Vector2 *get_vector2_array_from_table(lua_State *L, int index) {
+    luaL_checktype(L, index, LUA_TTABLE);
+    int len = luaL_len(L, index);
+    Vector2 *points = malloc(len * sizeof(Vector2));
+    for (int i = 0; i < len; i++) {
+        lua_rawgeti(L, index, i + 1);
+        points[i] = get_vector2_from_table(L, -1);
+        lua_pop(L, 1);
+    }
+    return points;
 }
