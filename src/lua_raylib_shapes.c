@@ -373,10 +373,6 @@ int lua_CheckCollisionLines(lua_State *L) {
     return 2;
 }
 
-#include <raylib.h>
-#include <lauxlib.h>
-#include "raylib_wrappers.h"
-
 int lua_GetCollisionRec(lua_State *L) {
     Rectangle rec1 = get_rectangle_from_table(L, 1);
     Rectangle rec2 = get_rectangle_from_table(L, 2);
