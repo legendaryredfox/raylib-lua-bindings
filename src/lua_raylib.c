@@ -440,7 +440,6 @@ static const luaL_Reg raylib_functions[] = {
     {"CheckCollisionLines", lua_CheckCollisionLines},
     {"GetCollisionRec", lua_GetCollisionRec},
 
-
     {NULL, NULL} 
 };
 
