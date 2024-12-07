@@ -7,6 +7,7 @@
 #include "lua_raylib_textures.h"
 #include "lua_raylib_models.h"
 #include "lua_raylib_text.h"
+#include "lua_raylib_shapes.h"
 
 // Register bindings
 static const luaL_Reg raylib_functions[] = {
@@ -398,6 +399,11 @@ static const luaL_Reg raylib_functions[] = {
     {"TextToCamel", lua_TextToCamel},
     {"TextToInteger", lua_TextToInteger},
     {"TextToFloat", lua_TextToFloat},
+    
+    //Shapes
+    {"SetShapesTexture", lua_SetShapesTexture},
+    {"GetShapesTexture", lua_GetShapesTexture},
+    {"GetShapesTextureRectangle", lua_GetShapesTextureRectangle},
     
     {NULL, NULL} 
 };
