@@ -257,3 +257,123 @@ void push_image_to_table(lua_State *L, Image image) {
     lua_pushinteger(L, image.format);
     lua_setfield(L, -2, "format");
 }
+
+void push_color_to_table(lua_State *L, Color color) {
+    lua_newtable(L);
+    lua_pushinteger(L, color.r);
+    lua_setfield(L, -2, "r");
+    lua_pushinteger(L, color.g);
+    lua_setfield(L, -2, "g");
+    lua_pushinteger(L, color.b);
+    lua_setfield(L, -2, "b");
+    lua_pushinteger(L, color.a);
+    lua_setfield(L, -2, "a");
+}
+
+NPatchInfo get_npatchinfo_from_table(lua_State *L, int index) {
+    NPatchInfo nPatchInfo;
+
+    luaL_checktype(L, index, LUA_TTABLE);
+
+    lua_getfield(L, index, "sourceRec");
+    if (lua_istable(L, -1)) {
+        nPatchInfo.source = get_rectangle_from_table(L, lua_gettop(L));
+    } else {
+        luaL_error(L, "'sourceRec' field must be a table");
+    }
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "layout");
+    if (lua_isinteger(L, -1)) {
+        nPatchInfo.layout = lua_tointeger(L, -1);
+    } else {
+        luaL_error(L, "'layout' field must be an integer");
+    }
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "left");
+    if (lua_isinteger(L, -1)) {
+        nPatchInfo.left = lua_tointeger(L, -1);
+    } else {
+        luaL_error(L, "'left' field must be an integer");
+    }
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "top");
+    if (lua_isinteger(L, -1)) {
+        nPatchInfo.top = lua_tointeger(L, -1);
+    } else {
+        luaL_error(L, "'top' field must be an integer");
+    }
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "right");
+    if (lua_isinteger(L, -1)) {
+        nPatchInfo.right = lua_tointeger(L, -1);
+    } else {
+        luaL_error(L, "'right' field must be an integer");
+    }
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "bottom");
+    if (lua_isinteger(L, -1)) {
+        nPatchInfo.bottom = lua_tointeger(L, -1);
+    } else {
+        luaL_error(L, "'bottom' field must be an integer");
+    }
+    lua_pop(L, 1);
+
+    return nPatchInfo;
+}
+
+Vector4 get_vector4_from_table(lua_State *L, int index) {
+    luaL_checktype(L, index, LUA_TTABLE);
+
+    Vector4 vec;
+
+    lua_pushstring(L, "x");
+    lua_gettable(L, index);
+    vec.x = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_pushstring(L, "y");
+    lua_gettable(L, index);
+    vec.y = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_pushstring(L, "z");
+    lua_gettable(L, index);
+    vec.z = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_pushstring(L, "w");
+    lua_gettable(L, index);
+    vec.w = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+
+    return vec;
+}
+
+#include "raylib.h"
+#include "lua.h"
+#include "lauxlib.h"
+
+void push_vector4_to_table(lua_State *L, Vector4 vec) {
+    lua_newtable(L);
+
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, vec.x);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, vec.y);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "z");
+    lua_pushnumber(L, vec.z);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "w");
+    lua_pushnumber(L, vec.w);
+    lua_settable(L, -3);
+}
