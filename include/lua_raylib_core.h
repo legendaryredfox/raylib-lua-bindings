@@ -3,14 +3,62 @@
 
 #include "lua_raylib.h"
 
+/**
+ * @brief Initializes a window.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ */
 int lua_InitWindow(lua_State *L);
+
+/**
+ * @brief Closes the window.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ */
 int lua_CloseWindow(lua_State *L);
+
+/**
+ * @brief Checks if the window should close.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (boolean result)
+ */
 int lua_WindowShouldClose(lua_State *L);
+
+/**
+ * @brief Gets the image from the clipboard.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Image result)
+ */
 int lua_GetClipboardImage(lua_State *L);
 
+/**
+ * @brief Sets the window icon.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ */
 int lua_SetWindowIcon(lua_State *L);
+
+/**
+ * @brief Takes a screenshot of the current window.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ */
 int lua_TakeScreenshot(lua_State *L);
+
+/**
+ * @brief Gets the current frames per second (FPS).
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (integer result)
+ */
 int lua_GetFPS(lua_State *L);
+
 int lua_IsWindowMinimized(lua_State *L);
 int lua_IsWindowMaximized(lua_State *L);
 int lua_RestoreWindow(lua_State *L);
