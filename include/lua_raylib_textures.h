@@ -859,72 +859,1185 @@ int lua_ImageAlphaClear(lua_State *L);
  * ```
  */
 int lua_ImageAlphaMask(lua_State *L);
+/**
+ * @brief Premultiplies the alpha channel of an image.
+ * 
+ * This function multiplies the RGB color components of the image by its alpha component, 
+ * making it suitable for blending operations.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageAlphaPremultiply(image)
+ * raylib.ExportImage(image, "premultiplied_alpha_image.png")
+ * ```
+ */
 int lua_ImageAlphaPremultiply(lua_State *L);
+
+/**
+ * @brief Applies a Gaussian blur to an image.
+ * 
+ * This function smooths the image using a Gaussian blur filter, useful for creating 
+ * soft effects or reducing image noise.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageBlurGaussian(image, 5) -- Applies a Gaussian blur with radius 5
+ * raylib.ExportImage(image, "blurred_image.png")
+ * ```
+ */
 int lua_ImageBlurGaussian(lua_State *L);
+
+/**
+ * @brief Applies a kernel convolution to an image.
+ * 
+ * This function processes the image with a custom kernel (filter), allowing for effects 
+ * like edge detection, sharpening, and blurring.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local kernel = {0, -1, 0, -1, 5, -1, 0, -1, 0} -- Sharpen kernel
+ * raylib.ImageKernelConvolution(image, kernel, 3, 3)
+ * raylib.ExportImage(image, "sharpened_image.png")
+ * ```
+ */
 int lua_ImageKernelConvolution(lua_State *L);
+
+/**
+ * @brief Resizes an image using nearest-neighbor scaling.
+ * 
+ * This function resizes the image to the specified width and height using 
+ * nearest-neighbor interpolation, which is fast but may produce jagged edges.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageResizeNN(image, 128, 128) -- Resizes the image to 128x128 pixels
+ * raylib.ExportImage(image, "resized_image.png")
+ * ```
+ */
 int lua_ImageResizeNN(lua_State *L);
+/**
+ * @brief Resizes the image canvas while maintaining the image's position.
+ * 
+ * This function resizes the image canvas to the specified width and height. 
+ * The image is centered in the new canvas, and the remaining space is filled with a background color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageResizeCanvas(image, 256, 256, 10, 10, raylib.BLACK) -- Adds a 10-pixel border on all sides
+ * raylib.ExportImage(image, "resized_canvas_image.png")
+ * ```
+ */
 int lua_ImageResizeCanvas(lua_State *L);
+
+/**
+ * @brief Generates mipmaps for the image.
+ * 
+ * This function generates a series of smaller versions (mipmaps) of the image, 
+ * which are used to improve rendering performance at different distances.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageMipmaps(image) -- Generates mipmaps for the image
+ * raylib.ExportImage(image, "image_with_mipmaps.png")
+ * ```
+ */
 int lua_ImageMipmaps(lua_State *L);
+
+/**
+ * @brief Applies a dithering effect to the image.
+ * 
+ * This function reduces the number of colors in the image using dithering, 
+ * which is useful for retro-style graphics or when reducing color depth.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDither(image, 256, 256, 4, 4) -- Reduces the color depth of the image
+ * raylib.ExportImage(image, "dithered_image.png")
+ * ```
+ */
 int lua_ImageDither(lua_State *L);
+
+/**
+ * @brief Rotates the image by a specified angle.
+ * 
+ * This function rotates the image clockwise by the specified angle (in degrees).
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageRotate(image, 45) -- Rotates the image by 45 degrees clockwise
+ * raylib.ExportImage(image, "rotated_image.png")
+ * ```
+ */
 int lua_ImageRotate(lua_State *L);
+/**
+ * @brief Resizes the image canvas while maintaining the image's position.
+ * 
+ * This function resizes the image canvas to the specified width and height. 
+ * The image is centered in the new canvas, and the remaining space is filled with a background color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageResizeCanvas(image, 256, 256, 10, 10, raylib.BLACK) -- Adds a 10-pixel border on all sides
+ * raylib.ExportImage(image, "resized_canvas_image.png")
+ * ```
+ */
+int lua_ImageResizeCanvas(lua_State *L);
+
+/**
+ * @brief Generates mipmaps for the image.
+ * 
+ * This function generates a series of smaller versions (mipmaps) of the image, 
+ * which are used to improve rendering performance at different distances.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageMipmaps(image) -- Generates mipmaps for the image
+ * raylib.ExportImage(image, "image_with_mipmaps.png")
+ * ```
+ */
+int lua_ImageMipmaps(lua_State *L);
+
+/**
+ * @brief Applies a dithering effect to the image.
+ * 
+ * This function reduces the number of colors in the image using dithering, 
+ * which is useful for retro-style graphics or when reducing color depth.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDither(image, 256, 256, 4, 4) -- Reduces the color depth of the image
+ * raylib.ExportImage(image, "dithered_image.png")
+ * ```
+ */
+int lua_ImageDither(lua_State *L);
+
+/**
+ * @brief Rotates the image by a specified angle.
+ * 
+ * This function rotates the image clockwise by the specified angle (in degrees).
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageRotate(image, 45) -- Rotates the image by 45 degrees clockwise
+ * raylib.ExportImage(image, "rotated_image.png")
+ * ```
+ */
+int lua_ImageRotate(lua_State *L);
+/**
+ * @brief Rotates the image 90 degrees clockwise.
+ * 
+ * This function rotates the image 90 degrees clockwise (rightward) in place.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageRotateCW(image) -- Rotates the image 90 degrees clockwise
+ * raylib.ExportImage(image, "rotated_cw_image.png")
+ * ```
+ */
 int lua_ImageRotateCW(lua_State *L);
+
+/**
+ * @brief Rotates the image 90 degrees counterclockwise.
+ * 
+ * This function rotates the image 90 degrees counterclockwise (leftward) in place.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageRotateCCW(image) -- Rotates the image 90 degrees counterclockwise
+ * raylib.ExportImage(image, "rotated_ccw_image.png")
+ * ```
+ */
 int lua_ImageRotateCCW(lua_State *L);
+
+/**
+ * @brief Loads the color data from an image.
+ * 
+ * This function extracts the color data from the image as an array of Color values.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (table of colors)
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local colors = raylib.LoadImageColors(image) -- Extracts the image's color data
+ * for i, color in ipairs(colors) do
+ *     print(color.r, color.g, color.b, color.a)
+ * end
+ * ```
+ */
 int lua_LoadImageColors(lua_State *L);
+
+/**
+ * @brief Loads the palette from an image.
+ * 
+ * This function extracts a palette from the image as an array of Color values with a maximum size.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (table of colors)
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local palette, colorsCount = raylib.LoadImagePalette(image, 16) -- Extracts a palette with up to 16 colors
+ * for i, color in ipairs(palette) do
+ *     print(color.r, color.g, color.b, color.a)
+ * end
+ * ```
+ */
 int lua_LoadImagePalette(lua_State *L);
+/**
+ * @brief Unloads the color data from memory.
+ * 
+ * This function releases the memory used by the color data extracted from an image.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local colors = raylib.LoadImageColors(image)
+ * raylib.UnloadImageColors(colors) -- Frees the memory used for the color data
+ * ```
+ */
 int lua_UnloadImageColors(lua_State *L);
+
+/**
+ * @brief Unloads the image palette from memory.
+ * 
+ * This function releases the memory used by the palette extracted from an image.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local palette, count = raylib.LoadImagePalette(image, 16)
+ * raylib.UnloadImagePalette(palette) -- Frees the memory used for the image palette
+ * ```
+ */
 int lua_UnloadImagePalette(lua_State *L);
+
+/**
+ * @brief Gets the alpha border rectangle of an image.
+ * 
+ * This function calculates the minimum bounding rectangle that encloses all the non-transparent pixels in the image.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Rectangle result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local alphaBorder = raylib.GetImageAlphaBorder(image, 0.5) -- Gets a rectangle around non-transparent pixels
+ * print("Border:", alphaBorder.x, alphaBorder.y, alphaBorder.width, alphaBorder.height)
+ * ```
+ */
 int lua_GetImageAlphaBorder(lua_State *L);
+
+/**
+ * @brief Gets the color of a specific pixel in an image.
+ * 
+ * This function retrieves the color of the pixel at the specified (x, y) position in the image.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local color = raylib.GetImageColor(image, 10, 20) -- Gets the color of the pixel at (10, 20)
+ * print("Color:", color.r, color.g, color.b, color.a)
+ * ```
+ */
 int lua_GetImageColor(lua_State *L);
+/**
+ * @brief Clears the background of an image with a specified color.
+ * 
+ * This function fills the entire image with a solid color, effectively resetting its contents.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageClearBackground(image, { r = 255, g = 0, b = 0, a = 255 }) -- Clears the image with red color
+ * ```
+ */
 int lua_ImageClearBackground(lua_State *L);
+
+/**
+ * @brief Draws a pixel at the specified position in an image.
+ * 
+ * This function modifies the pixel color at the specified (x, y) position in the image.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawPixel(image, 10, 20, { r = 0, g = 255, b = 0, a = 255 }) -- Draws a green pixel at position (10, 20)
+ * ```
+ */
 int lua_ImageDrawPixel(lua_State *L);
+
+/**
+ * @brief Draws a pixel at the specified position (Vector2) in an image.
+ * 
+ * This function modifies the pixel color at the position given by a Vector2 in the image.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawPixelV(image, { x = 50, y = 50 }, { r = 255, g = 255, b = 0, a = 255 }) -- Draws a yellow pixel at (50, 50)
+ * ```
+ */
 int lua_ImageDrawPixelV(lua_State *L);
+
+/**
+ * @brief Draws a line between two points in an image.
+ * 
+ * This function draws a straight line between the points (x1, y1) and (x2, y2) in the image.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawLine(image, 10, 20, 100, 120, { r = 0, g = 0, b = 255, a = 255 }) -- Draws a blue line from (10, 20) to (100, 120)
+ * ```
+ */
 int lua_ImageDrawLine(lua_State *L);
+/**
+ * @brief Draws a line between two points (Vector2) in an image.
+ * 
+ * This function draws a straight line between the points specified by two Vector2 objects.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawLineV(image, { x = 10, y = 20 }, { x = 100, y = 120 }, { r = 0, g = 0, b = 255, a = 255 }) -- Draws a blue line
+ * ```
+ */
 int lua_ImageDrawLineV(lua_State *L);
+
+/**
+ * @brief Draws a line between two points with extended parameters in an image.
+ * 
+ * This function draws a line with thickness between two points (Vector2) in the image.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawLineEx(image, { x = 10, y = 20 }, { x = 100, y = 120 }, 5, { r = 255, g = 0, b = 0, a = 255 }) -- Draws a thick red line
+ * ```
+ */
 int lua_ImageDrawLineEx(lua_State *L);
+
+/**
+ * @brief Draws a circle in an image at a specified position.
+ * 
+ * This function draws a circle at the given (x, y) position with the specified radius and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawCircle(image, 50, 50, 25, { r = 0, g = 255, b = 0, a = 255 }) -- Draws a green circle at (50, 50) with a radius of 25
+ * ```
+ */
 int lua_ImageDrawCircle(lua_State *L);
+
+/**
+ * @brief Draws a circle in an image at a specified position (Vector2).
+ * 
+ * This function draws a circle at the position specified by a Vector2 with the given radius and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawCircleV(image, { x = 75, y = 75 }, 30, { r = 255, g = 255, b = 0, a = 255 }) -- Draws a yellow circle
+ * ```
+ */
 int lua_ImageDrawCircleV(lua_State *L);
+/**
+ * @brief Draws the outline of a circle in an image at a specified position.
+ * 
+ * This function draws the outline of a circle at the given (x, y) position with the specified radius and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawCircleLines(image, 50, 50, 25, { r = 0, g = 0, b = 255, a = 255 }) -- Draws a blue circle outline at (50, 50) with a radius of 25
+ * ```
+ */
 int lua_ImageDrawCircleLines(lua_State *L);
+
+/**
+ * @brief Draws the outline of a circle in an image at a specified position (Vector2).
+ * 
+ * This function draws the outline of a circle at the position specified by a Vector2 with the given radius and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawCircleLinesV(image, { x = 75, y = 75 }, 30, { r = 255, g = 0, b = 0, a = 255 }) -- Draws a red circle outline
+ * ```
+ */
 int lua_ImageDrawCircleLinesV(lua_State *L);
+
+/**
+ * @brief Draws a rectangle in an image at a specified position.
+ * 
+ * This function draws a rectangle at the given (x, y) position with the specified width, height, and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawRectangle(image, 10, 20, 100, 50, { r = 0, g = 255, b = 0, a = 255 }) -- Draws a green rectangle at (10, 20) with a width of 100 and height of 50
+ * ```
+ */
 int lua_ImageDrawRectangle(lua_State *L);
+
+/**
+ * @brief Draws a rectangle in an image at a specified position (Vector2).
+ * 
+ * This function draws a rectangle at the position specified by a Vector2 with the given size (Vector2) and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawRectangleV(image, { x = 20, y = 40 }, { x = 150, y = 80 }, { r = 255, g = 0, b = 0, a = 255 }) -- Draws a red rectangle at (20, 40) with size (150, 80)
+ * ```
+ */
 int lua_ImageDrawRectangleV(lua_State *L);
+/**
+ * @brief Draws a rectangle in an image using a Rectangle structure.
+ * 
+ * This function draws a rectangle in an image using a `Rectangle` structure to specify the position and size.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawRectangleRec(image, { x = 30, y = 40, width = 100, height = 50 }, { r = 255, g = 255, b = 0, a = 255 }) -- Draws a yellow rectangle at (30, 40) with width 100 and height 50
+ * ```
+ */
 int lua_ImageDrawRectangleRec(lua_State *L);
+
+/**
+ * @brief Draws the outline of a rectangle in an image.
+ * 
+ * This function draws the outline of a rectangle at the given position (x, y) with the specified width, height, and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawRectangleLines(image, 50, 50, 150, 100, { r = 255, g = 0, b = 0, a = 255 }) -- Draws a red rectangle outline at (50, 50) with width 150 and height 100
+ * ```
+ */
 int lua_ImageDrawRectangleLines(lua_State *L);
+
+/**
+ * @brief Draws a triangle in an image using three points.
+ * 
+ * This function draws a filled triangle in an image using three points (Vector2) and a color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawTriangle(image, { x = 100, y = 100 }, { x = 150, y = 50 }, { x = 200, y = 100 }, { r = 0, g = 0, b = 255, a = 255 }) -- Draws a blue triangle
+ * ```
+ */
 int lua_ImageDrawTriangle(lua_State *L);
+
+/**
+ * @brief Draws a triangle in an image using extended parameters.
+ * 
+ * This function draws a filled triangle in an image using three points (Vector2) and a color with extended options for customization.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawTriangleEx(image, { x = 100, y = 150 }, { x = 200, y = 50 }, { x = 250, y = 150 }, { r = 0, g = 255, b = 0, a = 255 }) -- Draws a green triangle
+ * ```
+ */
 int lua_ImageDrawTriangleEx(lua_State *L);
+/**
+ * @brief Draws the outline of a triangle in an image.
+ * 
+ * This function draws the outline of a triangle in an image using three points (Vector2) and a color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawTriangleLines(image, { x = 100, y = 50 }, { x = 150, y = 150 }, { x = 200, y = 50 }, { r = 255, g = 255, b = 0, a = 255 }) -- Draws a yellow triangle outline
+ * ```
+ */
 int lua_ImageDrawTriangleLines(lua_State *L);
+
+/**
+ * @brief Draws a triangle fan in an image.
+ * 
+ * This function draws a fan-shaped collection of triangles in an image using an array of points (Vector2) and a color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local points = { { x = 100, y = 100 }, { x = 150, y = 50 }, { x = 200, y = 100 }, { x = 150, y = 150 } }
+ * raylib.ImageDrawTriangleFan(image, points, { r = 0, g = 255, b = 0, a = 255 }) -- Draws a green triangle fan
+ * ```
+ */
 int lua_ImageDrawTriangleFan(lua_State *L);
+
+/**
+ * @brief Draws a triangle strip in an image.
+ * 
+ * This function draws a connected series of triangles in an image using an array of points (Vector2) and a color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local points = { { x = 100, y = 50 }, { x = 150, y = 100 }, { x = 200, y = 50 }, { x = 250, y = 100 } }
+ * raylib.ImageDrawTriangleStrip(image, points, { r = 0, g = 0, b = 255, a = 255 }) -- Draws a blue triangle strip
+ * ```
+ */
 int lua_ImageDrawTriangleStrip(lua_State *L);
+
+/**
+ * @brief Draws an image onto another image.
+ * 
+ * This function draws an image onto another image at a specified position and color tint.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local targetImage = raylib.LoadImage("background.png")
+ * local sourceImage = raylib.LoadImage("sprite.png")
+ * raylib.ImageDraw(targetImage, sourceImage, { x = 50, y = 50 }, { r = 255, g = 255, b = 255, a = 255 }) -- Draws the source image onto the target at position (50, 50)
+ * ```
+ */
 int lua_ImageDraw(lua_State *L);
+/**
+ * @brief Draws text on an image.
+ * 
+ * This function draws a string of text on an image at a specified position using a given font size and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawText(image, "Hello, World!", 50, 50, 20, { r = 255, g = 0, b = 0, a = 255 }) -- Draws red text at position (50, 50)
+ * ```
+ */
 int lua_ImageDrawText(lua_State *L);
+
+/**
+ * @brief Draws text on an image using extended parameters.
+ * 
+ * This function draws a string of text on an image using a specified font, position, font size, spacing, and color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * local font = raylib.LoadFont("font.ttf")
+ * raylib.ImageDrawTextEx(image, font, "Hello, World!", { x = 50, y = 50 }, 20, 2, { r = 0, g = 0, b = 255, a = 255 }) -- Draws blue text at position (50, 50) with custom font
+ * ```
+ */
 int lua_ImageDrawTextEx(lua_State *L);
+
+/**
+ * @brief Loads a render texture.
+ * 
+ * This function creates a new render texture with the specified width and height.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (RenderTexture result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local renderTexture = raylib.LoadRenderTexture(800, 600) -- Creates a render texture of size 800x600
+ * ```
+ */
 int lua_LoadRenderTexture(lua_State *L);
+
+/**
+ * @brief Checks if a texture is valid.
+ * 
+ * This function checks if a given texture is valid.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (boolean result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("image.png")
+ * local isValid = raylib.IsTextureValid(texture) -- Returns true if the texture is valid
+ * ```
+ */
 int lua_IsTextureValid(lua_State *L);
+/**
+ * @brief Checks if a render texture is valid.
+ * 
+ * This function checks if a given render texture is valid.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (boolean result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local renderTexture = raylib.LoadRenderTexture(800, 600)
+ * local isValid = raylib.IsRenderTextureValid(renderTexture) -- Returns true if the render texture is valid
+ * ```
+ */
 int lua_IsRenderTextureValid(lua_State *L);
+
+/**
+ * @brief Unloads a render texture from memory.
+ * 
+ * This function releases all resources used by a render texture.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local renderTexture = raylib.LoadRenderTexture(800, 600)
+ * raylib.UnloadRenderTexture(renderTexture) -- Frees the render texture from memory
+ * ```
+ */
 int lua_UnloadRenderTexture(lua_State *L);
+
+/**
+ * @brief Sets the filter mode for a texture.
+ * 
+ * This function allows you to set a texture's filtering mode, such as `POINT`, `BILINEAR`, or `TRILINEAR`.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("image.png")
+ * raylib.SetTextureFilter(texture, raylib.FILTER_BILINEAR) -- Applies bilinear filtering to the texture
+ * ```
+ */
 int lua_SetTextureFilter(lua_State *L);
+
+/**
+ * @brief Sets the wrap mode for a texture.
+ * 
+ * This function sets the wrapping mode for a texture, such as `WRAP_REPEAT`, `WRAP_CLAMP`, or `WRAP_MIRROR`.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("image.png")
+ * raylib.SetTextureWrap(texture, raylib.WRAP_REPEAT) -- Sets the texture to repeat mode
+ * ```
+ */
 int lua_SetTextureWrap(lua_State *L);
+/**
+ * @brief Draws a texture at a specified position.
+ * 
+ * This function draws a texture at the given x and y position on the screen.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("image.png")
+ * raylib.DrawTexture(texture, 100, 50, raylib.WHITE) -- Draws the texture at position (100, 50)
+ * ```
+ */
 int lua_DrawTexture(lua_State *L);
+
+/**
+ * @brief Draws a texture at a specified position using a Vector2.
+ * 
+ * This function draws a texture at a given position using a Vector2 to specify the position.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("image.png")
+ * raylib.DrawTextureV(texture, { x = 100, y = 50 }, raylib.WHITE) -- Draws the texture at position (100, 50) using a Vector2
+ * ```
+ */
 int lua_DrawTextureV(lua_State *L);
+
+/**
+ * @brief Draws a texture with extended parameters.
+ * 
+ * This function draws a texture with extra parameters like rotation and scaling.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("image.png")
+ * raylib.DrawTextureEx(texture, { x = 100, y = 50 }, 45.0, 1.5, raylib.WHITE) -- Draws the texture at (100, 50), rotates 45 degrees, scales by 1.5x
+ * ```
+ */
 int lua_DrawTextureEx(lua_State *L);
+
+/**
+ * @brief Draws a part of a texture.
+ * 
+ * This function draws a portion of a texture defined by a rectangle.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("image.png")
+ * local sourceRec = { x = 0, y = 0, width = 64, height = 64 }
+ * raylib.DrawTextureRec(texture, sourceRec, { x = 100, y = 50 }, raylib.WHITE) -- Draws a 64x64 section of the texture at (100, 50)
+ * ```
+ */
 int lua_DrawTextureRec(lua_State *L);
+/**
+ * @brief Draws a texture with extended parameters.
+ * 
+ * This function draws a texture with detailed control over position, rotation, origin, and scaling.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("image.png")
+ * local sourceRec = { x = 0, y = 0, width = 64, height = 64 }
+ * local destRec = { x = 200, y = 100, width = 128, height = 128 }
+ * local origin = { x = 32, y = 32 }
+ * raylib.DrawTexturePro(texture, sourceRec, destRec, origin, 45.0, raylib.WHITE) -- Draws the texture with rotation, scaling, and position adjustments
+ * ```
+ */
 int lua_DrawTexturePro(lua_State *L);
+
+/**
+ * @brief Draws a texture using N-patch information.
+ * 
+ * This function draws a texture following the rules of N-patch, which allows scaling while preserving corners, edges, and center.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * local texture = raylib.LoadTexture("npatch.png")
+ * local nPatchInfo = { sourceRec = { x = 0, y = 0, width = 64, height = 64 }, left = 8, top = 8, right = 8, bottom = 8, type = raylib.NPATCH_NINE_PATCH }
+ * local destRec = { x = 100, y = 100, width = 128, height = 128 }
+ * raylib.DrawTextureNPatch(texture, nPatchInfo, destRec, { x = 0, y = 0 }, 0.0, raylib.WHITE) -- Draws an N-patch texture with controlled scaling
+ * ```
+ */
 int lua_DrawTextureNPatch(lua_State *L);
+
+/**
+ * @brief Checks if two colors are equal.
+ * 
+ * This function checks if two Color values are equal.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (boolean result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color1 = raylib.RED
+ * local color2 = raylib.RED
+ * local isEqual = raylib.ColorIsEqual(color1, color2) -- Returns true since both colors are red
+ * print(isEqual)
+ * ```
+ */
 int lua_ColorIsEqual(lua_State *L);
+
+/**
+ * @brief Applies fade effect to a color.
+ * 
+ * This function adjusts the alpha value of a color to apply a fade effect.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local fadedColor = raylib.Fade(color, 0.5) -- Fades the color to 50% opacity
+ * print(fadedColor)
+ * ```
+ */
 int lua_Fade(lua_State *L);
+/**
+ * @brief Converts a Color to an integer representation.
+ * 
+ * This function converts a Color to an integer where the color channels are packed into a single integer value.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (integer result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local colorInt = raylib.ColorToInt(color) -- Converts the color to an integer
+ * print(colorInt)
+ * ```
+ */
 int lua_ColorToInt(lua_State *L);
+
+/**
+ * @brief Normalizes a Color to a Vector4.
+ * 
+ * This function normalizes a Color's RGBA channels to a Vector4 where each channel ranges from 0.0 to 1.0.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Vector4 result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local normalizedColor = raylib.ColorNormalize(color) -- Normalizes the color
+ * print(normalizedColor)
+ * ```
+ */
 int lua_ColorNormalize(lua_State *L);
+
+/**
+ * @brief Converts a normalized Vector4 to a Color.
+ * 
+ * This function converts a normalized Vector4 to a Color, scaling each channel from 0.0-1.0 back to 0-255.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local normalizedColor = { x = 1.0, y = 0.0, z = 0.0, w = 1.0 } -- Normalized red color
+ * local color = raylib.ColorFromNormalized(normalizedColor) -- Converts back to Color
+ * print(color)
+ * ```
+ */
 int lua_ColorFromNormalized(lua_State *L);
+
+/**
+ * @brief Converts a Color to HSV.
+ * 
+ * This function converts a Color to its HSV (Hue, Saturation, Value) representation.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Vector3 result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local hsv = raylib.ColorToHSV(color) -- Converts the color to HSV
+ * print(hsv)
+ * ```
+ */
 int lua_ColorToHSV(lua_State *L);
+/**
+ * @brief Converts HSV (Hue, Saturation, Value) to a Color.
+ * 
+ * This function converts an HSV value to a Color. The HSV model is often used in color selection and manipulation.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local hsv = { h = 0.0, s = 1.0, v = 1.0 } -- Red color in HSV
+ * local color = raylib.ColorFromHSV(hsv) -- Converts HSV to Color
+ * print(color)
+ * ```
+ */
 int lua_ColorFromHSV(lua_State *L);
+
+/**
+ * @brief Tints a Color with another Color.
+ * 
+ * This function applies a tint to a Color, mixing it with another Color. The resulting color is a blend of both.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local tint = raylib.GREEN
+ * local tintedColor = raylib.ColorTint(color, tint) -- Apply tint to color
+ * print(tintedColor)
+ * ```
+ */
 int lua_ColorTint(lua_State *L);
+
+/**
+ * @brief Adjusts the brightness of a Color.
+ * 
+ * This function adjusts the brightness of a Color by a given factor. A factor > 1.0 brightens the color, while a factor < 1.0 darkens it.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local brightenedColor = raylib.ColorBrightness(color, 1.5) -- Increases brightness
+ * print(brightenedColor)
+ * ```
+ */
 int lua_ColorBrightness(lua_State *L);
+
+/**
+ * @brief Adjusts the contrast of a Color.
+ * 
+ * This function adjusts the contrast of a Color by a given factor. A factor > 1.0 increases contrast, while a factor < 1.0 reduces it.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local contrastedColor = raylib.ColorContrast(color, 2.0) -- Increases contrast
+ * print(contrastedColor)
+ * ```
+ */
 int lua_ColorContrast(lua_State *L);
+/**
+ * @brief Adjusts the alpha (transparency) of a Color.
+ * 
+ * This function sets the alpha channel (transparency) of a Color, while keeping the RGB values intact. A value of 0 means fully transparent, and 255 means fully opaque.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local transparentColor = raylib.ColorAlpha(color, 128) -- Set alpha to 128 (semi-transparent)
+ * print(transparentColor)
+ * ```
+ */
 int lua_ColorAlpha(lua_State *L);
+
+/**
+ * @brief Blends two Colors based on alpha blending.
+ * 
+ * This function blends two Colors together based on their alpha values. It performs an alpha blend between the original Color and the blend Color.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color1 = raylib.RED
+ * local color2 = raylib.GREEN
+ * local blendedColor = raylib.ColorAlphaBlend(color1, color2) -- Blend two colors based on alpha
+ * print(blendedColor)
+ * ```
+ */
 int lua_ColorAlphaBlend(lua_State *L);
+
+/**
+ * @brief Linearly interpolates between two Colors.
+ * 
+ * This function interpolates between two Colors based on a given factor. A factor of 0 returns the first color, and a factor of 1 returns the second color. Intermediate values return a blend.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color1 = raylib.RED
+ * local color2 = raylib.BLUE
+ * local lerpedColor = raylib.ColorLerp(color1, color2, 0.5) -- Interpolate halfway between red and blue
+ * print(lerpedColor)
+ * ```
+ */
 int lua_ColorLerp(lua_State *L);
+
+/**
+ * @brief Gets the integer representation of a Color.
+ * 
+ * This function converts a Color into its integer representation, using a format like RGBA where each channel is a byte.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (integer result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local color = raylib.RED
+ * local colorInt = raylib.GetColor(color) -- Convert color to integer representation
+ * print(colorInt)
+ * ```
+ */
 int lua_GetColor(lua_State *L);
+/**
+ * @brief Gets the color of a pixel from the screen at a given position.
+ * 
+ * This function retrieves the color of a pixel at a specified position on the screen or render target. The color is returned in the form of a Color structure.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (Color result)
+ * 
+ * **Usage:**
+ * ```lua
+ * local pixelColor = raylib.GetPixelColor(100, 200) -- Get color of the pixel at position (100, 200)
+ * print(pixelColor)
+ * ```
+ */
 int lua_GetPixelColor(lua_State *L);
+
+/**
+ * @brief Sets the color of a specific pixel on the screen or render target.
+ * 
+ * This function allows setting a pixel's color at a specific position. It modifies the pixel data of the screen or render target.
+ * 
+ * @param L Lua state
+ * @return int Always returns 0
+ * 
+ * **Usage:**
+ * ```lua
+ * raylib.SetPixelColor(100, 200, raylib.RED) -- Set the pixel at position (100, 200) to red
+ * ```
+ */
 int lua_SetPixelColor(lua_State *L);
+
+/**
+ * @brief Gets the size of the pixel data in memory for an image or texture.
+ * 
+ * This function returns the size of the pixel data in memory for a given image or texture, in bytes.
+ * 
+ * @param L Lua state
+ * @return int Always returns 1 (integer result representing the data size in bytes)
+ * 
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("image.png")
+ * local dataSize = raylib.GetPixelDataSize(image) -- Get the size of the pixel data for the image
+ * print(dataSize)
+ * ```
+ */
 int lua_GetPixelDataSize(lua_State *L);
 
 #endif
