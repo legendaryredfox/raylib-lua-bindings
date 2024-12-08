@@ -106,7 +106,8 @@ This will delete the compiled object files and the generated shared library (lib
 ### Known Issues
 
 Currently, the project works well on Windows, but there are issues with it on Linux. Specifically, certain features do not function as expected on Linux, and troubleshooting has been difficult due to a lack of low-level programming experience. Contributions to help resolve these issues are highly welcome.
-Contributing
+
+### Contributing
 
 If you would like to contribute, please feel free to fork the repository, submit issues, and create pull requests.
 
