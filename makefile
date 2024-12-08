@@ -1,8 +1,19 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Iinclude -Ilua/src -Iraylib/src
-LDFLAGS = -Lraylib -lraylib -Llua -llua -lgdi32 -lwinmm
-OUTPUT = raylib.dll
+CFLAGS = -Iinclude -Ilua/src -Iraylib/src -I/lua/src
+
+# Platform-specific settings
+ifeq ($(OS),Windows_NT)
+    LDFLAGS = -Lraylib -lraylib -Llua -llua -lgdi32 -lwinmm
+    OUTPUT = libraylib.dll
+    RM = del /f /q
+    EXT = .dll
+else
+    LDFLAGS = -Lraylib -lraylib -L/usr/lib/x86_64-linux-gnu -llua5.4 -lX11 -lm -lpthread
+    OUTPUT = libraylib.so
+    RM = rm -f
+    EXT = .so
+endif
 
 # Directories
 SRC_DIR = src
@@ -12,11 +23,11 @@ INCLUDE_DIR = include
 SRC_FILES = $(SRC_DIR)/lua_raylib.c \
             $(SRC_DIR)/lua_raylib_core.c \
             $(SRC_DIR)/lua_raylib_draw.c \
-						$(SRC_DIR)/lua_raylib_audio.c \
-						$(SRC_DIR)/lua_raylib_textures.c \
-						$(SRC_DIR)/lua_raylib_models.c \
-						$(SRC_DIR)/lua_raylib_text.c \
-						$(SRC_DIR)/lua_raylib_shapes.c \
+            $(SRC_DIR)/lua_raylib_audio.c \
+            $(SRC_DIR)/lua_raylib_textures.c \
+            $(SRC_DIR)/lua_raylib_models.c \
+            $(SRC_DIR)/lua_raylib_text.c \
+            $(SRC_DIR)/lua_raylib_shapes.c \
             $(SRC_DIR)/raylib_wrappers.c
 
 # Object files
@@ -35,4 +46,4 @@ $(OUTPUT): $(OBJ_FILES)
 
 # Clean build files
 clean:
-	del $(OBJ_FILES) $(OUTPUT)
+	$(RM) $(OBJ_FILES) $(OUTPUT)

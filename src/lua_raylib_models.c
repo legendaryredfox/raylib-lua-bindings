@@ -1,5 +1,6 @@
 
 #include <raylib.h>
+#include <stdlib.h>
 #include "lua_raylib_models.h"
 #include "raylib_wrappers.h"
 
