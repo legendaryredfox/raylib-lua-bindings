@@ -42,7 +42,8 @@ Some people ported raylib to other languages in the form of bindings or wrappers
 | [kaylib](https://github.com/electronstudio/kaylib)                                       | 3.7              | [Kotlin/native](https://kotlinlang.org)                              | **???**              |
 | [KaylibKit](https://codeberg.org/Kenta/KaylibKit)                                        | 4.5              | [Kotlin/native](https://kotlinlang.org)                              | Zlib                 |
 | [raylib-lua](https://github.com/TSnake41/raylib-lua)                                     | 5.0              | [Lua](http://www.lua.org)                                            | ISC                  |
-| [raylib-matte](https://github.com/jcorks/raylib-matte)                                   | 4.6-dev          | [Matte](https://github.com/jcorks/matte)                             | MIT                  |
+| [raylib-lua-bindings (WIP)](https://github.com/legendaryredfox/raylib-lua-bindings)      | 5.5              | [Lua](http://www.lua.org)                                            | ISC                  |
+| [raylib-matte](https://github.com/jcorks/raylib-matte)                                   | 4.6-dev          | [Matte](https://github.com/jcorks/matte)                             |  **???**             |
 | [Raylib.nelua](https://github.com/AuzFox/Raylib.nelua)                                   | **5.0**          | [nelua](https://nelua.io)                                            | Zlib                 |
 | [raylib-bindings](https://github.com/vaiorabbit/raylib-bindings)                         | 5.6-dev              | [Ruby](https://www.ruby-lang.org/en)                                 | Zlib                 |
 | [naylib](https://github.com/planetis-m/naylib)                                           | **5.1-dev**      | [Nim](https://nim-lang.org)                                          | MIT                  |
@@ -85,6 +86,7 @@ Some people ported raylib to other languages in the form of bindings or wrappers
 | [raylib-cobol](https://codeberg.org/glowiak/raylib-cobol)                                | **auto**         | [COBOL](https://gnucobol.sourceforge.io)                             | Public domain        |
 | [raylib-apl](https://github.com/Brian-ED/raylib-apl)                                     | **5.0**          | [Dyalog APL](https://www.dyalog.com/)                                | MIT                  |
 | [raylib-jai](https://github.com/ahmedqarmout2/raylib-jai)                                | **5.5**          | [Jai](https://github.com/BSVino/JaiPrimer/blob/master/JaiPrimer.md)  | MIT                  |
+| [fnl-raylib](https://github.com/0riginaln0/fnl-raylib)                                   | **5.5**          | [Fennel](https://fennel-lang.org/)                                   | MIT                  |
 
 ### Utility Wrapers
 

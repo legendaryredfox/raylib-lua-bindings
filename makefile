@@ -9,7 +9,7 @@ ifeq ($(OS),Windows_NT)
     RM = del /f /q
     EXT = .dll
 else
-    LDFLAGS = -Lraylib -lraylib -L/usr/lib/x86_64-linux-gnu -llua5.4 -lX11 -lm -lpthread
+    LDFLAGS = -Lraylib -lraylib -L/usr/lib/x86_64-linux-gnu -llua5.4 -lX11 -lm -lpthread -fPIC
     OUTPUT = libraylib.so
     RM = rm -f
     EXT = .so
