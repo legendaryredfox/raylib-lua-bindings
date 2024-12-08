@@ -12,13 +12,11 @@ This project provides bindings for **Raylib** (a simple and easy-to-use game dev
 
 Before building this project, ensure you have the following software installed:
 
-### On Linux:
+### On Linux: (Work still in progress)
 
 1. **GCC**: C compiler used for compiling Raylib and Lua bindings.
 2. **Raylib**: A simple game development library.
 3. **Lua 5.4**: The scripting language for which we create bindings.
-4. **Make**: A tool to automate the build process.
-5. **X11, pthread, and other dependencies** required for linking Raylib on Linux. (support on linux is currently limited)
 
 ### On Windows:
 
@@ -45,13 +43,7 @@ cd raylib-lua-bindings
 
 #### On Linux:
 
-Install the necessary libraries:
-
-```bash
-
-sudo apt-get update
-sudo apt-get install gcc make liblua5.4-dev libraylib-dev libx11-dev libpthread-stubs0-dev
-```
+I'm still working on that
 
 #### On Windows:
 
