@@ -1,7 +1,8 @@
 local raylib = require("raylib")
--- Raylib Lua Example - Basic window
 
--- Initialization
+-- Raylib Lua Example - Basic window
+local RAYWHITE = raylib.ColorToInt({r = 245, g = 245, b = 245, a = 255})-- Initialization
+local BLACK = {r = 0, g = 0, b = 0, a = 255}
 ----------------------------------------------------------------------------------------
 local screenWidth = 800
 local screenHeight = 450
@@ -16,15 +17,8 @@ while not raylib.WindowShouldClose() do  -- Detect window close button or ESC ke
     -- Update
 
     raylib.BeginDrawing()
-
-    raylib.ClearBackground(0xFFFFFFFF)
-    local text = "Hello Raylib + Lua!"
-    local posX = 100
-    local posY = 150
-    local fontSize = 20
-    local color = {r = 0, g = 0, b = 0, a = 100} -- Gray
-    
-    raylib.DrawText(text, posX, posY, fontSize, color)
+    raylib.ClearBackground(RAYWHITE)
+    raylib.DrawText("Hello Raylib + Lua!", 100, 150, 20, BLACK)
     raylib.EndDrawing()
     ------------------------------------------------------------------------------------
 end
