@@ -5,12 +5,12 @@ CFLAGS = -Iinclude -Ilua/src -Iraylib/src -I/lua/src
 # Platform-specific settings
 ifeq ($(OS),Windows_NT)
     LDFLAGS = -Lraylib -lraylib -Llua -llua -lgdi32 -lwinmm
-    OUTPUT = libraylib.dll
+    OUTPUT = raylib.dll
     RM = del /f /q
     EXT = .dll
 else
-    LDFLAGS = -Lraylib -lraylib -L/usr/lib/x86_64-linux-gnu -llua5.4 -lX11 -lm -lpthread -fPIC
-    OUTPUT = libraylib.so
+    LDFLAGS = -Lraylib -lraylib -L/usr/lib/x86_64-linux-gnu -llua5.4 -lX11 -lm -lpthread -fPIC -I/usr/include/lua5.4
+    OUTPUT = raylib.so
     RM = rm -f
     EXT = .so
 endif

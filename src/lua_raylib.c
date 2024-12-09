@@ -50,11 +50,6 @@ void register_raylib_colors(lua_State *L) {
     push_color(L, (Color){ 245, 245, 245, 255 }); lua_setglobal(L, "RAYWHITE");
 }
 
-int luaopen_raylib(lua_State *L) {
-    register_raylib_colors(L);
-    return 1;
-}
-
 // Register bindings
 static const luaL_Reg raylib_functions[] = {
 
@@ -491,5 +486,6 @@ static const luaL_Reg raylib_functions[] = {
 
 int luaopen_raylib(lua_State *L) {
     luaL_newlib(L, raylib_functions);
+    register_raylib_colors(L);
     return 1;
 }
