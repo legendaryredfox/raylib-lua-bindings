@@ -6,6 +6,7 @@ This project provides bindings for **Raylib** (a simple and easy-to-use game dev
 
 - **Simple Lua bindings** for Raylib
 - Includes bindings for **drawing**, **audio**, **textures**, **models**, and more
+- Autocomplete available for VSCode: https://marketplace.visualstudio.com/items?itemName=LegendaryRedfox.raylib-lua-bindings-autocomplete
 - Easily extendable: Add more bindings as you go!
 
 ## Prerequisites
