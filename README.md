@@ -1,3 +1,5 @@
+![logo](images/logo.png)
+
 # Raylib-Lua Bindings (WIP)
 
 This project provides bindings for **Raylib** (a simple and easy-to-use game development library) to be used with **Lua**, a powerful, efficient, lightweight scripting language. With this binding, you can use Raylib's functionalities directly from Lua scripts, enabling rapid development of games and graphical applications.
@@ -18,6 +20,7 @@ Before building this project, ensure you have the following software installed:
 1. **GCC**: C compiler used for compiling Raylib and Lua bindings.
 2. **Raylib**: A simple game development library.
 3. **Lua 5.4**: The scripting language for which we create bindings.
+4. **Make**: A tool to automate the build process.
 
 ### On Windows:
 
