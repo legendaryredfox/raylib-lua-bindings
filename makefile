@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Iinclude -Ilua/src -Iraylib/src -I/lua/src
+CFLAGS = -Iinclude -Ilua/src -Iraylib/src -I/lua/src -fPIC
 
 # Platform-specific settings
 ifeq ($(OS),Windows_NT)
