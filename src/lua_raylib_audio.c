@@ -384,38 +384,18 @@ int lua_SetAudioStreamBufferSizeDefault(lua_State *L) {
 
 int lua_AttachAudioStreamProcessor(lua_State *L) {
     AudioStream *stream = luaL_checkudata(L, 1, "AudioStream");
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-
-    int callbackRef = luaL_ref(L, LUA_REGISTRYINDEX);
-    globalLuaState = L;
-
     AttachAudioStreamProcessor(*stream, audioStreamProcessorWrapper);
-
-    lua_pushinteger(L, callbackRef);
-    lua_pushcclosure(L, audioStreamProcessorWrapper, 1);
-
     return 0;
 }
 
 int lua_DetachAudioStreamProcessor(lua_State *L) {
     AudioStream *stream = luaL_checkudata(L, 1, "AudioStream");
-
     DetachAudioStreamProcessor(*stream, audioStreamProcessorWrapper);
-
     return 0;
 }
 
 int lua_AttachAudioMixedProcessor(lua_State *L) {
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-
-    int callbackRef = luaL_ref(L, LUA_REGISTRYINDEX);
-    globalLuaState = L;
-
     AttachAudioMixedProcessor(audioMixedProcessorWrapper);
-
-    lua_pushinteger(L, callbackRef);
-    lua_pushcclosure(L, audioMixedProcessorWrapper, 1);
-
     return 0;
 }
 
@@ -426,48 +406,27 @@ int lua_DetachAudioMixedProcessor(lua_State *L) {
 
 int lua_SetAudioStreamCallback(lua_State *L) {
     AudioStream *stream = luaL_checkudata(L, 1, "AudioStream");
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-
-    int callbackRef = luaL_ref(L, LUA_REGISTRYINDEX);
-    globalLuaState = L;
-
     SetAudioStreamCallback(*stream, audioStreamCallbackWrapper);
-
-    lua_pushinteger(L, callbackRef);
-    lua_pushcclosure(L, audioStreamCallbackWrapper, 1);
-
     return 0;
 }
 
 void audioStreamProcessorWrapper(void *buffer, unsigned int frames) {
-    lua_State *L = globalLuaState;
-    lua_rawgeti(L, LUA_REGISTRYINDEX, lua_tointeger(L, lua_upvalueindex(1)));
-    lua_pushlightuserdata(L, buffer);
-    lua_pushinteger(L, frames);
-    if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
-        fprintf(stderr, "Error in audioStreamProcessorWrapper: %s\n", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
+    lua_getglobal(globalLuaState, "audioStreamProcessorWrapper");
+    lua_pushlightuserdata(globalLuaState, buffer);
+    lua_pushinteger(globalLuaState, frames);
+    lua_pcall(globalLuaState, 2, 0, 0);
 }
 
 void audioMixedProcessorWrapper(void *buffer, unsigned int frames) {
-    lua_State *L = globalLuaState;
-    lua_rawgeti(L, LUA_REGISTRYINDEX, lua_tointeger(L, lua_upvalueindex(1)));
-    lua_pushlightuserdata(L, buffer);
-    lua_pushinteger(L, frames);
-    if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
-        fprintf(stderr, "Error in audioMixedProcessorWrapper: %s\n", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
+    lua_getglobal(globalLuaState, "audioMixedProcessorWrapper");
+    lua_pushlightuserdata(globalLuaState, buffer);
+    lua_pushinteger(globalLuaState, frames);
+    lua_pcall(globalLuaState, 2, 0, 0);
 }
 
 void audioStreamCallbackWrapper(void *buffer, unsigned int frames) {
-    lua_State *L = globalLuaState;
-    lua_rawgeti(L, LUA_REGISTRYINDEX, lua_tointeger(L, lua_upvalueindex(1)));
-    lua_pushlightuserdata(L, buffer);
-    lua_pushinteger(L, frames);
-    if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
-        fprintf(stderr, "Error in audioStreamCallbackWrapper: %s\n", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
+    lua_getglobal(globalLuaState, "audioStreamCallbackWrapper");
+    lua_pushlightuserdata(globalLuaState, buffer);
+    lua_pushinteger(globalLuaState, frames);
+    lua_pcall(globalLuaState, 2, 0, 0);
 }
