@@ -215,6 +215,10 @@ static const luaL_Reg raylib_functions[] = {
     {"SetAudioStreamPan", lua_SetAudioStreamPan},
     {"SetAudioStreamBufferSizeDefault", lua_SetAudioStreamBufferSizeDefault},
     {"SetAudioStreamCallback", lua_SetAudioStreamCallback},
+    {"AttachAudioStreamProcessor", lua_AttachAudioStreamProcessor},
+    {"AttachAudioMixedProcessor", lua_AttachAudioMixedProcessor},
+    {"DetachAudioStreamProcessor", lua_DetachAudioStreamProcessor},
+    {"DetachAudioMixedProcessor", lua_DetachAudioMixedProcessor},
 
     //Textures
     {"LoadImage", lua_LoadImage},
