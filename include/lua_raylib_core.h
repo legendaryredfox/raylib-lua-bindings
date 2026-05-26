@@ -1507,5 +1507,26 @@ int lua_DisableEventWaiting(lua_State *L);
  * @note This can be useful for detecting when the user moves the cursor outside the window.
  */
 int lua_IsCursorOnScreen(lua_State *L);
+int lua_IsKeyPressed(lua_State *L);
+int lua_IsKeyPressedRepeat(lua_State *L);
+int lua_GetKeyPressed(lua_State *L);
+int lua_GetCharPressed(lua_State *L);
+int lua_GetKeyName(lua_State *L);
+int lua_IsMouseButtonPressed(lua_State *L);
+int lua_IsMouseButtonReleased(lua_State *L);
+int lua_MakeDirectory(lua_State *L);
+int lua_IsFileNameValid(lua_State *L);
+int lua_ComputeCRC32(lua_State *L);
+int lua_ComputeMD5(lua_State *L);
+int lua_ComputeSHA1(lua_State *L);
+int lua_ComputeSHA256(lua_State *L);
+int lua_FileCopy(lua_State *L);
+int lua_FileMove(lua_State *L);
+int lua_FileRemove(lua_State *L);
+int lua_FileRename(lua_State *L);
+int lua_FileTextFindIndex(lua_State *L);
+int lua_FileTextReplace(lua_State *L);
+int lua_GetDirectoryFileCount(lua_State *L);
+int lua_GetDirectoryFileCountEx(lua_State *L);
 
 #endif

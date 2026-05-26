@@ -20,20 +20,11 @@ int lua_WindowShouldClose(lua_State *L) {
 }
 
 int lua_GetClipboardImage(lua_State *L) {
-    if (luaL_getmetatable(L, "Image") == LUA_TNIL) {
-        return luaL_error(L, "Image metatable not registered");
-    }
-    lua_pop(L, 1);  
-
     Image image = GetClipboardImage();
     Image *userdata = (Image *)lua_newuserdata(L, sizeof(Image));
-    
     *userdata = image;
-    
-    luaL_getmetatable(L, "Image");
-    lua_setmetatable(L, -2);
-    
-    return 1;                      
+    luaL_setmetatable(L, "Image");
+    return 1;
 }
 
 
@@ -97,12 +88,7 @@ int lua_GetMouseY(lua_State *L) {
 }
 
 int lua_GetMousePosition(lua_State *L) {
-    Vector2 position = GetMousePosition();
-    lua_newtable(L);
-    lua_pushnumber(L, position.x);
-    lua_setfield(L, -2, "x");
-    lua_pushnumber(L, position.y);
-    lua_setfield(L, -2, "y");
+    push_vector2_to_table(L, GetMousePosition());
     return 1;
 }
 
@@ -218,12 +204,7 @@ int lua_GetMonitorRefreshRate(lua_State *L) {
 
 int lua_GetMonitorPosition(lua_State *L) {
     int monitor = luaL_checkinteger(L, 1);
-    Vector2 position = GetMonitorPosition(monitor);
-    lua_newtable(L);
-    lua_pushnumber(L, position.x);
-    lua_setfield(L, -2, "x");
-    lua_pushnumber(L, position.y);
-    lua_setfield(L, -2, "y");
+    push_vector2_to_table(L, GetMonitorPosition(monitor));
     return 1;
 }
 
@@ -297,12 +278,7 @@ int lua_SetMouseScale(lua_State *L) {
 
 int lua_GetTouchPosition(lua_State *L) {
     int index = luaL_checkinteger(L, 1);
-    Vector2 position = GetTouchPosition(index);
-    lua_newtable(L);
-    lua_pushnumber(L, position.x);
-    lua_setfield(L, -2, "x");
-    lua_pushnumber(L, position.y);
-    lua_setfield(L, -2, "y");
+    push_vector2_to_table(L, GetTouchPosition(index));
     return 1;
 }
 
@@ -447,5 +423,157 @@ int lua_DisableEventWaiting(lua_State *L) {
 
 int lua_IsCursorOnScreen(lua_State *L) {
     lua_pushboolean(L, IsCursorOnScreen());
+    return 1;
+}
+
+int lua_IsKeyPressed(lua_State *L) {
+    int key = luaL_checkinteger(L, 1);
+    lua_pushboolean(L, IsKeyPressed(key));
+    return 1;
+}
+
+int lua_IsKeyPressedRepeat(lua_State *L) {
+    int key = luaL_checkinteger(L, 1);
+    lua_pushboolean(L, IsKeyPressedRepeat(key));
+    return 1;
+}
+
+int lua_GetKeyPressed(lua_State *L) {
+    lua_pushinteger(L, GetKeyPressed());
+    return 1;
+}
+
+int lua_GetCharPressed(lua_State *L) {
+    lua_pushinteger(L, GetCharPressed());
+    return 1;
+}
+
+int lua_GetKeyName(lua_State *L) {
+    int key = luaL_checkinteger(L, 1);
+    lua_pushstring(L, GetKeyName(key));
+    return 1;
+}
+
+int lua_IsMouseButtonPressed(lua_State *L) {
+    int button = luaL_checkinteger(L, 1);
+    lua_pushboolean(L, IsMouseButtonPressed(button));
+    return 1;
+}
+
+int lua_IsMouseButtonReleased(lua_State *L) {
+    int button = luaL_checkinteger(L, 1);
+    lua_pushboolean(L, IsMouseButtonReleased(button));
+    return 1;
+}
+
+int lua_MakeDirectory(lua_State *L) {
+    const char *dirPath = luaL_checkstring(L, 1);
+    lua_pushinteger(L, MakeDirectory(dirPath));
+    return 1;
+}
+
+int lua_IsFileNameValid(lua_State *L) {
+    const char *fileName = luaL_checkstring(L, 1);
+    lua_pushboolean(L, IsFileNameValid(fileName));
+    return 1;
+}
+
+int lua_ComputeCRC32(lua_State *L) {
+    size_t dataSize;
+    const char *data = luaL_checklstring(L, 1, &dataSize);
+    unsigned int crc = ComputeCRC32((unsigned char *)data, (int)dataSize);
+    lua_pushinteger(L, (lua_Integer)crc);
+    return 1;
+}
+
+int lua_ComputeMD5(lua_State *L) {
+    size_t dataSize;
+    const char *data = luaL_checklstring(L, 1, &dataSize);
+    unsigned int *hash = ComputeMD5((unsigned char *)data, (int)dataSize);
+    lua_createtable(L, 4, 0);
+    for (int i = 0; i < 4; i++) {
+        lua_pushinteger(L, (lua_Integer)hash[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
+}
+
+int lua_ComputeSHA1(lua_State *L) {
+    size_t dataSize;
+    const char *data = luaL_checklstring(L, 1, &dataSize);
+    unsigned int *hash = ComputeSHA1((unsigned char *)data, (int)dataSize);
+    lua_createtable(L, 5, 0);
+    for (int i = 0; i < 5; i++) {
+        lua_pushinteger(L, (lua_Integer)hash[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
+}
+
+int lua_ComputeSHA256(lua_State *L) {
+    size_t dataSize;
+    const char *data = luaL_checklstring(L, 1, &dataSize);
+    unsigned int *hash = ComputeSHA256((unsigned char *)data, (int)dataSize);
+    lua_createtable(L, 8, 0);
+    for (int i = 0; i < 8; i++) {
+        lua_pushinteger(L, (lua_Integer)hash[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
+}
+
+int lua_FileCopy(lua_State *L) {
+    const char *srcPath = luaL_checkstring(L, 1);
+    const char *dstPath = luaL_checkstring(L, 2);
+    lua_pushinteger(L, FileCopy(srcPath, dstPath));
+    return 1;
+}
+
+int lua_FileMove(lua_State *L) {
+    const char *srcPath = luaL_checkstring(L, 1);
+    const char *dstPath = luaL_checkstring(L, 2);
+    lua_pushinteger(L, FileMove(srcPath, dstPath));
+    return 1;
+}
+
+int lua_FileRemove(lua_State *L) {
+    const char *fileName = luaL_checkstring(L, 1);
+    lua_pushinteger(L, FileRemove(fileName));
+    return 1;
+}
+
+int lua_FileRename(lua_State *L) {
+    const char *fileName   = luaL_checkstring(L, 1);
+    const char *fileRename = luaL_checkstring(L, 2);
+    lua_pushinteger(L, FileRename(fileName, fileRename));
+    return 1;
+}
+
+int lua_FileTextFindIndex(lua_State *L) {
+    const char *fileName = luaL_checkstring(L, 1);
+    const char *search   = luaL_checkstring(L, 2);
+    lua_pushinteger(L, FileTextFindIndex(fileName, search));
+    return 1;
+}
+
+int lua_FileTextReplace(lua_State *L) {
+    const char *fileName    = luaL_checkstring(L, 1);
+    const char *search      = luaL_checkstring(L, 2);
+    const char *replacement = luaL_checkstring(L, 3);
+    lua_pushinteger(L, FileTextReplace(fileName, search, replacement));
+    return 1;
+}
+
+int lua_GetDirectoryFileCount(lua_State *L) {
+    const char *dirPath = luaL_checkstring(L, 1);
+    lua_pushinteger(L, (lua_Integer)GetDirectoryFileCount(dirPath));
+    return 1;
+}
+
+int lua_GetDirectoryFileCountEx(lua_State *L) {
+    const char *basePath      = luaL_checkstring(L, 1);
+    const char *filter        = luaL_checkstring(L, 2);
+    bool scanSubdirs          = lua_toboolean(L, 3);
+    lua_pushinteger(L, (lua_Integer)GetDirectoryFileCountEx(basePath, filter, scanSubdirs));
     return 1;
 }

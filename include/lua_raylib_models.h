@@ -1537,5 +1537,6 @@ int lua_GetRayCollisionTriangle(lua_State *L);
  * @note This function allows for collision detection against quads, useful for custom polygonal shapes.
  */
 int lua_GetRayCollisionQuad(lua_State *L);
+int lua_UpdateModelAnimationEx(lua_State *L);
 
 #endif

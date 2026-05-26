@@ -44,3 +44,7 @@ src/*.o
 
 # Generated executable and shared library
 raylib.dll
+
+
+#Other
+last_session.txt

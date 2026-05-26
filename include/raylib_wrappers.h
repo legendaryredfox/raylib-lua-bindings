@@ -103,14 +103,6 @@ Rectangle get_rectangle_from_table(lua_State *L, int index);
 NPatchInfo get_npatchinfo_from_table(lua_State *L, int index);
 
 /**
- * @brief Pushes an Image struct onto the Lua stack.
- * 
- * @param L Lua state
- * @param image The Image struct to push
- */
-void push_image_to_lua(lua_State *L, Image image);
-
-/**
  * @brief Pushes a Vector3 struct to a Lua table.
  * 
  * @param L Lua state
@@ -160,10 +152,20 @@ void push_image_to_table(lua_State *L, Image image);
 
 /**
  * @brief Pushes a Color struct to a Lua table.
- * 
+ *
  * @param L Lua state
  * @param color The Color struct to push
  */
 void push_color_to_table(lua_State *L, Color color);
+
+/**
+ * @brief Pushes a BoundingBox struct to a Lua table with "min" and "max" Vector3 fields.
+ */
+void push_bounding_box_to_table(lua_State *L, BoundingBox bbox);
+
+/**
+ * @brief Pushes a RayCollision struct to a Lua table with hit, distance, point, normal fields.
+ */
+void push_ray_collision_to_table(lua_State *L, RayCollision col);
 
 #endif

@@ -8,6 +8,7 @@ This project provides bindings for **Raylib** (a simple and easy-to-use game dev
 
 - **Simple Lua bindings** for Raylib
 - Includes bindings for **drawing**, **audio**, **textures**, **models**, and more
+- Colors accepted as `{r,g,b,a}` tables **or** packed `0xRRGGBBAA` integers
 - Autocomplete available for VSCode: https://marketplace.visualstudio.com/items?itemName=LegendaryRedfox.raylib-lua-bindings-autocomplete
 - Easily extendable: Add more bindings as you go!
 
@@ -17,17 +18,18 @@ Before building this project, ensure you have the following software installed:
 
 ### On Linux: (Work still in progress)
 
-1. **GCC**: C compiler used for compiling Raylib and Lua bindings.
-2. **Raylib**: A simple game development library.
-3. **Lua 5.4**: The scripting language for which we create bindings.
-4. **Make**: A tool to automate the build process.
+1. **GCC**: C compiler used for compiling the bindings.
+2. **Make**: A tool to automate the build process.
+3. **libX11** development headers (usually `libx11-dev`).
+
+Raylib 6.0 and Lua 5.5.0 are **vendored** as static libraries — no system installation required.
 
 ### On Windows:
 
-1. **GCC (MinGW)**: C compiler used for compiling Raylib and Lua bindings.
-2. **Raylib**: A simple game development library.
-3. **Lua 5.4**: The scripting language for which we create bindings.
-4. **Make**: A tool to automate the build process.
+1. **GCC (MinGW)**: C compiler used for compiling the bindings.
+2. **Make**: A tool to automate the build process.
+
+> **Note**: Windows users must supply a Lua 5.5.0 `lua.lib` (the vendored one is for Lua 5.4) and a Raylib 6.0 import library.
 
 ### Additional Libraries (for both platforms):
 
@@ -79,17 +81,36 @@ raylib.InitWindow(800, 600, "Raylib Lua Example")
 
 -- Main game loop
 while not raylib.WindowShouldClose() do
-raylib.BeginDrawing()
-raylib.ClearBackground(raylib.DARKGRAY)
-raylib.DrawText("Hello, Raylib and Lua!", 10, 10, 20, raylib.DARKGREEN)
-raylib.EndDrawing()
+    raylib.BeginDrawing()
+    raylib.ClearBackground(DARKGRAY)                          -- named color constant
+    raylib.DrawText("Hello, Raylib and Lua!", 10, 10, 20, DARKGREEN)
+    raylib.EndDrawing()
 end
 
 -- Close window
 raylib.CloseWindow()
 ```
 
-### 5. Cleaning up
+Color values can be passed as a named constant, a `{r,g,b,a}` table, or a packed
+32-bit integer (`0xRRGGBBAA`):
+
+```lua
+raylib.ClearBackground(RAYWHITE)               -- named global (table)
+raylib.ClearBackground({r=245, g=245, b=245, a=255})  -- explicit table
+raylib.ClearBackground(0xF5F5F5FF)             -- packed integer
+```
+
+### 5. Running tests
+
+The test suite covers text utilities, hashing functions (CRC32/MD5/SHA1/SHA256), color utilities, and filesystem operations — all functions that don't require an open window.
+
+```bash
+make test
+```
+
+Tests are pure Lua scripts in `tests/` and use the bundled `raylib.so`. No extra dependencies are needed.
+
+### 6. Cleaning up
 
 To remove the object files and shared library:
 
@@ -99,9 +120,17 @@ make clean
 
 This will delete the compiled object files and the generated shared library (libraylib.so or raylib.dll).
 
+| Make target | Effect |
+|-------------|--------|
+| `make` | Compile all sources, link `raylib.so` / `raylib.dll` |
+| `make test` | Run the Lua unit test suite |
+| `make clean` | Remove object files and the shared library |
+
 ### Known Issues
 
-Currently, the project works well on Windows, but there are issues with it on Linux. Specifically, certain features do not function as expected on Linux, and troubleshooting has been difficult due to a lack of low-level programming experience. Contributions to help resolve these issues are highly welcome.
+- The project works well on Windows; Linux support is in progress and some features may not behave correctly.
+- Audio stream processor callbacks dispatch to fixed Lua global function names, so only one processor of each type can be active at a time.
+- Contributions to help resolve these issues are highly welcome.
 
 ### Contributing
 

@@ -1056,5 +1056,13 @@ int lua_TextToInteger(lua_State *L);
  * @note Non-numeric characters in the text may cause undefined behavior or result in 0.0.
  */
 int lua_TextToFloat(lua_State *L);
+int lua_TextReplaceAlloc(lua_State *L);
+int lua_TextReplaceBetween(lua_State *L);
+int lua_TextReplaceBetweenAlloc(lua_State *L);
+int lua_TextInsertAlloc(lua_State *L);
+int lua_TextRemoveSpaces(lua_State *L);
+int lua_GetTextBetween(lua_State *L);
+int lua_LoadTextLines(lua_State *L);
+int lua_MeasureTextCodepoints(lua_State *L);
 
 #endif

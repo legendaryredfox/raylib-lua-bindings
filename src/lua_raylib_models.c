@@ -42,7 +42,7 @@ int lua_UnloadModel(lua_State *L) {
 int lua_UpdateModelAnimation(lua_State *L) {
     Model *model = luaL_checkudata(L, 1, "Model");
     ModelAnimation *animation = luaL_checkudata(L, 2, "ModelAnimation");
-    int frame = luaL_checkinteger(L, 3);
+    float frame = (float)luaL_checknumber(L, 3);
     UpdateModelAnimation(*model, *animation, frame);
     return 0;
 }
@@ -291,17 +291,7 @@ int lua_IsModelValid(lua_State *L) {
 
 int lua_GetModelBoundingBox(lua_State *L) {
     Model *model = luaL_checkudata(L, 1, "Model");
-    BoundingBox bbox = GetModelBoundingBox(*model);
-
-    lua_newtable(L);
-    lua_pushstring(L, "min");
-    push_vector3_to_table(L, bbox.min);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "max");
-    push_vector3_to_table(L, bbox.max);
-    lua_settable(L, -3);
-
+    push_bounding_box_to_table(L, GetModelBoundingBox(*model));
     return 1;
 }
 
@@ -366,17 +356,7 @@ int lua_UpdateMeshBuffer(lua_State *L) {
 
 int lua_GetMeshBoundingBox(lua_State *L) {
     Mesh *mesh = luaL_checkudata(L, 1, "Mesh");
-    BoundingBox bbox = GetMeshBoundingBox(*mesh);
-
-    lua_newtable(L);
-    lua_pushstring(L, "min");
-    push_vector3_to_table(L, bbox.min);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "max");
-    push_vector3_to_table(L, bbox.max);
-    lua_settable(L, -3);
-
+    push_bounding_box_to_table(L, GetMeshBoundingBox(*mesh));
     return 1;
 }
 
@@ -559,7 +539,7 @@ int lua_LoadModelAnimations(lua_State *L) {
 
 int lua_UnloadModelAnimation(lua_State *L) {
     ModelAnimation *animation = luaL_checkudata(L, 1, "ModelAnimation");
-    UnloadModelAnimation(*animation);
+    UnloadModelAnimations(animation, 1);
     return 0;
 }
 
@@ -570,7 +550,7 @@ int lua_UnloadModelAnimations(lua_State *L) {
     for (int i = 1; i <= animCount; i++) {
         lua_rawgeti(L, 1, i);
         ModelAnimation *animation = luaL_checkudata(L, -1, "ModelAnimation");
-        UnloadModelAnimation(*animation);
+        UnloadModelAnimations(animation, 1);
         lua_pop(L, 1);
     }
     return 0;
@@ -608,133 +588,54 @@ int lua_CheckCollisionBoxSphere(lua_State *L) {
 }
 
 int lua_GetRayCollisionSphere(lua_State *L) {
-    Ray ray = get_ray_from_table(L, 1);
+    Ray ray        = get_ray_from_table(L, 1);
     Vector3 center = get_vector3_from_table(L, 2);
-    float radius = luaL_checknumber(L, 3);
-    RayCollision collision = GetRayCollisionSphere(ray, center, radius);
-
-    lua_newtable(L);
-    lua_pushstring(L, "hit");
-    lua_pushboolean(L, collision.hit);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "distance");
-    lua_pushnumber(L, collision.distance);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "point");
-    push_vector3_to_table(L, collision.point);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "normal");
-    push_vector3_to_table(L, collision.normal);
-    lua_settable(L, -3);
-
+    float radius   = luaL_checknumber(L, 3);
+    push_ray_collision_to_table(L, GetRayCollisionSphere(ray, center, radius));
     return 1;
 }
 
 int lua_GetRayCollisionBox(lua_State *L) {
-    Ray ray = get_ray_from_table(L, 1);
+    Ray ray         = get_ray_from_table(L, 1);
     BoundingBox box = get_bounding_box_from_table(L, 2);
-    RayCollision collision = GetRayCollisionBox(ray, box);
-
-    lua_newtable(L);
-    lua_pushstring(L, "hit");
-    lua_pushboolean(L, collision.hit);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "distance");
-    lua_pushnumber(L, collision.distance);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "point");
-    push_vector3_to_table(L, collision.point);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "normal");
-    push_vector3_to_table(L, collision.normal);
-    lua_settable(L, -3);
-
+    push_ray_collision_to_table(L, GetRayCollisionBox(ray, box));
     return 1;
 }
 
 int lua_GetRayCollisionMesh(lua_State *L) {
-    Ray ray = get_ray_from_table(L, 1);
-    Mesh *mesh = luaL_checkudata(L, 2, "Mesh");
+    Ray ray          = get_ray_from_table(L, 1);
+    Mesh *mesh       = luaL_checkudata(L, 2, "Mesh");
     Matrix transform = get_matrix_from_table(L, 3);
-    RayCollision collision = GetRayCollisionMesh(ray, *mesh, transform);
-
-    lua_newtable(L);
-    lua_pushstring(L, "hit");
-    lua_pushboolean(L, collision.hit);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "distance");
-    lua_pushnumber(L, collision.distance);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "point");
-    push_vector3_to_table(L, collision.point);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "normal");
-    push_vector3_to_table(L, collision.normal);
-    lua_settable(L, -3);
-
+    push_ray_collision_to_table(L, GetRayCollisionMesh(ray, *mesh, transform));
     return 1;
 }
 
 int lua_GetRayCollisionTriangle(lua_State *L) {
-    Ray ray = get_ray_from_table(L, 1);
+    Ray ray    = get_ray_from_table(L, 1);
     Vector3 p1 = get_vector3_from_table(L, 2);
     Vector3 p2 = get_vector3_from_table(L, 3);
     Vector3 p3 = get_vector3_from_table(L, 4);
-    RayCollision collision = GetRayCollisionTriangle(ray, p1, p2, p3);
-
-    lua_newtable(L);
-    lua_pushstring(L, "hit");
-    lua_pushboolean(L, collision.hit);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "distance");
-    lua_pushnumber(L, collision.distance);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "point");
-    push_vector3_to_table(L, collision.point);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "normal");
-    push_vector3_to_table(L, collision.normal);
-    lua_settable(L, -3);
-
+    push_ray_collision_to_table(L, GetRayCollisionTriangle(ray, p1, p2, p3));
     return 1;
 }
 
 int lua_GetRayCollisionQuad(lua_State *L) {
-    Ray ray = get_ray_from_table(L, 1);
+    Ray ray    = get_ray_from_table(L, 1);
     Vector3 p1 = get_vector3_from_table(L, 2);
     Vector3 p2 = get_vector3_from_table(L, 3);
     Vector3 p3 = get_vector3_from_table(L, 4);
     Vector3 p4 = get_vector3_from_table(L, 5);
-    RayCollision collision = GetRayCollisionQuad(ray, p1, p2, p3, p4);
-
-    lua_newtable(L);
-    lua_pushstring(L, "hit");
-    lua_pushboolean(L, collision.hit);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "distance");
-    lua_pushnumber(L, collision.distance);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "point");
-    push_vector3_to_table(L, collision.point);
-    lua_settable(L, -3);
-
-    lua_pushstring(L, "normal");
-    push_vector3_to_table(L, collision.normal);
-    lua_settable(L, -3);
-
+    push_ray_collision_to_table(L, GetRayCollisionQuad(ray, p1, p2, p3, p4));
     return 1;
+}
+
+int lua_UpdateModelAnimationEx(lua_State *L) {
+    Model *model         = luaL_checkudata(L, 1, "Model");
+    ModelAnimation *animA = luaL_checkudata(L, 2, "ModelAnimation");
+    float frameA         = (float)luaL_checknumber(L, 3);
+    ModelAnimation *animB = luaL_checkudata(L, 4, "ModelAnimation");
+    float frameB         = (float)luaL_checknumber(L, 5);
+    float blend          = (float)luaL_checknumber(L, 6);
+    UpdateModelAnimationEx(*model, *animA, frameA, *animB, frameB, blend);
+    return 0;
 }

@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Iinclude -Ilua/src -Iraylib/src -I/lua/src -fPIC
+CFLAGS = -Iinclude -Ilua/src -Iraylib/src -fPIC
 
 # Platform-specific settings
 ifeq ($(OS),Windows_NT)
@@ -9,7 +9,7 @@ ifeq ($(OS),Windows_NT)
     RM = del /f /q
     EXT = .dll
 else
-    LDFLAGS = -Lraylib -lraylib -L/usr/lib/x86_64-linux-gnu -llua5.4 -lX11 -lm -lpthread -fPIC -I/usr/include/lua5.4
+    LDFLAGS = -Lraylib -lraylib -Llua -llua -lX11 -lm -lpthread -fPIC
     OUTPUT = raylib.so
     RM = rm -f
     EXT = .so
@@ -43,6 +43,10 @@ $(OUTPUT): $(OBJ_FILES)
 # Compile source files to object files
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Run unit tests (requires lua 5.5 on PATH)
+test: $(OUTPUT)
+	LUA_CPATH="./?.so" lua tests/runner.lua
 
 # Clean build files
 clean:

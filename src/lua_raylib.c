@@ -123,23 +123,38 @@ static const luaL_Reg raylib_functions[] = {
     {"GetWindowHandle", lua_GetWindowHandle},
     {"GetCurrentMonitor", lua_GetCurrentMonitor},
     {"GetWindowScaleDPI", lua_GetWindowScaleDPI},
-    {"GetClipboardImage", lua_GetClipboardImage},
     {"EnableEventWaiting", lua_EnableEventWaiting},
     {"DisableEventWaiting", lua_DisableEventWaiting},
     {"IsCursorOnScreen", lua_IsCursorOnScreen},
+    {"IsKeyPressed", lua_IsKeyPressed},
+    {"IsKeyPressedRepeat", lua_IsKeyPressedRepeat},
+    {"GetKeyPressed", lua_GetKeyPressed},
+    {"GetCharPressed", lua_GetCharPressed},
+    {"GetKeyName", lua_GetKeyName},
+    {"IsMouseButtonPressed", lua_IsMouseButtonPressed},
+    {"IsMouseButtonReleased", lua_IsMouseButtonReleased},
+    {"MakeDirectory", lua_MakeDirectory},
+    {"IsFileNameValid", lua_IsFileNameValid},
+    {"ComputeCRC32", lua_ComputeCRC32},
+    {"ComputeMD5", lua_ComputeMD5},
+    {"ComputeSHA1", lua_ComputeSHA1},
+    {"ComputeSHA256", lua_ComputeSHA256},
+    {"FileCopy", lua_FileCopy},
+    {"FileMove", lua_FileMove},
+    {"FileRemove", lua_FileRemove},
+    {"FileRename", lua_FileRename},
+    {"FileTextFindIndex", lua_FileTextFindIndex},
+    {"FileTextReplace", lua_FileTextReplace},
+    {"GetDirectoryFileCount", lua_GetDirectoryFileCount},
+    {"GetDirectoryFileCountEx", lua_GetDirectoryFileCountEx},
 
     //Draw
     {"BeginDrawing", lua_BeginDrawing},
     {"EndDrawing", lua_EndDrawing},
     {"ClearBackground", lua_ClearBackground},
     {"DrawRectangle", lua_DrawRectangle},
-    {"DrawRectangleLines", lua_DrawRectangleLines},
-    {"DrawRectangleGradientV", lua_DrawRectangleGradientV},
-    {"DrawRectangleGradientEx", lua_DrawRectangleGradientEx},
-    {"DrawRectangleRounded", lua_DrawRectangleRounded},
     {"DrawTriangle", lua_DrawTriangle},
     {"DrawTriangleLines", lua_DrawTriangleLines},
-    {"DrawTriangleStrip", lua_DrawTriangleStrip},
     {"DrawPoly", lua_DrawPoly},
     {"DrawPolyLines", lua_DrawPolyLines},
     {"DrawPolyLinesEx", lua_DrawPolyLinesEx},
@@ -154,7 +169,9 @@ static const luaL_Reg raylib_functions[] = {
     {"DrawLineBezier", lua_DrawLineBezier},
     {"DrawLineStrip", lua_DrawLineStrip},
     {"DrawEllipse", lua_DrawEllipse},
-    {"DrawRingLines", lua_DrawRingLines},
+    {"DrawEllipseV", lua_DrawEllipseV},
+    {"DrawEllipseLinesV", lua_DrawEllipseLinesV},
+    {"DrawLineDashed", lua_DrawLineDashed},
     {"DrawGrid", lua_DrawGrid},
 
     //Audio
@@ -395,6 +412,7 @@ static const luaL_Reg raylib_functions[] = {
     {"GetRayCollisionMesh", lua_GetRayCollisionMesh},
     {"GetRayCollisionTriangle", lua_GetRayCollisionTriangle},
     {"GetRayCollisionQuad", lua_GetRayCollisionQuad},
+    {"UpdateModelAnimationEx", lua_UpdateModelAnimationEx},
 
     //Text
     {"GetFontDefault", lua_GetFontDefault},
@@ -444,6 +462,14 @@ static const luaL_Reg raylib_functions[] = {
     {"TextToCamel", lua_TextToCamel},
     {"TextToInteger", lua_TextToInteger},
     {"TextToFloat", lua_TextToFloat},
+    {"TextReplaceAlloc", lua_TextReplaceAlloc},
+    {"TextReplaceBetween", lua_TextReplaceBetween},
+    {"TextReplaceBetweenAlloc", lua_TextReplaceBetweenAlloc},
+    {"TextInsertAlloc", lua_TextInsertAlloc},
+    {"TextRemoveSpaces", lua_TextRemoveSpaces},
+    {"GetTextBetween", lua_GetTextBetween},
+    {"LoadTextLines", lua_LoadTextLines},
+    {"MeasureTextCodepoints", lua_MeasureTextCodepoints},
     
     //Shapes
     {"SetShapesTexture", lua_SetShapesTexture},
@@ -489,6 +515,7 @@ static const luaL_Reg raylib_functions[] = {
 };
 
 int luaopen_raylib(lua_State *L) {
+    globalLuaState = L;
     luaL_newlib(L, raylib_functions);
     register_raylib_colors(L);
     return 1;

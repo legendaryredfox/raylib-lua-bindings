@@ -245,7 +245,7 @@ int lua_ExportImageToMemory(lua_State *L) {
 
     if (fileData) {
         lua_pushlstring(L, (const char *)fileData, fileSize);
-        UnloadImageColors((Color *)fileData);
+        MemFree(fileData);
     } else {
         lua_pushnil(L);
     }

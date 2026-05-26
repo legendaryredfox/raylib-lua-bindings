@@ -355,8 +355,9 @@ int lua_CheckCollisionPointLine(lua_State *L) {
 int lua_CheckCollisionPointPoly(lua_State *L) {
     Vector2 point = get_vector2_from_table(L, 1);
     Vector2 *points = get_vector2_array_from_table(L, 2);
-    int pointCount = luaL_len(L, 2);
+    int pointCount = (int)luaL_len(L, 2);
     bool result = CheckCollisionPointPoly(point, points, pointCount);
+    free(points);
     lua_pushboolean(L, result);
     return 1;
 }

@@ -357,57 +357,89 @@ int lua_TextSubtext(lua_State *L) {
 }
 
 int lua_TextReplace(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-    const char *replace = luaL_checkstring(L, 2);
-    const char *by = luaL_checkstring(L, 3);
-    char *result = TextReplace(text, replace, by);
+    const char *text        = luaL_checkstring(L, 1);
+    const char *search      = luaL_checkstring(L, 2);
+    const char *replacement = luaL_checkstring(L, 3);
+    lua_pushstring(L, TextReplace(text, search, replacement));
+    return 1;
+}
+
+int lua_TextReplaceAlloc(lua_State *L) {
+    const char *text        = luaL_checkstring(L, 1);
+    const char *search      = luaL_checkstring(L, 2);
+    const char *replacement = luaL_checkstring(L, 3);
+    char *result = TextReplaceAlloc(text, search, replacement);
     lua_pushstring(L, result);
-    free(result); // Free memory allocated by TextReplace
+    MemFree(result);
+    return 1;
+}
+
+int lua_TextReplaceBetween(lua_State *L) {
+    const char *text        = luaL_checkstring(L, 1);
+    const char *begin       = luaL_checkstring(L, 2);
+    const char *end         = luaL_checkstring(L, 3);
+    const char *replacement = luaL_checkstring(L, 4);
+    lua_pushstring(L, TextReplaceBetween(text, begin, end, replacement));
+    return 1;
+}
+
+int lua_TextReplaceBetweenAlloc(lua_State *L) {
+    const char *text        = luaL_checkstring(L, 1);
+    const char *begin       = luaL_checkstring(L, 2);
+    const char *end         = luaL_checkstring(L, 3);
+    const char *replacement = luaL_checkstring(L, 4);
+    char *result = TextReplaceBetweenAlloc(text, begin, end, replacement);
+    lua_pushstring(L, result);
+    MemFree(result);
     return 1;
 }
 
 int lua_TextInsert(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
+    const char *text   = luaL_checkstring(L, 1);
     const char *insert = luaL_checkstring(L, 2);
-    int position = luaL_checkinteger(L, 3);
-    char *result = TextInsert(text, insert, position);
+    int position       = luaL_checkinteger(L, 3);
+    lua_pushstring(L, TextInsert(text, insert, position));
+    return 1;
+}
+
+int lua_TextInsertAlloc(lua_State *L) {
+    const char *text   = luaL_checkstring(L, 1);
+    const char *insert = luaL_checkstring(L, 2);
+    int position       = luaL_checkinteger(L, 3);
+    char *result = TextInsertAlloc(text, insert, position);
     lua_pushstring(L, result);
-    free(result); // Free memory allocated by TextInsert
+    MemFree(result);
     return 1;
 }
 
 int lua_TextJoin(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     const char *delimiter = luaL_checkstring(L, 2);
-    int count = lua_rawlen(L, 1);
-    const char **textList = malloc(sizeof(char *) * count);
+    int count = (int)lua_rawlen(L, 1);
+    char **textList = (char **)malloc(sizeof(char *) * count);
 
     for (int i = 0; i < count; i++) {
         lua_rawgeti(L, 1, i + 1);
-        textList[i] = luaL_checkstring(L, -1);
+        textList[i] = (char *)luaL_checkstring(L, -1);
         lua_pop(L, 1);
     }
 
-    const char *result = TextJoin(textList, count, delimiter);
-    lua_pushstring(L, result);
-    free((void *)result); // Free memory allocated by TextJoin
+    lua_pushstring(L, TextJoin(textList, count, delimiter));
     free(textList);
     return 1;
 }
 
 int lua_TextSplit(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-    char delimiter = luaL_checkstring(L, 2)[0];
+    const char *text  = luaL_checkstring(L, 1);
+    char delimiter    = luaL_checkstring(L, 2)[0];
     int count;
-    const char **result = TextSplit(text, delimiter, &count);
+    char **result = TextSplit(text, delimiter, &count);
 
-    lua_newtable(L);
+    lua_createtable(L, count, 0);
     for (int i = 0; i < count; i++) {
         lua_pushstring(L, result[i]);
         lua_rawseti(L, -2, i + 1);
     }
-
-    free(result); // Free memory allocated by TextSplit
     return 1;
 }
 
@@ -444,47 +476,27 @@ int lua_TextFindIndex(lua_State *L) {
 }
 
 int lua_TextToUpper(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-
-    const char *result = TextToUpper(text);
-    lua_pushstring(L, result);
-    free((void *)result); // Free memory allocated by raylib
+    lua_pushstring(L, TextToUpper(luaL_checkstring(L, 1)));
     return 1;
 }
 
 int lua_TextToLower(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-
-    const char *result = TextToLower(text);
-    lua_pushstring(L, result);
-    free((void *)result); // Free memory allocated by raylib
+    lua_pushstring(L, TextToLower(luaL_checkstring(L, 1)));
     return 1;
 }
 
 int lua_TextToPascal(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-
-    const char *result = TextToPascal(text);
-    lua_pushstring(L, result);
-    free((void *)result); // Free memory allocated by raylib
+    lua_pushstring(L, TextToPascal(luaL_checkstring(L, 1)));
     return 1;
 }
 
 int lua_TextToSnake(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-
-    const char *result = TextToSnake(text);
-    lua_pushstring(L, result);
-    free((void *)result); // Free memory allocated by raylib
+    lua_pushstring(L, TextToSnake(luaL_checkstring(L, 1)));
     return 1;
 }
 
 int lua_TextToCamel(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
-
-    const char *result = TextToCamel(text);
-    lua_pushstring(L, result);
-    free((void *)result); // Free memory allocated by raylib
+    lua_pushstring(L, TextToCamel(luaL_checkstring(L, 1)));
     return 1;
 }
 
@@ -499,5 +511,49 @@ int lua_TextToFloat(lua_State *L) {
     const char *text = luaL_checkstring(L, 1);
     float value = TextToFloat(text);
     lua_pushnumber(L, value);
+    return 1;
+}
+
+int lua_TextRemoveSpaces(lua_State *L) {
+    lua_pushstring(L, TextRemoveSpaces(luaL_checkstring(L, 1)));
+    return 1;
+}
+
+int lua_GetTextBetween(lua_State *L) {
+    const char *text  = luaL_checkstring(L, 1);
+    const char *begin = luaL_checkstring(L, 2);
+    const char *end   = luaL_checkstring(L, 3);
+    lua_pushstring(L, GetTextBetween(text, begin, end));
+    return 1;
+}
+
+int lua_LoadTextLines(lua_State *L) {
+    const char *text = luaL_checkstring(L, 1);
+    int count = 0;
+    char **lines = LoadTextLines(text, &count);
+    lua_createtable(L, count, 0);
+    for (int i = 0; i < count; i++) {
+        lua_pushstring(L, lines[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+    UnloadTextLines(lines, count);
+    return 1;
+}
+
+int lua_MeasureTextCodepoints(lua_State *L) {
+    Font *font = luaL_checkudata(L, 1, "Font");
+    luaL_checktype(L, 2, LUA_TTABLE);
+    int length = (int)lua_rawlen(L, 2);
+    int *codepoints = (int *)malloc(sizeof(int) * length);
+    for (int i = 0; i < length; i++) {
+        lua_rawgeti(L, 2, i + 1);
+        codepoints[i] = luaL_checkinteger(L, -1);
+        lua_pop(L, 1);
+    }
+    float fontSize = (float)luaL_checknumber(L, 3);
+    float spacing  = (float)luaL_checknumber(L, 4);
+    Vector2 size = MeasureTextCodepoints(*font, codepoints, length, fontSize, spacing);
+    free(codepoints);
+    push_vector2_to_table(L, size);
     return 1;
 }

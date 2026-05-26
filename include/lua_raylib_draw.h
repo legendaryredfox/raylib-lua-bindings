@@ -746,5 +746,8 @@ int lua_DrawRing(lua_State *L);
  * ```
  */
 int lua_DrawRingLines(lua_State *L);
+int lua_DrawEllipseV(lua_State *L);
+int lua_DrawEllipseLinesV(lua_State *L);
+int lua_DrawLineDashed(lua_State *L);
 
 #endif

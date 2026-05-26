@@ -1,6 +1,12 @@
 #include "lua_raylib_draw.h"
 #include "raylib_wrappers.h"
 
+static Color check_color(lua_State *L, int index) {
+    if (lua_isinteger(L, index))
+        return convert_color((int)lua_tointeger(L, index));
+    return get_color_from_table(L, index);
+}
+
 int lua_BeginDrawing(lua_State *L) {
     BeginDrawing();
     return 0;
@@ -12,20 +18,16 @@ int lua_EndDrawing(lua_State *L) {
 }
 
 int lua_ClearBackground(lua_State *L) {
-    int color = luaL_checkinteger(L, 1);
-    Color bgColor = convert_color(color);
-    ClearBackground(bgColor);
+    ClearBackground(check_color(L, 1));
     return 0;
 }
 
 int lua_DrawRectangle(lua_State *L) {
-    int x = luaL_checkinteger(L, 1);
-    int y = luaL_checkinteger(L, 2);
-    int width = luaL_checkinteger(L, 3);
+    int x      = luaL_checkinteger(L, 1);
+    int y      = luaL_checkinteger(L, 2);
+    int width  = luaL_checkinteger(L, 3);
     int height = luaL_checkinteger(L, 4);
-    int color = luaL_checkinteger(L, 5);
-    Color rectColor = convert_color(color);
-    DrawRectangle(x, y, width, height, rectColor);
+    DrawRectangle(x, y, width, height, check_color(L, 5));
     return 0;
 }
 
@@ -201,12 +203,11 @@ int lua_DrawRectangleGradientEx(lua_State *L) {
 }
 
 int lua_DrawCircleGradient(lua_State *L) {
-    int centerX = luaL_checkinteger(L, 1);
-    int centerY = luaL_checkinteger(L, 2);
-    float radius = luaL_checknumber(L, 3);
-    Color color1 = get_color_from_table(L, 4);
-    Color color2 = get_color_from_table(L, 5);
-    DrawCircleGradient(centerX, centerY, radius, color1, color2);
+    Vector2 center = get_vector2_from_table(L, 1);
+    float radius   = (float)luaL_checknumber(L, 2);
+    Color inner    = get_color_from_table(L, 3);
+    Color outer    = get_color_from_table(L, 4);
+    DrawCircleGradient(center, radius, inner, outer);
     return 0;
 }
 
@@ -288,5 +289,33 @@ int lua_DrawRingLines(lua_State *L) {
     int segments = luaL_checkinteger(L, 6);
     Color color = get_color_from_table(L, 7);
     DrawRingLines(center, innerRadius, outerRadius, startAngle, endAngle, segments, color);
+    return 0;
+}
+
+int lua_DrawEllipseV(lua_State *L) {
+    Vector2 center  = get_vector2_from_table(L, 1);
+    float radiusH   = (float)luaL_checknumber(L, 2);
+    float radiusV   = (float)luaL_checknumber(L, 3);
+    Color color     = get_color_from_table(L, 4);
+    DrawEllipseV(center, radiusH, radiusV, color);
+    return 0;
+}
+
+int lua_DrawEllipseLinesV(lua_State *L) {
+    Vector2 center  = get_vector2_from_table(L, 1);
+    float radiusH   = (float)luaL_checknumber(L, 2);
+    float radiusV   = (float)luaL_checknumber(L, 3);
+    Color color     = get_color_from_table(L, 4);
+    DrawEllipseLinesV(center, radiusH, radiusV, color);
+    return 0;
+}
+
+int lua_DrawLineDashed(lua_State *L) {
+    Vector2 startPos = get_vector2_from_table(L, 1);
+    Vector2 endPos   = get_vector2_from_table(L, 2);
+    int dashSize     = luaL_checkinteger(L, 3);
+    int spaceSize    = luaL_checkinteger(L, 4);
+    Color color      = get_color_from_table(L, 5);
+    DrawLineDashed(startPos, endPos, dashSize, spaceSize, color);
     return 0;
 }
