@@ -534,8 +534,26 @@ static const luaL_Reg raylib_functions[] = {
     {NULL, NULL} 
 };
 
+// Register an (empty) named metatable for every Raylib userdata type. Without
+// these, luaL_setmetatable() would silently attach a nil metatable and the
+// matching luaL_checkudata() would then reject every object. The metatables
+// carry no methods: Raylib objects are driven through the module's free
+// functions and released explicitly with the matching Unload* call.
+static void register_raylib_metatables(lua_State *L) {
+    static const char *const typeNames[] = {
+        "AudioStream", "Camera", "Font", "GlyphInfo", "Image", "Material",
+        "Mesh", "Model", "ModelAnimation", "Music", "RenderTexture2D",
+        "Sound", "Texture2D", "TextureCubemap", "Wave", NULL
+    };
+    for (int i = 0; typeNames[i] != NULL; i++) {
+        luaL_newmetatable(L, typeNames[i]);
+        lua_pop(L, 1);
+    }
+}
+
 int luaopen_raylib(lua_State *L) {
     globalLuaState = L;
+    register_raylib_metatables(L);
     luaL_newlib(L, raylib_functions);
     register_raylib_colors(L);
     return 1;

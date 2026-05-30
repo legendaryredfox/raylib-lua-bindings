@@ -13,6 +13,20 @@
 Color convert_color(int color);
 
 /**
+ * @brief Resolves a raw data buffer argument that may be a Lua string or userdata.
+ *
+ * Binary blobs (audio samples, pixel data, mesh buffers) are most naturally
+ * passed from Lua as binary strings, but a raw pointer (light/full userdata,
+ * e.g. from LoadWaveSamples) is also accepted. Returns NULL for nil. The byte
+ * length is not returned — callers already take an explicit size/count argument.
+ *
+ * @param L Lua state
+ * @param index Stack index of the data argument
+ * @return const void* Pointer to the buffer bytes (valid for the call's duration)
+ */
+const void *get_data_buffer(lua_State *L, int index);
+
+/**
  * @brief Retrieves a Color struct from a Lua table.
  * 
  * @param L Lua state
@@ -143,12 +157,12 @@ void push_vector4_to_table(lua_State *L, Vector4 vec);
 void push_rectangle_to_table(lua_State *L, Rectangle rect);
 
 /**
- * @brief Pushes an Image struct to a Lua table.
- * 
+ * @brief Pushes an Image struct as a Lua userdata carrying the "Image" metatable.
+ *
  * @param L Lua state
  * @param image The Image struct to push
  */
-void push_image_to_table(lua_State *L, Image image);
+void push_image_to_userdata(lua_State *L, Image image);
 
 /**
  * @brief Pushes a Color struct to a Lua table.

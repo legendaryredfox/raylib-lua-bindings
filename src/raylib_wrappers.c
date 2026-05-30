@@ -2,6 +2,12 @@
 #include "raylib_wrappers.h"
 #include "lauxlib.h"
 
+const void *get_data_buffer(lua_State *L, int index) {
+    if (lua_type(L, index) == LUA_TSTRING)
+        return lua_tostring(L, index);
+    return lua_touserdata(L, index);
+}
+
 Color convert_color(int color) {
     return (Color){
         (unsigned char)((color >> 24) & 0xFF),
@@ -170,13 +176,10 @@ void push_color_to_table(lua_State *L, Color color) {
     lua_pushinteger(L, color.a); lua_setfield(L, -2, "a");
 }
 
-void push_image_to_table(lua_State *L, Image image) {
-    lua_createtable(L, 0, 5);
-    lua_pushlightuserdata(L, image.data); lua_setfield(L, -2, "data");
-    lua_pushinteger(L, image.width);      lua_setfield(L, -2, "width");
-    lua_pushinteger(L, image.height);     lua_setfield(L, -2, "height");
-    lua_pushinteger(L, image.mipmaps);    lua_setfield(L, -2, "mipmaps");
-    lua_pushinteger(L, image.format);     lua_setfield(L, -2, "format");
+void push_image_to_userdata(lua_State *L, Image image) {
+    Image *pImage = (Image *)lua_newuserdata(L, sizeof(Image));
+    *pImage = image;
+    luaL_setmetatable(L, "Image");
 }
 
 void push_bounding_box_to_table(lua_State *L, BoundingBox bbox) {

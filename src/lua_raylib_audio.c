@@ -1,4 +1,5 @@
 #include "lua_raylib_audio.h"
+#include "raylib_wrappers.h"
 
 lua_State *globalLuaState = NULL;
 
@@ -154,7 +155,7 @@ int lua_IsSoundValid(lua_State *L) {
 
 int lua_UpdateSound(lua_State *L) {
     Sound *sound = luaL_checkudata(L, 1, "Sound");
-    const void *data = lua_touserdata(L, 2);
+    const void *data = get_data_buffer(L, 2);
     int sampleCount = luaL_checkinteger(L, 3);
     UpdateSound(*sound, data, sampleCount);
     return 0;
@@ -313,7 +314,7 @@ int lua_UnloadAudioStream(lua_State *L) {
 
 int lua_UpdateAudioStream(lua_State *L) {
     AudioStream *stream = luaL_checkudata(L, 1, "AudioStream");
-    const void *data = lua_touserdata(L, 2);
+    const void *data = get_data_buffer(L, 2);
     int frameCount = luaL_checkinteger(L, 3);
     UpdateAudioStream(*stream, data, frameCount);
     return 0;

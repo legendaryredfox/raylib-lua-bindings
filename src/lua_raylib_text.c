@@ -250,8 +250,10 @@ int lua_LoadUTF8(lua_State *L) {
 }
 
 int lua_UnloadUTF8(lua_State *L) {
-    char *text = (char *)luaL_checkstring(L, 1);
-    UnloadUTF8(text);
+    // No-op: lua_LoadUTF8 already frees the raylib buffer and returns a plain
+    // Lua string. Calling UnloadUTF8() on that string would free Lua-owned
+    // memory. Kept for API symmetry; validates the argument is a string.
+    luaL_checkstring(L, 1);
     return 0;
 }
 
@@ -343,8 +345,16 @@ int lua_TextLength(lua_State *L) {
 }
 
 int lua_TextFormat(lua_State *L) {
-    const char *formattedText = luaL_checkstring(L, 1);
-    lua_pushstring(L, formattedText);
+    // Raylib's variadic C TextFormat cannot be forwarded Lua varargs safely, so
+    // delegate to Lua's own string.format, which shares printf-style specifiers
+    // (%d, %s, %f, ...). Previously this returned the format string unchanged.
+    int nargs = lua_gettop(L);
+    luaL_checkstring(L, 1);
+    lua_getglobal(L, "string");
+    lua_getfield(L, -1, "format");
+    lua_remove(L, -2);        // drop the 'string' table, leaving string.format
+    lua_insert(L, 1);         // move string.format below the format args
+    lua_call(L, nargs, 1);
     return 1;
 }
 

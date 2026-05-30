@@ -8,7 +8,7 @@ This project provides bindings for **Raylib** (a simple and easy-to-use game dev
 
 - **Simple Lua bindings** for Raylib
 - Includes bindings for **drawing**, **audio**, **textures**, **models**, and more
-- Colors accepted as `{r,g,b,a}` tables **or** packed `0xRRGGBBAA` integers
+- Colors as `{r,g,b,a}` tables or named constants (`RED`, `RAYWHITE`, …); `ClearBackground` and `DrawRectangle` additionally accept a packed `0xRRGGBBAA` integer
 - Autocomplete available for VSCode: https://marketplace.visualstudio.com/items?itemName=LegendaryRedfox.raylib-lua-bindings-autocomplete
 - Easily extendable: Add more bindings as you go!
 
@@ -91,24 +91,26 @@ end
 raylib.CloseWindow()
 ```
 
-Color values can be passed as a named constant, a `{r,g,b,a}` table, or a packed
-32-bit integer (`0xRRGGBBAA`):
+Colors are passed as a named constant or a `{r,g,b,a}` table. A packed 32-bit
+integer (`0xRRGGBBAA`) is *additionally* accepted by `ClearBackground` and
+`DrawRectangle`; every other function expects a table or named constant:
 
 ```lua
-raylib.ClearBackground(RAYWHITE)               -- named global (table)
+raylib.ClearBackground(RAYWHITE)                      -- named constant (a table)
 raylib.ClearBackground({r=245, g=245, b=245, a=255})  -- explicit table
-raylib.ClearBackground(0xF5F5F5FF)             -- packed integer
+raylib.ClearBackground(0xF5F5F5FF)                    -- packed int (ClearBackground/DrawRectangle only)
+raylib.DrawText("hi", 10, 10, 20, RAYWHITE)           -- other calls need a table/constant
 ```
 
 ### 5. Running tests
 
-The test suite covers text utilities, hashing functions (CRC32/MD5/SHA1/SHA256), color utilities, and filesystem operations — all functions that don't require an open window.
+The suite (189 checks) covers text utilities, hashing (CRC32/MD5/SHA1/SHA256), color utilities, CPU-side image operations (generate/inspect/copy/transform), and filesystem helpers — everything that runs without an open window.
 
 ```bash
 make test
 ```
 
-Tests are pure Lua scripts in `tests/` and use the bundled `raylib.so`. No extra dependencies are needed.
+Tests are plain Lua scripts in `tests/` run against the bundled `raylib.so`. The only requirement is a Lua 5.5 interpreter on `PATH`.
 
 ### 6. Cleaning up
 
@@ -130,6 +132,7 @@ This will delete the compiled object files and the generated shared library (lib
 
 - The project works well on Windows; Linux support is in progress and some features may not behave correctly.
 - Audio stream processor callbacks dispatch to fixed Lua global function names, so only one processor of each type can be active at a time.
+- Raylib objects (textures, images, sounds, fonts, models, …) are returned as userdata and must be released with the matching `Unload*`; they are not garbage-collected automatically.
 - Contributions to help resolve these issues are highly welcome.
 
 ### Contributing

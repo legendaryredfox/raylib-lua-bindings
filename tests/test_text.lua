@@ -57,6 +57,15 @@ T.assert_eq("TextFindIndex mid",   r.TextFindIndex("hello world", "world"), 6)
 T.assert_eq("TextFindIndex start", r.TextFindIndex("hello world", "hello"), 0)
 T.assert_eq("TextFindIndex miss",  r.TextFindIndex("hello world", "xyz"),  -1)
 
+-- TextFormat: delegates to Lua string.format (printf-style specifiers)
+T.assert_eq("TextFormat int+str", r.TextFormat("%d-%s", 42, "x"), "42-x")
+T.assert_eq("TextFormat plain",   r.TextFormat("no specifiers"),  "no specifiers")
+T.assert_eq("TextFormat padded",  r.TextFormat("%03d", 7),        "007")
+
+-- LoadUTF8: codepoints -> UTF-8 string; UnloadUTF8 is a safe no-op
+T.assert_eq("LoadUTF8 'AB'", r.LoadUTF8({65, 66}), "AB")
+T.assert_true("UnloadUTF8 no-op is safe", (pcall(r.UnloadUTF8, "AB")))
+
 -- TextToInteger
 T.assert_eq("TextToInteger positive", r.TextToInteger("42"),  42)
 T.assert_eq("TextToInteger negative", r.TextToInteger("-10"), -10)

@@ -21,7 +21,7 @@ int lua_LoadTexture(lua_State *L) {
     Texture2D texture = LoadTexture(fileName);
     Texture2D *pTexture = lua_newuserdata(L, sizeof(Texture2D));
     *pTexture = texture;
-    luaL_setmetatable(L, "Texture");
+    luaL_setmetatable(L, "Texture2D");
     return 1;
 }
 
@@ -30,25 +30,25 @@ int lua_LoadTextureFromImage(lua_State *L) {
     Texture2D texture = LoadTextureFromImage(*image);
     Texture2D *pTexture = lua_newuserdata(L, sizeof(Texture2D));
     *pTexture = texture;
-    luaL_setmetatable(L, "Texture");
+    luaL_setmetatable(L, "Texture2D");
     return 1;
 }
 
 int lua_UnloadTexture(lua_State *L) {
-    Texture2D *texture = luaL_checkudata(L, 1, "Texture");
+    Texture2D *texture = luaL_checkudata(L, 1, "Texture2D");
     UnloadTexture(*texture);
     return 0;
 }
 
 int lua_UpdateTexture(lua_State *L) {
-    Texture2D *texture = luaL_checkudata(L, 1, "Texture");
-    const void *pixels = lua_touserdata(L, 2);
+    Texture2D *texture = luaL_checkudata(L, 1, "Texture2D");
+    const void *pixels = get_data_buffer(L, 2);
     UpdateTexture(*texture, pixels);
     return 0;
 }
 
 int lua_GenTextureMipmaps(lua_State *L) {
-    Texture2D *texture = luaL_checkudata(L, 1, "Texture");
+    Texture2D *texture = luaL_checkudata(L, 1, "Texture2D");
     GenTextureMipmaps(texture);
     return 0;
 }
@@ -146,14 +146,14 @@ int lua_LoadTextureCubemap(lua_State *L) {
 }
 
 int lua_UpdateTextureRec(lua_State *L) {
-    Texture2D *texture = luaL_checkudata(L, 1, "Texture");
+    Texture2D *texture = luaL_checkudata(L, 1, "Texture2D");
     Rectangle rec = {
         luaL_checknumber(L, 2),
         luaL_checknumber(L, 3),
         luaL_checknumber(L, 4),
         luaL_checknumber(L, 5)
     };
-    const void *pixels = lua_touserdata(L, 6);
+    const void *pixels = get_data_buffer(L, 6);
     UpdateTextureRec(*texture, rec, pixels);
     return 0;
 }
@@ -166,7 +166,7 @@ int lua_LoadImageRaw(lua_State *L) {
     int headerSize = luaL_checkinteger(L, 5);
 
     Image image = LoadImageRaw(fileName, width, height, format, headerSize);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -175,11 +175,9 @@ int lua_LoadImageAnim(lua_State *L) {
     int frames;
     Image image = LoadImageAnim(fileName, &frames);
 
-    lua_newtable(L);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     lua_pushinteger(L, frames);
-    lua_setfield(L, -2, "frames");
-    return 1;
+    return 2;
 }
 
 int lua_LoadImageAnimFromMemory(lua_State *L) {
@@ -190,11 +188,9 @@ int lua_LoadImageAnimFromMemory(lua_State *L) {
 
     Image image = LoadImageAnimFromMemory(fileType, fileData, dataSize, &frames);
 
-    lua_newtable(L);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     lua_pushinteger(L, frames);
-    lua_setfield(L, -2, "frames");
-    return 1;
+    return 2;
 }
 
 int lua_LoadImageFromMemory(lua_State *L) {
@@ -203,7 +199,7 @@ int lua_LoadImageFromMemory(lua_State *L) {
     int dataSize = luaL_checkinteger(L, 3);
 
     Image image = LoadImageFromMemory(fileType, fileData, dataSize);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -211,13 +207,13 @@ int lua_LoadImageFromTexture(lua_State *L) {
     Texture2D *texture = luaL_checkudata(L, 1, "Texture2D");
 
     Image image = LoadImageFromTexture(*texture);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
 int lua_LoadImageFromScreen(lua_State *L) {
     Image image = LoadImageFromScreen();
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -266,7 +262,7 @@ int lua_GenImageColor(lua_State *L) {
     int height = luaL_checkinteger(L, 2);
     Color color = get_color_from_table(L, 3);
     Image image = GenImageColor(width, height, color);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -277,7 +273,7 @@ int lua_GenImageGradientLinear(lua_State *L) {
     Color start = get_color_from_table(L, 4);
     Color end = get_color_from_table(L, 5);
     Image image = GenImageGradientLinear(width, height, direction, start, end);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -288,7 +284,7 @@ int lua_GenImageGradientRadial(lua_State *L) {
     Color inner = get_color_from_table(L, 4);
     Color outer = get_color_from_table(L, 5);
     Image image = GenImageGradientRadial(width, height, density, inner, outer);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -299,7 +295,7 @@ int lua_GenImageGradientSquare(lua_State *L) {
     Color inner = get_color_from_table(L, 4);
     Color outer = get_color_from_table(L, 5);
     Image image = GenImageGradientSquare(width, height, density, inner, outer);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -311,7 +307,7 @@ int lua_GenImageChecked(lua_State *L) {
     Color col1 = get_color_from_table(L, 5);
     Color col2 = get_color_from_table(L, 6);
     Image image = GenImageChecked(width, height, checksX, checksY, col1, col2);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -320,7 +316,7 @@ int lua_GenImageWhiteNoise(lua_State *L) {
     int height = luaL_checkinteger(L, 2);
     float factor = luaL_checknumber(L, 3);
     Image image = GenImageWhiteNoise(width, height, factor);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -331,7 +327,7 @@ int lua_GenImagePerlinNoise(lua_State *L) {
     int offsetY = luaL_checkinteger(L, 4);
     float scale = luaL_checknumber(L, 5);
     Image image = GenImagePerlinNoise(width, height, offsetX, offsetY, scale);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -340,7 +336,7 @@ int lua_GenImageCellular(lua_State *L) {
     int height = luaL_checkinteger(L, 2);
     int tileSize = luaL_checkinteger(L, 3);
     Image image = GenImageCellular(width, height, tileSize);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -349,7 +345,7 @@ int lua_GenImageText(lua_State *L) {
     int height = luaL_checkinteger(L, 2);
     const char *text = luaL_checkstring(L, 3);
     Image image = GenImageText(width, height, text);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -357,7 +353,7 @@ int lua_ImageFromImage(lua_State *L) {
     Image *src = luaL_checkudata(L, 1, "Image");
     Rectangle rect = get_rectangle_from_table(L, 2);
     Image image = ImageFromImage(*src, rect);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -365,7 +361,7 @@ int lua_ImageFromChannel(lua_State *L) {
     Image *src = luaL_checkudata(L, 1, "Image");
     int channel = luaL_checkinteger(L, 2);
     Image image = ImageFromChannel(*src, channel);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -374,7 +370,7 @@ int lua_ImageText(lua_State *L) {
     int fontSize = luaL_checkinteger(L, 2);
     Color color = get_color_from_table(L, 3);
     Image image = ImageText(text, fontSize, color);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 
@@ -385,7 +381,7 @@ int lua_ImageTextEx(lua_State *L) {
     float spacing = luaL_checknumber(L, 4);
     Color tint = get_color_from_table(L, 5);
     Image image = ImageTextEx(*font, text, fontSize, spacing, tint);
-    push_image_to_table(L, image);
+    push_image_to_userdata(L, image);
     return 1;
 }
 

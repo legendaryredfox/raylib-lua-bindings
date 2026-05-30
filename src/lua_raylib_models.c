@@ -4,6 +4,18 @@
 #include "lua_raylib_models.h"
 #include "raylib_wrappers.h"
 
+// Free a single animation's internal allocations without freeing the struct
+// itself. Raylib 6 exposes only the plural UnloadModelAnimations(), whose final
+// RL_FREE(animations) would free Lua-owned userdata memory and corrupt the heap.
+// This mirrors the per-element work the plural does (see raylib's rmodels.c),
+// using the public MemFree (== raylib's RL_FREE).
+static void unload_one_model_animation(ModelAnimation anim) {
+    if (anim.keyframePoses != NULL) {
+        for (int i = 0; i < anim.keyframeCount; i++) MemFree(anim.keyframePoses[i]);
+        MemFree(anim.keyframePoses);
+    }
+}
+
 int lua_LoadModel(lua_State *L) {
     const char *fileName = luaL_checkstring(L, 1);
     Model model = LoadModel(fileName);
@@ -347,7 +359,7 @@ int lua_UploadMesh(lua_State *L) {
 int lua_UpdateMeshBuffer(lua_State *L) {
     Mesh *mesh = luaL_checkudata(L, 1, "Mesh");
     int index = luaL_checkinteger(L, 2);
-    const void *data = lua_touserdata(L, 3);
+    const void *data = get_data_buffer(L, 3);
     int dataSize = luaL_checkinteger(L, 4);
     int offset = luaL_checkinteger(L, 5);
     UpdateMeshBuffer(*mesh, index, data, dataSize, offset);
@@ -481,7 +493,12 @@ int lua_LoadMaterials(lua_State *L) {
         luaL_setmetatable(L, "Material");
         lua_rawseti(L, -2, i + 1);
     }
-    UnloadMaterials(materials, materialCount);
+    // Each element was copied (shallow) into its own userdata, which now owns the
+    // internal `maps`/shader allocations. Free only the array container raylib
+    // allocated for the list — NOT the elements (UnloadMaterial would free the
+    // maps the userdata copies still reference). Ownership is released later by
+    // the caller via UnloadMaterial on each userdata.
+    MemFree(materials);
     return 1;
 }
 
@@ -533,13 +550,15 @@ int lua_LoadModelAnimations(lua_State *L) {
         luaL_setmetatable(L, "ModelAnimation");
         lua_rawseti(L, -2, i + 1);
     }
-    UnloadModelAnimations(animations, animCount);
+    // Free only the array container; each userdata copy now owns its framePoses
+    // and bones. Releasing them is the caller's job via UnloadModelAnimation.
+    MemFree(animations);
     return 1;
 }
 
 int lua_UnloadModelAnimation(lua_State *L) {
     ModelAnimation *animation = luaL_checkudata(L, 1, "ModelAnimation");
-    UnloadModelAnimations(animation, 1);
+    unload_one_model_animation(*animation);
     return 0;
 }
 
@@ -550,7 +569,7 @@ int lua_UnloadModelAnimations(lua_State *L) {
     for (int i = 1; i <= animCount; i++) {
         lua_rawgeti(L, 1, i);
         ModelAnimation *animation = luaL_checkudata(L, -1, "ModelAnimation");
-        UnloadModelAnimations(animation, 1);
+        unload_one_model_animation(*animation);
         lua_pop(L, 1);
     }
     return 0;

@@ -58,8 +58,13 @@ Both Raylib and Lua are linked from **vendored static libraries** (`raylib/libra
 
 `luaopen_raylib` is the single Lua C module entry point. It:
 1. Sets `globalLuaState = L` so that audio callbacks can reach the Lua state.
-2. Registers all wrapped functions via a `luaL_Reg` table.
-3. Calls `register_raylib_colors` to push Raylib's named colour constants (e.g. `RAYWHITE`, `RED`) as Lua globals.
+2. Calls `register_raylib_metatables` to create one named metatable per userdata
+   type (`Image`, `Texture2D`, `Sound`, `Model`, …). These must exist before any
+   binding runs — `luaL_setmetatable` / `luaL_checkudata` rely on them to tag and
+   type-check objects. (Without them, `setmetatable` attaches a nil metatable and
+   every `checkudata` rejects its argument.)
+3. Registers all wrapped functions via a `luaL_Reg` table.
+4. Calls `register_raylib_colors` to push Raylib's named colour constants (e.g. `RAYWHITE`, `RED`) as Lua globals.
 
 ### Binding pattern
 
@@ -86,11 +91,15 @@ helpers use `lua_setfield` / `lua_getfield` exclusively (never the older
 | `push_<type>_to_table(L, value)` | C → Lua | `push_vector2_to_table`, `push_rectangle_to_table`, `push_ray_collision_to_table` |
 
 Available push helpers: `push_vector2/3/4_to_table`, `push_rectangle_to_table`,
-`push_color_to_table`, `push_image_to_table`, `push_bounding_box_to_table`,
-`push_ray_collision_to_table`.
+`push_color_to_table`, `push_bounding_box_to_table`, `push_ray_collision_to_table`.
+Images are pushed with `push_image_to_userdata` — an Image is **userdata**, not a
+table, so every `Image`-returning binding (`LoadImage`, the `GenImage*` family,
+`ImageCopy`, …) yields the same type that `ImageDraw*`/`UnloadImage` expect.
 
-Complex opaque types (Image, Texture, Model, Sound, Music, AudioStream, etc.) are
-stored as **Lua userdata** with a named metatable (e.g. `"Image"`, `"Sound"`).
+Complex opaque types (Image, Texture2D, Model, Sound, Music, AudioStream, etc.)
+are stored as **Lua userdata** with a named metatable (e.g. `"Image"`, `"Sound"`).
+The canonical texture metatable name is `"Texture2D"` everywhere (load → draw →
+unload). Every type in this set gets its metatable from `register_raylib_metatables`.
 
 ### Colour representation
 
@@ -128,6 +137,20 @@ These rules are critical when adding new bindings:
   `UnloadImageColors`.**
 - **`get_vector2_array_from_table`**: allocates with `malloc`; the caller must
   `free()` the returned pointer after use.
+- **`LoadMaterials` / `LoadModelAnimations`**: each element is shallow-copied into
+  its own userdata, which then owns that element's internal allocations. The
+  binding `MemFree`s only the array container raylib returned — it must NOT call
+  `UnloadMaterial` / `UnloadModelAnimations` on the source (that would free data
+  the userdata copies still point at). The Lua caller releases each element with
+  `UnloadMaterial` / `UnloadModelAnimation`.
+- **`UnloadModelAnimation`**: use the singular `UnloadModelAnimation(anim)` on a
+  userdata — it frees only `framePoses`/`bones`. The plural form also `RL_FREE`s
+  the pointer, which is Lua-owned userdata memory (heap corruption).
+- **Raw data buffers** (`UpdateSound`, `UpdateAudioStream`, `UpdateTexture`,
+  `UpdateTextureRec`, `UpdateMeshBuffer`): resolve the data argument with
+  `get_data_buffer`, which accepts a Lua binary string (the usual case) or a raw
+  pointer. Do not use `lua_touserdata` directly — a Lua string yields NULL there
+  and raylib then dereferences it.
 
 ## Adding a new binding
 
@@ -182,9 +205,10 @@ LUA_CPATH="./?.so" lua tests/runner.lua
 | `tests/test_text.lua` | `TextLength`, `TextIsEqual`, `TextToUpper/Lower`, `TextSubtext`, `TextReplace*`, `TextInsert*`, `TextJoin`, `TextSplit`, `TextFindIndex`, case converters, `GetCodepoint*`, `CodepointToUTF8`, `TextCopy`, `TextAppend`, and more |
 | `tests/test_hashing.lua` | `ComputeCRC32`, `ComputeMD5`, `ComputeSHA1`, `ComputeSHA256` — fixed expected values |
 | `tests/test_color.lua` | `ColorToInt`, `ColorNormalize`, `ColorFromNormalized`, `ColorToHSV`, `ColorFromHSV`, `ColorTint`, `ColorAlpha`, `ColorBrightness`, `GetRandomValue` |
+| `tests/test_image.lua` | Image userdata round-trips: `GenImageColor`/`GenImageChecked` return userdata, `IsImageValid`, `GetImageColor`, `ImageCopy`, `ImageColorInvert`, distinct-metatable type rejection, `UnloadImage` |
 | `tests/test_filesystem.lua` | `MakeDirectory`, `IsFileNameValid`, `FileCopy`, `FileRemove`, `FileRename`, `FileMove`, `GetDirectoryFileCount` |
 
-All 165 tests run without a window. Functions that require `InitWindow` (drawing, audio, textures, input) are not tested — correctness is verified by running example scripts.
+All 189 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
 
 ### Known test quirks
 
@@ -197,7 +221,7 @@ All 165 tests run without a window. Functions that require `InitWindow` (drawing
 - Linux support is incomplete; some bindings may behave incorrectly or crash.
 - Audio stream processor callbacks store a single global `lua_State*` and dispatch
   to fixed-name Lua globals — only one processor of each type can be active at a time.
-- No automated test suite exists; correctness is verified by running example scripts.
+- GPU/audio-dependent bindings (rendering, hardware textures, audio playback, input) require a window or audio device and are verified by running example scripts; everything window-free is covered by the `tests/` suite (see Testing).
 - The library ships with vendored **Raylib 6.0** and **Lua 5.5.0** static libraries; keeping these up to date requires re-downloading and rebuilding the vendored sources.
 - `GetTargetFPS` is exposed in the Lua API but Raylib does not have that function; it currently delegates to `GetFPS()` instead.
 - Windows pre-built Lua libs (`lua/lua.lib`, `lua/lua54.lib`) are still for Lua 5.4; Windows users must rebuild against Lua 5.5.0.

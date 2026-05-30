@@ -47,6 +47,7 @@ local suite_files = {
     "tests/test_text.lua",
     "tests/test_hashing.lua",
     "tests/test_color.lua",
+    "tests/test_image.lua",
     "tests/test_filesystem.lua",
 }
 
