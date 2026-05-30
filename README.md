@@ -104,7 +104,7 @@ raylib.DrawText("hi", 10, 10, 20, RAYWHITE)           -- other calls need a tabl
 
 ### 5. Running tests
 
-The suite (227 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, and random sequences — everything that runs without an open window.
+The suite (235 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, and random sequences — everything that runs without an open window.
 
 ```bash
 make test

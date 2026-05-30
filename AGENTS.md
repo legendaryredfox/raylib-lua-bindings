@@ -231,7 +231,7 @@ LUA_CPATH="./?.so" lua tests/runner.lua
 | `tests/test_filesystem.lua` | `MakeDirectory`, `IsFileNameValid`, `FileCopy`, `FileRemove`, `FileRename`, `FileMove`, `GetDirectoryFileCount` |
 | `tests/test_extra.lua` | `TextToInteger/Float`, path utilities, `Load/SaveFileData/Text`, `Compress/DecompressData`, `Encode/DecodeDataBase64`, `LoadRandomSequence`, `LoadDirectoryFiles`, `ExportDataAsCode` |
 
-All 227 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
+All 235 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
 
 ### Known test quirks
 

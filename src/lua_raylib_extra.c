@@ -10,6 +10,9 @@
 // static; only register_extra() is exported.
 
 #include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include "raylib.h"
 #include <lua.h>
 #include <lauxlib.h>
@@ -860,6 +863,215 @@ static int lua_PlayAutomationEvent(lua_State *L) {
 // ---------------------------------------------------------------------------
 static int lua_UnloadTextLines(lua_State *L) { (void)L; return 0; }
 
+// ===========================================================================
+// File I/O & trace-log callbacks
+//
+// Each Set*Callback stores the Lua function in the registry and installs a C
+// trampoline that forwards to it through the shared globalLuaState. Passing nil
+// clears the callback and restores raylib's default behavior.
+// ===========================================================================
+
+extern lua_State *globalLuaState;   // set in luaopen_raylib (src/lua_raylib.c)
+
+static int traceLogRef     = LUA_NOREF;
+static int loadFileDataRef = LUA_NOREF;
+static int saveFileDataRef = LUA_NOREF;
+static int loadFileTextRef = LUA_NOREF;
+static int saveFileTextRef = LUA_NOREF;
+
+static void trace_log_trampoline(int logLevel, const char *text, va_list args) {
+    lua_State *L = globalLuaState;
+    if (L == NULL || traceLogRef == LUA_NOREF) return;
+    char buffer[1024];
+    vsnprintf(buffer, sizeof(buffer), text, args);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, traceLogRef);
+    lua_pushinteger(L, logLevel);
+    lua_pushstring(L, buffer);
+    if (lua_pcall(L, 2, 0, 0) != LUA_OK) lua_pop(L, 1);   // swallow errors; never break logging
+}
+
+static unsigned char *load_file_data_trampoline(const char *fileName, int *dataSize) {
+    lua_State *L = globalLuaState;
+    if (dataSize) *dataSize = 0;
+    if (L == NULL || loadFileDataRef == LUA_NOREF) return NULL;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, loadFileDataRef);
+    lua_pushstring(L, fileName);
+    if (lua_pcall(L, 1, 1, 0) != LUA_OK) { lua_pop(L, 1); return NULL; }
+    if (lua_type(L, -1) != LUA_TSTRING) { lua_pop(L, 1); return NULL; }
+    size_t len; const char *s = lua_tolstring(L, -1, &len);
+    unsigned char *buf = (unsigned char *)MemAlloc((unsigned int)len);   // raylib frees this with MemFree
+    if (buf != NULL) { memcpy(buf, s, len); if (dataSize) *dataSize = (int)len; }
+    lua_pop(L, 1);
+    return buf;
+}
+
+static char *load_file_text_trampoline(const char *fileName) {
+    lua_State *L = globalLuaState;
+    if (L == NULL || loadFileTextRef == LUA_NOREF) return NULL;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, loadFileTextRef);
+    lua_pushstring(L, fileName);
+    if (lua_pcall(L, 1, 1, 0) != LUA_OK) { lua_pop(L, 1); return NULL; }
+    if (lua_type(L, -1) != LUA_TSTRING) { lua_pop(L, 1); return NULL; }
+    size_t len; const char *s = lua_tolstring(L, -1, &len);
+    char *buf = (char *)MemAlloc((unsigned int)len + 1);
+    if (buf != NULL) { memcpy(buf, s, len); buf[len] = '\0'; }
+    lua_pop(L, 1);
+    return buf;
+}
+
+static bool save_file_data_trampoline(const char *fileName, void *data, int dataSize) {
+    lua_State *L = globalLuaState;
+    if (L == NULL || saveFileDataRef == LUA_NOREF) return false;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, saveFileDataRef);
+    lua_pushstring(L, fileName);
+    lua_pushlstring(L, (const char *)data, (size_t)dataSize);
+    if (lua_pcall(L, 2, 1, 0) != LUA_OK) { lua_pop(L, 1); return false; }
+    bool ok = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+    return ok;
+}
+
+static bool save_file_text_trampoline(const char *fileName, const char *text) {
+    lua_State *L = globalLuaState;
+    if (L == NULL || saveFileTextRef == LUA_NOREF) return false;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, saveFileTextRef);
+    lua_pushstring(L, fileName);
+    lua_pushstring(L, text);
+    if (lua_pcall(L, 2, 1, 0) != LUA_OK) { lua_pop(L, 1); return false; }
+    bool ok = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+    return ok;
+}
+
+// Rebind one callback slot from Lua stack position 1. Returns 1 if the caller
+// should install a NULL (cleared) callback, 0 if it should install the trampoline.
+static int set_callback_slot(lua_State *L, int *ref) {
+    if (*ref != LUA_NOREF) { luaL_unref(L, LUA_REGISTRYINDEX, *ref); *ref = LUA_NOREF; }
+    if (lua_isnoneornil(L, 1)) return 1;
+    luaL_checktype(L, 1, LUA_TFUNCTION);
+    lua_pushvalue(L, 1);
+    *ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    return 0;
+}
+
+static int lua_SetTraceLogCallback(lua_State *L) {
+    if (set_callback_slot(L, &traceLogRef)) SetTraceLogCallback(NULL);
+    else SetTraceLogCallback(trace_log_trampoline);
+    return 0;
+}
+static int lua_SetLoadFileDataCallback(lua_State *L) {
+    if (set_callback_slot(L, &loadFileDataRef)) SetLoadFileDataCallback(NULL);
+    else SetLoadFileDataCallback(load_file_data_trampoline);
+    return 0;
+}
+static int lua_SetSaveFileDataCallback(lua_State *L) {
+    if (set_callback_slot(L, &saveFileDataRef)) SetSaveFileDataCallback(NULL);
+    else SetSaveFileDataCallback(save_file_data_trampoline);
+    return 0;
+}
+static int lua_SetLoadFileTextCallback(lua_State *L) {
+    if (set_callback_slot(L, &loadFileTextRef)) SetLoadFileTextCallback(NULL);
+    else SetLoadFileTextCallback(load_file_text_trampoline);
+    return 0;
+}
+static int lua_SetSaveFileTextCallback(lua_State *L) {
+    if (set_callback_slot(L, &saveFileTextRef)) SetSaveFileTextCallback(NULL);
+    else SetSaveFileTextCallback(save_file_text_trampoline);
+    return 0;
+}
+
+// ===========================================================================
+// Raw memory — operates on raylib-owned buffers as light userdata pointers.
+// Advanced/interop use only; ordinary Lua code never needs these.
+// ===========================================================================
+
+static int lua_MemAlloc(lua_State *L) {
+    void *p = MemAlloc((unsigned int)luaL_checkinteger(L, 1));
+    if (p) lua_pushlightuserdata(L, p); else lua_pushnil(L);
+    return 1;
+}
+static int lua_MemRealloc(lua_State *L) {
+    void *p = MemRealloc(lua_touserdata(L, 1), (unsigned int)luaL_checkinteger(L, 2));
+    if (p) lua_pushlightuserdata(L, p); else lua_pushnil(L);
+    return 1;
+}
+static int lua_MemFree(lua_State *L) {
+    MemFree(lua_touserdata(L, 1));
+    return 0;
+}
+
+// ===========================================================================
+// Drag-and-drop files (needs a window; returns a Lua array of dropped paths)
+// ===========================================================================
+
+static int lua_IsFileDropped(lua_State *L) {
+    lua_pushboolean(L, IsFileDropped());
+    return 1;
+}
+static int lua_LoadDroppedFiles(lua_State *L) {
+    FilePathList list = LoadDroppedFiles();
+    lua_createtable(L, (int)list.count, 0);
+    for (unsigned int i = 0; i < list.count; i++) {
+        lua_pushstring(L, list.paths[i]);
+        lua_rawseti(L, -2, (lua_Integer)i + 1);
+    }
+    UnloadDroppedFiles(list);
+    return 1;
+}
+static int lua_UnloadDroppedFiles(lua_State *L) { (void)L; return 0; }   // paths returned as a Lua table
+
+// ===========================================================================
+// Font atlas internals — "GlyphInfoArray" userdata holds the raw glyph array
+// produced by LoadFontData and consumed by GenImageFontAtlas / UnloadFontData.
+// ===========================================================================
+
+typedef struct { GlyphInfo *glyphs; int count; } GlyphInfoArray;
+
+static int lua_LoadFontData(lua_State *L) {
+    size_t dataSize;
+    const char *fileData = luaL_checklstring(L, 1, &dataSize);
+    int fontSize = (int)luaL_checkinteger(L, 2);
+    int type = (int)luaL_optinteger(L, 4, 0);     // arg 3 = optional codepoints array
+    int *codepoints = NULL; int codepointCount = 0;
+    if (lua_istable(L, 3)) {
+        codepointCount = (int)luaL_len(L, 3);
+        if (codepointCount > 0) {
+            codepoints = (int *)malloc(sizeof(int) * codepointCount);
+            for (int i = 0; i < codepointCount; i++) { lua_rawgeti(L, 3, i + 1); codepoints[i] = (int)luaL_checkinteger(L, -1); lua_pop(L, 1); }
+        }
+    }
+    int glyphCount = 0;
+    GlyphInfo *glyphs = LoadFontData((const unsigned char *)fileData, (int)dataSize, fontSize, codepoints, codepointCount, type, &glyphCount);
+    free(codepoints);
+    GlyphInfoArray *arr = (GlyphInfoArray *)lua_newuserdata(L, sizeof(GlyphInfoArray));
+    arr->glyphs = glyphs;
+    arr->count = glyphCount;   // raylib reports the actual glyph count
+    luaL_setmetatable(L, "GlyphInfoArray");
+    return 1;
+}
+
+static int lua_GenImageFontAtlas(lua_State *L) {
+    GlyphInfoArray *arr = luaL_checkudata(L, 1, "GlyphInfoArray");
+    int fontSize   = (int)luaL_checkinteger(L, 2);
+    int padding    = (int)luaL_checkinteger(L, 3);
+    int packMethod = (int)luaL_checkinteger(L, 4);
+    Rectangle *recs = NULL;
+    Image image = GenImageFontAtlas(arr->glyphs, &recs, arr->count, fontSize, padding, packMethod);
+    push_image_to_userdata(L, image);
+    lua_createtable(L, arr->count, 0);
+    if (recs != NULL) {
+        for (int i = 0; i < arr->count; i++) { push_rectangle_to_table(L, recs[i]); lua_rawseti(L, -2, i + 1); }
+        MemFree(recs);
+    }
+    return 2;   // image, recsTable
+}
+
+static int lua_UnloadFontData(lua_State *L) {
+    GlyphInfoArray *arr = luaL_checkudata(L, 1, "GlyphInfoArray");
+    if (arr->glyphs != NULL) { UnloadFontData(arr->glyphs, arr->count); arr->glyphs = NULL; arr->count = 0; }
+    return 0;
+}
+
 // ---------------------------------------------------------------------------
 // Registration
 // ---------------------------------------------------------------------------
@@ -957,6 +1169,16 @@ static const luaL_Reg extra_functions[] = {
     {"GetAutomationEventCount", lua_GetAutomationEventCount}, {"PlayAutomationEvent", lua_PlayAutomationEvent},
     // Text lines
     {"UnloadTextLines", lua_UnloadTextLines},
+    // File I/O & trace-log callbacks
+    {"SetTraceLogCallback", lua_SetTraceLogCallback},
+    {"SetLoadFileDataCallback", lua_SetLoadFileDataCallback}, {"SetSaveFileDataCallback", lua_SetSaveFileDataCallback},
+    {"SetLoadFileTextCallback", lua_SetLoadFileTextCallback}, {"SetSaveFileTextCallback", lua_SetSaveFileTextCallback},
+    // Raw memory
+    {"MemAlloc", lua_MemAlloc}, {"MemRealloc", lua_MemRealloc}, {"MemFree", lua_MemFree},
+    // Font atlas internals
+    {"LoadFontData", lua_LoadFontData}, {"GenImageFontAtlas", lua_GenImageFontAtlas}, {"UnloadFontData", lua_UnloadFontData},
+    // Drag-and-drop
+    {"IsFileDropped", lua_IsFileDropped}, {"LoadDroppedFiles", lua_LoadDroppedFiles}, {"UnloadDroppedFiles", lua_UnloadDroppedFiles},
     {NULL, NULL}
 };
 

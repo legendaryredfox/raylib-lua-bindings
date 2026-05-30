@@ -544,7 +544,7 @@ static void register_raylib_metatables(lua_State *L) {
         "AudioStream", "Camera", "Font", "GlyphInfo", "Image", "Material",
         "Mesh", "Model", "ModelAnimation", "Music", "RenderTexture2D",
         "Shader", "Sound", "Texture2D", "TextureCubemap", "Wave",
-        "AutomationEventList", "VrStereoConfig", NULL
+        "AutomationEventList", "GlyphInfoArray", "VrStereoConfig", NULL
     };
     for (int i = 0; typeNames[i] != NULL; i++) {
         luaL_newmetatable(L, typeNames[i]);

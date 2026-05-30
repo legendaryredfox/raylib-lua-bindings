@@ -118,6 +118,43 @@ r.UnloadAutomationEventList(evlist)
 os.remove(evPath)
 
 -- ---------------------------------------------------------------------------
+-- Custom file/log callbacks (routed through the already-bound Load/Save/TraceLog;
+-- each is reset to nil afterwards to restore raylib's default behavior)
+-- ---------------------------------------------------------------------------
+r.SetLoadFileDataCallback(function(fn) return "DATA<" .. fn .. ">" end)
+T.assert_eq("custom LoadFileData", r.LoadFileData("a.bin"), "DATA<a.bin>")
+r.SetLoadFileDataCallback(nil)
+
+r.SetLoadFileTextCallback(function(fn) return "TEXT<" .. fn .. ">" end)
+T.assert_eq("custom LoadFileText", r.LoadFileText("a.txt"), "TEXT<a.txt>")
+r.SetLoadFileTextCallback(nil)
+
+local capt = {}
+r.SetSaveFileDataCallback(function(fn, data) capt.fn = fn; capt.data = data; return true end)
+T.assert_true("custom SaveFileData returns true", r.SaveFileData("b.bin", "payload"))
+T.assert_eq("custom SaveFileData received data", capt.data, "payload")
+r.SetSaveFileDataCallback(nil)
+
+r.SetSaveFileTextCallback(function(fn, text) return text == "ok" end)
+T.assert_true ("custom SaveFileText true",  r.SaveFileText("b.txt", "ok"))
+T.assert_false("custom SaveFileText false", r.SaveFileText("b.txt", "no"))
+r.SetSaveFileTextCallback(nil)
+
+local logmsg
+r.SetTraceLogCallback(function(level, text) logmsg = text end)
+r.TraceLog(4, "hello-from-lua")        -- 4 = LOG_WARNING (passes default INFO filter)
+T.assert_eq("custom TraceLogCallback", logmsg, "hello-from-lua")
+r.SetTraceLogCallback(nil)
+
+-- Raw memory (light-userdata round-trip)
+local mp = r.MemAlloc(64)
+T.assert_true("MemAlloc returns userdata", type(mp) == "userdata")
+mp = r.MemRealloc(mp, 128)
+T.assert_true("MemRealloc returns userdata", type(mp) == "userdata")
+r.MemFree(mp)
+T.assert_true("MemFree no crash", true)
+
+-- ---------------------------------------------------------------------------
 -- Cleanup
 -- ---------------------------------------------------------------------------
 os.remove(codePath)
