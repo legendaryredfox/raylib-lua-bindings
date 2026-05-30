@@ -2,7 +2,7 @@
 
 ## Project overview
 
-This project is a C shared library that exposes [Raylib](https://www.raylib.com/) (a simple, C-based game development framework) as a Lua 5.4 module. It is loaded with `require("raylib")` from any Lua script, giving the script access to Raylib's drawing, audio, texture, model, text, and input APIs without writing any C.
+This project is a C shared library that exposes [Raylib](https://www.raylib.com/) (a simple, C-based game development framework) as a Lua 5.5 module. It is loaded with `require("raylib")` from any Lua script, giving the script access to Raylib's drawing, audio, texture, model, text, and input APIs without writing any C.
 
 The output artifact is a single shared library (`raylib.so` on Linux, `raylib.dll` on Windows) that Lua's dynamic loader picks up at runtime.
 
@@ -19,9 +19,10 @@ raylib-lua-bindings/
 │   ├── lua_raylib_models.c # 3D mesh/model/material/animation, 3D collision, ray casts
 │   ├── lua_raylib_text.c   # Font loading, text drawing, text measurement, UTF-8 helpers
 │   ├── lua_raylib_audio.c  # Sound, music streams, audio streams, audio processors
+│   ├── lua_raylib_extra.c  # Added bindings: render modes, camera, shaders, input, filesystem, data utils
 │   └── raylib_wrappers.c   # Shared C helpers: struct ↔ Lua table conversion
 ├── include/                # Header for every src/ file + vendored raylib.h / lua headers
-├── lua/                    # Vendored Lua 5.4 source tree and pre-built .lib files (Windows)
+├── lua/                    # Vendored Lua 5.5.0 source tree (Windows .lib files are still 5.4)
 ├── raylib/                 # Vendored Raylib source tree
 ├── examples/
 │   └── basic_window.lua    # Minimal "Hello World" Lua script
@@ -99,7 +100,24 @@ table, so every `Image`-returning binding (`LoadImage`, the `GenImage*` family,
 Complex opaque types (Image, Texture2D, Model, Sound, Music, AudioStream, etc.)
 are stored as **Lua userdata** with a named metatable (e.g. `"Image"`, `"Sound"`).
 The canonical texture metatable name is `"Texture2D"` everywhere (load → draw →
-unload). Every type in this set gets its metatable from `register_raylib_metatables`.
+unload). Every type in this set gets its metatable from `register_raylib_metatables`
+(which also registers `"Shader"`).
+
+### Extra bindings module (`src/lua_raylib_extra.c`)
+
+A large batch of bindings (render-state mode pairs, 3D/2D camera + coordinate
+transforms, the shader subsystem, gamepad/gesture/touch input, filesystem & path
+helpers, data compression / base64, random sequences, logging, directory listing,
+audio playback control, and 3D/2D draw extras) lives in `lua_raylib_extra.c`. Its
+functions are `static` and registered as a group by `register_extra(L)`, which
+`luaL_setfuncs` them onto the module table created by `luaopen_raylib` (called
+right after `luaL_newlib`). To add more there, append to its `extra_functions[]`
+table — no change to `lua_raylib.c` is needed.
+
+`Camera` (3D) is **userdata** (`"Camera"`); build one with `CreateCamera3D(position,
+target, up, fovy, projection)` so it can be passed to `BeginMode3D` / `UpdateCamera`
+(which mutates it in place) / `DrawBillboard`. `Camera2D` is a plain table
+`{offset, target, rotation, zoom}`. `Matrix` ↔ table uses fields `m0`..`m15`.
 
 ### Colour representation
 
@@ -144,8 +162,12 @@ These rules are critical when adding new bindings:
   the userdata copies still point at). The Lua caller releases each element with
   `UnloadMaterial` / `UnloadModelAnimation`.
 - **`UnloadModelAnimation`**: use the singular `UnloadModelAnimation(anim)` on a
-  userdata — it frees only `framePoses`/`bones`. The plural form also `RL_FREE`s
-  the pointer, which is Lua-owned userdata memory (heap corruption).
+  userdata. raylib 6.0 has **no** singular `UnloadModelAnimation`, so the binding
+  uses a static helper (`unload_one_model_animation`) that frees only the
+  `keyframePoses` rows and array (`ModelAnimation` has `keyframeCount` /
+  `keyframePoses`, no `bones` field). The plural `UnloadModelAnimations` must NOT
+  be used on a single userdata — it also `RL_FREE`s the pointer, which is
+  Lua-owned userdata memory (heap corruption).
 - **Raw data buffers** (`UpdateSound`, `UpdateAudioStream`, `UpdateTexture`,
   `UpdateTextureRec`, `UpdateMeshBuffer`): resolve the data argument with
   `get_data_buffer`, which accepts a Lua binary string (the usual case) or a raw
@@ -207,8 +229,9 @@ LUA_CPATH="./?.so" lua tests/runner.lua
 | `tests/test_color.lua` | `ColorToInt`, `ColorNormalize`, `ColorFromNormalized`, `ColorToHSV`, `ColorFromHSV`, `ColorTint`, `ColorAlpha`, `ColorBrightness`, `GetRandomValue` |
 | `tests/test_image.lua` | Image userdata round-trips: `GenImageColor`/`GenImageChecked` return userdata, `IsImageValid`, `GetImageColor`, `ImageCopy`, `ImageColorInvert`, distinct-metatable type rejection, `UnloadImage` |
 | `tests/test_filesystem.lua` | `MakeDirectory`, `IsFileNameValid`, `FileCopy`, `FileRemove`, `FileRename`, `FileMove`, `GetDirectoryFileCount` |
+| `tests/test_extra.lua` | `TextToInteger/Float`, path utilities, `Load/SaveFileData/Text`, `Compress/DecompressData`, `Encode/DecodeDataBase64`, `LoadRandomSequence`, `LoadDirectoryFiles`, `ExportDataAsCode` |
 
-All 189 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
+All 227 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
 
 ### Known test quirks
 

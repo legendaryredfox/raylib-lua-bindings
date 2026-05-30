@@ -160,6 +160,26 @@ void push_vector4_to_table(lua_State *L, Vector4 vec) {
     lua_pushnumber(L, vec.w); lua_setfield(L, -2, "w");
 }
 
+void push_matrix_to_table(lua_State *L, Matrix mat) {
+    lua_createtable(L, 0, 16);
+    lua_pushnumber(L, mat.m0);  lua_setfield(L, -2, "m0");
+    lua_pushnumber(L, mat.m1);  lua_setfield(L, -2, "m1");
+    lua_pushnumber(L, mat.m2);  lua_setfield(L, -2, "m2");
+    lua_pushnumber(L, mat.m3);  lua_setfield(L, -2, "m3");
+    lua_pushnumber(L, mat.m4);  lua_setfield(L, -2, "m4");
+    lua_pushnumber(L, mat.m5);  lua_setfield(L, -2, "m5");
+    lua_pushnumber(L, mat.m6);  lua_setfield(L, -2, "m6");
+    lua_pushnumber(L, mat.m7);  lua_setfield(L, -2, "m7");
+    lua_pushnumber(L, mat.m8);  lua_setfield(L, -2, "m8");
+    lua_pushnumber(L, mat.m9);  lua_setfield(L, -2, "m9");
+    lua_pushnumber(L, mat.m10); lua_setfield(L, -2, "m10");
+    lua_pushnumber(L, mat.m11); lua_setfield(L, -2, "m11");
+    lua_pushnumber(L, mat.m12); lua_setfield(L, -2, "m12");
+    lua_pushnumber(L, mat.m13); lua_setfield(L, -2, "m13");
+    lua_pushnumber(L, mat.m14); lua_setfield(L, -2, "m14");
+    lua_pushnumber(L, mat.m15); lua_setfield(L, -2, "m15");
+}
+
 void push_rectangle_to_table(lua_State *L, Rectangle rect) {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, rect.x);      lua_setfield(L, -2, "x");

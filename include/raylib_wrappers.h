@@ -150,11 +150,22 @@ void push_vector4_to_table(lua_State *L, Vector4 vec);
 
 /**
  * @brief Pushes a Rectangle struct to a Lua table.
- * 
+ *
  * @param L Lua state
  * @param rect The Rectangle struct to push
  */
 void push_rectangle_to_table(lua_State *L, Rectangle rect);
+
+/**
+ * @brief Pushes a Matrix struct to a Lua table with fields m0..m15.
+ *
+ * Mirrors get_matrix_from_table: column-major raylib layout, each element
+ * stored under the key "m<N>" (m0 through m15).
+ *
+ * @param L Lua state
+ * @param mat The Matrix struct to push
+ */
+void push_matrix_to_table(lua_State *L, Matrix mat);
 
 /**
  * @brief Pushes an Image struct as a Lua userdata carrying the "Image" metatable.

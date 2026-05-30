@@ -7,7 +7,7 @@ This project provides bindings for **Raylib** (a simple and easy-to-use game dev
 ## Features
 
 - **Simple Lua bindings** for Raylib
-- Includes bindings for **drawing**, **audio**, **textures**, **models**, and more
+- Includes bindings for **drawing**, **audio**, **textures**, **models**, **shaders**, **3D/2D cameras**, **gamepad/gesture/touch input**, **filesystem & data utilities**, and more
 - Colors as `{r,g,b,a}` tables or named constants (`RED`, `RAYWHITE`, …); `ClearBackground` and `DrawRectangle` additionally accept a packed `0xRRGGBBAA` integer
 - Autocomplete available for VSCode: https://marketplace.visualstudio.com/items?itemName=LegendaryRedfox.raylib-lua-bindings-autocomplete
 - Easily extendable: Add more bindings as you go!
@@ -104,7 +104,7 @@ raylib.DrawText("hi", 10, 10, 20, RAYWHITE)           -- other calls need a tabl
 
 ### 5. Running tests
 
-The suite (189 checks) covers text utilities, hashing (CRC32/MD5/SHA1/SHA256), color utilities, CPU-side image operations (generate/inspect/copy/transform), and filesystem helpers — everything that runs without an open window.
+The suite (227 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, and random sequences — everything that runs without an open window.
 
 ```bash
 make test

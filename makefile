@@ -28,6 +28,7 @@ SRC_FILES = $(SRC_DIR)/lua_raylib.c \
             $(SRC_DIR)/lua_raylib_models.c \
             $(SRC_DIR)/lua_raylib_text.c \
             $(SRC_DIR)/lua_raylib_shapes.c \
+            $(SRC_DIR)/lua_raylib_extra.c \
             $(SRC_DIR)/raylib_wrappers.c
 
 # Object files

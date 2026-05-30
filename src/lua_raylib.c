@@ -543,7 +543,8 @@ static void register_raylib_metatables(lua_State *L) {
     static const char *const typeNames[] = {
         "AudioStream", "Camera", "Font", "GlyphInfo", "Image", "Material",
         "Mesh", "Model", "ModelAnimation", "Music", "RenderTexture2D",
-        "Sound", "Texture2D", "TextureCubemap", "Wave", NULL
+        "Shader", "Sound", "Texture2D", "TextureCubemap", "Wave",
+        "AutomationEventList", "VrStereoConfig", NULL
     };
     for (int i = 0; typeNames[i] != NULL; i++) {
         luaL_newmetatable(L, typeNames[i]);
@@ -551,10 +552,15 @@ static void register_raylib_metatables(lua_State *L) {
     }
 }
 
+// Defined in lua_raylib_extra.c — adds the extra bindings (mode pairs, camera,
+// shaders, input, filesystem, …) onto the module table at the top of the stack.
+void register_extra(lua_State *L);
+
 int luaopen_raylib(lua_State *L) {
     globalLuaState = L;
     register_raylib_metatables(L);
     luaL_newlib(L, raylib_functions);
+    register_extra(L);
     register_raylib_colors(L);
     return 1;
 }
