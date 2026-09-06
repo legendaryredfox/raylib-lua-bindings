@@ -98,7 +98,7 @@ int lua_DrawRectangleRounded(lua_State *L) {
 int lua_DrawLineStrip(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     int pointsCount = lua_rawlen(L, 1);
-    Vector2 *points = malloc(pointsCount * sizeof(Vector2));
+    Vector2 * points = (Vector2 *)lua_newuserdatauv(L, (size_t)(pointsCount * sizeof(Vector2)) + 1, 0);
     if (!points) {
         return luaL_error(L, "Memory allocation failed for points array");
     }
@@ -111,7 +111,6 @@ int lua_DrawLineStrip(lua_State *L) {
 
     Color color = get_color_from_table(L, 2);
     DrawLineStrip(points, pointsCount, color);
-    free(points);
     return 0;
 }
 
@@ -251,7 +250,7 @@ int lua_DrawTriangleLines(lua_State *L) {
 int lua_DrawTriangleStrip(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     int pointsCount = lua_rawlen(L, 1);
-    Vector2 *points = malloc(pointsCount * sizeof(Vector2));
+    Vector2 * points = (Vector2 *)lua_newuserdatauv(L, (size_t)(pointsCount * sizeof(Vector2)) + 1, 0);
     if (!points) {
         return luaL_error(L, "Memory allocation failed for points array");
     }
@@ -264,7 +263,6 @@ int lua_DrawTriangleStrip(lua_State *L) {
 
     Color color = get_color_from_table(L, 2);
     DrawTriangleStrip(points, pointsCount, color);
-    free(points);
     return 0;
 }
 

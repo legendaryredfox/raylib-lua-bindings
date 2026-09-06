@@ -3,8 +3,29 @@
 #include "lauxlib.h"
 
 const void *get_data_buffer(lua_State *L, int index) {
-    if (lua_type(L, index) == LUA_TSTRING)
-        return lua_tostring(L, index);
+    // Use lua_tolstring so binary blobs with embedded NUL bytes are not
+    // truncated (lua_tostring is fine for the pointer, but tolstring makes the
+    // intent explicit and keeps the string pinned).
+    if (lua_type(L, index) == LUA_TSTRING) {
+        size_t len;
+        return lua_tolstring(L, index, &len);
+    }
+    return lua_touserdata(L, index);
+}
+
+const void *get_data_buffer_checked(lua_State *L, int index, size_t need) {
+    // When the buffer is a Lua string we know its length, so reject calls that
+    // would make raylib read past the end (out-of-bounds read). Raw userdata
+    // pointers carry no length, so they are passed through unchecked.
+    if (lua_type(L, index) == LUA_TSTRING) {
+        size_t len;
+        const char *data = lua_tolstring(L, index, &len);
+        if (len < need) {
+            luaL_error(L, "data buffer too small: need %d bytes, got %d",
+                       (int)need, (int)len);
+        }
+        return data;
+    }
     return lua_touserdata(L, index);
 }
 
@@ -128,10 +149,17 @@ NPatchInfo get_npatchinfo_from_table(lua_State *L, int index) {
 }
 
 Vector2 *get_vector2_array_from_table(lua_State *L, int index) {
+    index = lua_absindex(L, index);
     luaL_checktype(L, index, LUA_TTABLE);
-    int len = (int)luaL_len(L, index);
-    Vector2 *points = (Vector2 *)malloc(len * sizeof(Vector2));
-    for (int i = 0; i < len; i++) {
+    lua_Integer len = luaL_len(L, index);
+    if (len < 0) len = 0;
+    // Back the array with a Lua-managed userdata rather than malloc: the garbage
+    // collector reclaims it even if an element read below raises a Lua error, so
+    // there is no leak on the error path, and it never returns NULL (a memory
+    // failure raises instead). Callers must NOT free the result; it stays alive
+    // for the duration of the calling C function (it is pinned on the stack).
+    Vector2 *points = (Vector2 *)lua_newuserdatauv(L, (size_t)len * sizeof(Vector2) + 1, 0);
+    for (lua_Integer i = 0; i < len; i++) {
         lua_rawgeti(L, index, i + 1);
         points[i] = get_vector2_from_table(L, -1);
         lua_pop(L, 1);

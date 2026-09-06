@@ -27,6 +27,7 @@ int lua_StopSound(lua_State *L) {
 int lua_UnloadSound(lua_State *L) {
     Sound *sound = luaL_checkudata(L, 1, "Sound");
     UnloadSound(*sound);
+    memset(sound, 0, sizeof(*sound));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -164,12 +165,14 @@ int lua_UpdateSound(lua_State *L) {
 int lua_UnloadWave(lua_State *L) {
     Wave *wave = luaL_checkudata(L, 1, "Wave");
     UnloadWave(*wave);
+    memset(wave, 0, sizeof(*wave));  // prevent use-after-free if reused
     return 0;
 }
 
 int lua_UnloadSoundAlias(lua_State *L) {
     Sound *alias = luaL_checkudata(L, 1, "Sound");
     UnloadSoundAlias(*alias);
+    memset(alias, 0, sizeof(*alias));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -235,6 +238,7 @@ int lua_IsMusicValid(lua_State *L) {
 int lua_UnloadMusicStream(lua_State *L) {
     Music *music = luaL_checkudata(L, 1, "Music");
     UnloadMusicStream(*music);
+    memset(music, 0, sizeof(*music));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -309,6 +313,7 @@ int lua_IsAudioStreamValid(lua_State *L) {
 int lua_UnloadAudioStream(lua_State *L) {
     AudioStream *stream = luaL_checkudata(L, 1, "AudioStream");
     UnloadAudioStream(*stream);
+    memset(stream, 0, sizeof(*stream));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -411,23 +416,38 @@ int lua_SetAudioStreamCallback(lua_State *L) {
     return 0;
 }
 
+// WARNING: raylib invokes these processor/callback wrappers on its internal
+// audio thread. Lua is single-threaded and these calls are NOT synchronized
+// with the main-thread VM, so doing substantial Lua work here can race with the
+// rest of the program. Keep any Lua-side handler minimal; a fully thread-safe
+// design would marshal the buffer to the main thread (e.g. a lock-free ring
+// buffer) instead of calling Lua directly. The shared helper below at least
+// keeps a missing state, a missing/non-callable handler, or a Lua error inside
+// the handler from crashing the process.
+static void invoke_audio_callback(const char *name, void *buffer, unsigned int frames) {
+    lua_State *L = globalLuaState;
+    if (L == NULL) return;
+    if (lua_getglobal(L, name) != LUA_TFUNCTION) {
+        lua_pop(L, 1);  // not defined or not a function: nothing to call
+        return;
+    }
+    lua_pushlightuserdata(L, buffer);
+    lua_pushinteger(L, frames);
+    if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
+        TraceLog(LOG_WARNING, "raylib-lua: audio callback '%s' failed: %s",
+                 name, lua_tostring(L, -1));
+        lua_pop(L, 1);  // discard the error message
+    }
+}
+
 void audioStreamProcessorWrapper(void *buffer, unsigned int frames) {
-    lua_getglobal(globalLuaState, "audioStreamProcessorWrapper");
-    lua_pushlightuserdata(globalLuaState, buffer);
-    lua_pushinteger(globalLuaState, frames);
-    lua_pcall(globalLuaState, 2, 0, 0);
+    invoke_audio_callback("audioStreamProcessorWrapper", buffer, frames);
 }
 
 void audioMixedProcessorWrapper(void *buffer, unsigned int frames) {
-    lua_getglobal(globalLuaState, "audioMixedProcessorWrapper");
-    lua_pushlightuserdata(globalLuaState, buffer);
-    lua_pushinteger(globalLuaState, frames);
-    lua_pcall(globalLuaState, 2, 0, 0);
+    invoke_audio_callback("audioMixedProcessorWrapper", buffer, frames);
 }
 
 void audioStreamCallbackWrapper(void *buffer, unsigned int frames) {
-    lua_getglobal(globalLuaState, "audioStreamCallbackWrapper");
-    lua_pushlightuserdata(globalLuaState, buffer);
-    lua_pushinteger(globalLuaState, frames);
-    lua_pcall(globalLuaState, 2, 0, 0);
+    invoke_audio_callback("audioStreamCallbackWrapper", buffer, frames);
 }

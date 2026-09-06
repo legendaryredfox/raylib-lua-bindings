@@ -50,6 +50,7 @@ local suite_files = {
     "tests/test_image.lua",
     "tests/test_filesystem.lua",
     "tests/test_extra.lua",
+    "tests/test_safety.lua",
 }
 
 for _, path in ipairs(suite_files) do

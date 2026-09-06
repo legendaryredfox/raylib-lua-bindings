@@ -266,15 +266,13 @@ static int lua_SetShaderValueV(lua_State *L) {
     int total = shader_elem_count(type) * count;
     if (total <= 0) return 0;
     if (shader_is_int(type)) {
-        int *buf = (int *)malloc(sizeof(int) * total);
+        int * buf = (int *)lua_newuserdatauv(L, (size_t)(sizeof(int) * total) + 1, 0);
         for (int i = 0; i < total; i++) { lua_rawgeti(L, 3, i + 1); buf[i] = (int)luaL_checkinteger(L, -1); lua_pop(L, 1); }
         SetShaderValueV(*shader, loc, buf, type, count);
-        free(buf);
     } else {
-        float *buf = (float *)malloc(sizeof(float) * total);
+        float * buf = (float *)lua_newuserdatauv(L, (size_t)(sizeof(float) * total) + 1, 0);
         for (int i = 0; i < total; i++) { lua_rawgeti(L, 3, i + 1); buf[i] = (float)luaL_checknumber(L, -1); lua_pop(L, 1); }
         SetShaderValueV(*shader, loc, buf, type, count);
-        free(buf);
     }
     return 0;
 }
@@ -298,6 +296,7 @@ static int lua_SetShaderValueTexture(lua_State *L) {
 static int lua_UnloadShader(lua_State *L) {
     Shader *shader = luaL_checkudata(L, 1, "Shader");
     UnloadShader(*shader);
+    memset(shader, 0, sizeof(*shader));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -372,14 +371,13 @@ static int lua_DrawMeshInstanced(lua_State *L) {
     luaL_checktype(L, 3, LUA_TTABLE);
     int instances = (int)luaL_len(L, 3);
     if (instances <= 0) return 0;
-    Matrix *transforms = (Matrix *)malloc(sizeof(Matrix) * instances);
+    Matrix * transforms = (Matrix *)lua_newuserdatauv(L, (size_t)(sizeof(Matrix) * instances) + 1, 0);
     for (int i = 0; i < instances; i++) {
         lua_rawgeti(L, 3, i + 1);
         transforms[i] = get_matrix_from_table(L, -1);
         lua_pop(L, 1);
     }
     DrawMeshInstanced(*mesh, *material, transforms, instances);
-    free(transforms);
     return 0;
 }
 
@@ -393,7 +391,6 @@ static int lua_DrawTriangleFan(lua_State *L) {
     Vector2 *points = get_vector2_array_from_table(L, 1);
     Color color = get_color_from_table(L, 2);
     DrawTriangleFan(points, pointCount, color);
-    free(points);
     return 0;
 }
 
@@ -613,7 +610,7 @@ static int lua_EncodeDataBase64(lua_State *L) {
 static int lua_DecodeDataBase64(lua_State *L) {
     const char *data = luaL_checkstring(L, 1);
     int outputSize = 0;
-    unsigned char *decoded = DecodeDataBase64((const unsigned char *)data, &outputSize);
+    unsigned char *decoded = DecodeDataBase64(data, &outputSize);
     if (decoded == NULL) { lua_pushnil(L); return 1; }
     lua_pushlstring(L, (const char *)decoded, (size_t)outputSize);
     MemFree(decoded);
@@ -727,7 +724,7 @@ static int lua_SetWindowIcons(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     int count = (int)luaL_len(L, 1);
     if (count <= 0) { SetWindowIcons(NULL, 0); return 0; }
-    Image *images = (Image *)malloc(sizeof(Image) * count);
+    Image * images = (Image *)lua_newuserdatauv(L, (size_t)(sizeof(Image) * count) + 1, 0);
     for (int i = 0; i < count; i++) {
         lua_rawgeti(L, 1, i + 1);
         Image *img = luaL_checkudata(L, -1, "Image");
@@ -735,7 +732,6 @@ static int lua_SetWindowIcons(lua_State *L) {
         lua_pop(L, 1);
     }
     SetWindowIcons(images, count);   // raylib copies the pixel data internally
-    free(images);
     return 0;
 }
 
@@ -789,6 +785,7 @@ static int lua_LoadVrStereoConfig(lua_State *L) {
 static int lua_UnloadVrStereoConfig(lua_State *L) {
     VrStereoConfig *config = luaL_checkudata(L, 1, "VrStereoConfig");
     UnloadVrStereoConfig(*config);
+    memset(config, 0, sizeof(*config));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -815,6 +812,7 @@ static int lua_LoadAutomationEventList(lua_State *L) {
 static int lua_UnloadAutomationEventList(lua_State *L) {
     AutomationEventList *list = luaL_checkudata(L, 1, "AutomationEventList");
     UnloadAutomationEventList(*list);
+    memset(list, 0, sizeof(*list));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -1036,13 +1034,12 @@ static int lua_LoadFontData(lua_State *L) {
     if (lua_istable(L, 3)) {
         codepointCount = (int)luaL_len(L, 3);
         if (codepointCount > 0) {
-            codepoints = (int *)malloc(sizeof(int) * codepointCount);
+            codepoints = (int *)lua_newuserdatauv(L, (size_t)codepointCount * sizeof(int) + 1, 0);
             for (int i = 0; i < codepointCount; i++) { lua_rawgeti(L, 3, i + 1); codepoints[i] = (int)luaL_checkinteger(L, -1); lua_pop(L, 1); }
         }
     }
     int glyphCount = 0;
     GlyphInfo *glyphs = LoadFontData((const unsigned char *)fileData, (int)dataSize, fontSize, codepoints, codepointCount, type, &glyphCount);
-    free(codepoints);
     GlyphInfoArray *arr = (GlyphInfoArray *)lua_newuserdata(L, sizeof(GlyphInfoArray));
     arr->glyphs = glyphs;
     arr->count = glyphCount;   // raylib reports the actual glyph count

@@ -27,6 +27,19 @@ Color convert_color(int color);
 const void *get_data_buffer(lua_State *L, int index);
 
 /**
+ * @brief Like get_data_buffer, but validates a Lua-string buffer holds at least
+ *        `need` bytes, raising a Lua error otherwise. Guards raylib against
+ *        out-of-bounds reads when a caller-supplied size exceeds the string.
+ *        Raw userdata pointers (no known length) are passed through unchecked.
+ *
+ * @param L Lua state
+ * @param index Stack index of the data argument
+ * @param need Minimum number of bytes the buffer must contain
+ * @return const void* Pointer to the buffer bytes (valid for the call's duration)
+ */
+const void *get_data_buffer_checked(lua_State *L, int index, size_t need);
+
+/**
  * @brief Retrieves a Color struct from a Lua table.
  * 
  * @param L Lua state

@@ -1,6 +1,7 @@
 
 #include <raylib.h>
 #include <stdlib.h>
+#include <string.h>
 #include "lua_raylib_models.h"
 #include "raylib_wrappers.h"
 
@@ -48,6 +49,7 @@ int lua_DrawModelEx(lua_State *L) {
 int lua_UnloadModel(lua_State *L) {
     Model *model = luaL_checkudata(L, 1, "Model");
     UnloadModel(*model);
+    memset(model, 0, sizeof(*model));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -70,6 +72,7 @@ int lua_DrawMesh(lua_State *L) {
 int lua_UnloadMesh(lua_State *L) {
     Mesh *mesh = luaL_checkudata(L, 1, "Mesh");
     UnloadMesh(*mesh);
+    memset(mesh, 0, sizeof(*mesh));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -144,7 +147,7 @@ int lua_DrawTriangle3D(lua_State *L) {
 int lua_DrawTriangleStrip3D(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     int pointCount = lua_rawlen(L, 1);
-    Vector3 *points = malloc(sizeof(Vector3) * pointCount);
+    Vector3 * points = (Vector3 *)lua_newuserdatauv(L, (size_t)(sizeof(Vector3) * pointCount) + 1, 0);
 
     for (int i = 0; i < pointCount; i++) {
         lua_rawgeti(L, 1, i + 1);
@@ -155,7 +158,6 @@ int lua_DrawTriangleStrip3D(lua_State *L) {
     Color color = get_color_from_table(L, 2);
     DrawTriangleStrip3D(points, pointCount, color);
 
-    free(points);
     return 0;
 }
 
@@ -519,6 +521,7 @@ int lua_IsMaterialValid(lua_State *L) {
 int lua_UnloadMaterial(lua_State *L) {
     Material *material = luaL_checkudata(L, 1, "Material");
     UnloadMaterial(*material);
+    memset(material, 0, sizeof(*material));  // prevent use-after-free if reused
     return 0;
 }
 

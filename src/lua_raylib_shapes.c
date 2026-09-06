@@ -130,7 +130,6 @@ int lua_DrawSplineLinear(lua_State *L) {
     float thick = luaL_checknumber(L, 2);
     Color color = get_color_from_table(L, 3);
     DrawSplineLinear(points, pointCount, thick, color);
-    free(points);
     return 0;
 }
 
@@ -140,7 +139,6 @@ int lua_DrawSplineBasis(lua_State *L) {
     float thick = luaL_checknumber(L, 2);
     Color color = get_color_from_table(L, 3);
     DrawSplineBasis(points, pointCount, thick, color);
-    free(points);
     return 0;
 }
 
@@ -150,7 +148,6 @@ int lua_DrawSplineCatmullRom(lua_State *L) {
     float thick = luaL_checknumber(L, 2);
     Color color = get_color_from_table(L, 3);
     DrawSplineCatmullRom(points, pointCount, thick, color);
-    free(points);
     return 0;
 }
 
@@ -160,7 +157,6 @@ int lua_DrawSplineBezierQuadratic(lua_State *L) {
     float thick = luaL_checknumber(L, 2);
     Color color = get_color_from_table(L, 3);
     DrawSplineBezierQuadratic(points, pointCount, thick, color);
-    free(points);
     return 0;
 }
 
@@ -170,7 +166,6 @@ int lua_DrawSplineBezierCubic(lua_State *L) {
     float thick = luaL_checknumber(L, 2);
     Color color = get_color_from_table(L, 3);
     DrawSplineBezierCubic(points, pointCount, thick, color);
-    free(points);
     return 0;
 }
 
@@ -357,7 +352,6 @@ int lua_CheckCollisionPointPoly(lua_State *L) {
     Vector2 *points = get_vector2_array_from_table(L, 2);
     int pointCount = (int)luaL_len(L, 2);
     bool result = CheckCollisionPointPoly(point, points, pointCount);
-    free(points);
     lua_pushboolean(L, result);
     return 1;
 }

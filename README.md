@@ -131,8 +131,8 @@ This will delete the compiled object files and the generated shared library (lib
 ### Known Issues
 
 - The project works well on Windows; Linux support is in progress and some features may not behave correctly.
-- Audio stream processor callbacks dispatch to fixed Lua global function names, so only one processor of each type can be active at a time.
-- Raylib objects (textures, images, sounds, fonts, models, …) are returned as userdata and must be released with the matching `Unload*`; they are not garbage-collected automatically.
+- Audio stream processor callbacks dispatch to fixed Lua global function names, so only one processor of each type can be active at a time. **These callbacks run on raylib's internal audio thread and are not synchronized with the main Lua VM** — keep any handler minimal (a fully thread-safe design would marshal buffers to the main thread). A missing/failing handler is now handled gracefully instead of crashing.
+- Raylib objects (textures, images, sounds, fonts, models, …) are returned as userdata and must be released with the matching `Unload*`; they are **not** garbage-collected automatically. Automatic `__gc` is intentionally omitted because raylib objects share ownership (a mesh inside a model, a texture inside a material), which would make blind finalization double-free. After `Unload*`, the userdata is zeroed so accidental reuse is a safe no-op rather than a use-after-free.
 - Contributions to help resolve these issues are highly welcome.
 
 ### Contributing

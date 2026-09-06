@@ -1,6 +1,9 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Iinclude -Ilua/src -Iraylib/src -fPIC
+# -Wall -Wextra surface real bugs (uninitialized use, sign mismatches, etc.).
+# -Wno-unused-parameter keeps the noise down: every Lua C function takes
+# (lua_State *L) whether or not it uses it. Override with `make CFLAGS=...`.
+CFLAGS = -Iinclude -Ilua/src -Iraylib/src -fPIC -O2 -Wall -Wextra -Wno-unused-parameter
 
 # Platform-specific settings
 ifeq ($(OS),Windows_NT)

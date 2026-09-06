@@ -30,7 +30,7 @@ int lua_LoadFontEx(lua_State *L) {
     if (!lua_isnil(L, 3)) {
         luaL_checktype(L, 3, LUA_TTABLE);
         codepointCount = lua_rawlen(L, 3);
-        codepoints = (int *)malloc(sizeof(int) * codepointCount);
+        codepoints = (int *)lua_newuserdatauv(L, (size_t)codepointCount * sizeof(int) + 1, 0);
 
         for (int i = 0; i < codepointCount; i++) {
             lua_rawgeti(L, 3, i + 1);
@@ -40,7 +40,6 @@ int lua_LoadFontEx(lua_State *L) {
     }
 
     Font font = LoadFontEx(fileName, fontSize, codepoints, codepointCount);
-    free(codepoints);
 
     Font *pFont = lua_newuserdata(L, sizeof(Font));
     *pFont = font;
@@ -71,7 +70,7 @@ int lua_LoadFontFromMemory(lua_State *L) {
     if (!lua_isnil(L, 4)) {
         luaL_checktype(L, 4, LUA_TTABLE);
         codepointCount = lua_rawlen(L, 4);
-        codepoints = (int *)malloc(sizeof(int) * codepointCount);
+        codepoints = (int *)lua_newuserdatauv(L, (size_t)codepointCount * sizeof(int) + 1, 0);
 
         for (int i = 0; i < codepointCount; i++) {
             lua_rawgeti(L, 4, i + 1);
@@ -81,7 +80,6 @@ int lua_LoadFontFromMemory(lua_State *L) {
     }
 
     Font font = LoadFontFromMemory(fileType, (unsigned char *)fileData, (int)dataSize, fontSize, codepoints, codepointCount);
-    free(codepoints);
 
     Font *pFont = lua_newuserdata(L, sizeof(Font));
     *pFont = font;
@@ -98,6 +96,7 @@ int lua_IsFontValid(lua_State *L) {
 int lua_UnloadFont(lua_State *L) {
     Font *font = luaL_checkudata(L, 1, "Font");
     UnloadFont(*font);
+    memset(font, 0, sizeof(*font));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -163,7 +162,7 @@ int lua_DrawTextCodepoints(lua_State *L) {
     Font *font = luaL_checkudata(L, 1, "Font");
     luaL_checktype(L, 2, LUA_TTABLE);
     int codepointCount = lua_rawlen(L, 2);
-    int *codepoints = (int *)malloc(sizeof(int) * codepointCount);
+    int * codepoints = (int *)lua_newuserdatauv(L, (size_t)(sizeof(int) * codepointCount) + 1, 0);
 
     for (int i = 0; i < codepointCount; i++) {
         lua_rawgeti(L, 2, i + 1);
@@ -178,7 +177,6 @@ int lua_DrawTextCodepoints(lua_State *L) {
 
     DrawTextCodepoints(*font, codepoints, codepointCount, position, fontSize, spacing, tint);
 
-    free(codepoints);
     return 0;
 }
 
@@ -234,7 +232,7 @@ int lua_GetGlyphAtlasRec(lua_State *L) {
 int lua_LoadUTF8(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     int length = lua_rawlen(L, 1);
-    int *codepoints = malloc(sizeof(int) * length);
+    int * codepoints = (int *)lua_newuserdatauv(L, (size_t)(sizeof(int) * length) + 1, 0);
 
     for (int i = 0; i < length; i++) {
         lua_rawgeti(L, 1, i + 1);
@@ -243,7 +241,6 @@ int lua_LoadUTF8(lua_State *L) {
     }
 
     char *text = LoadUTF8(codepoints, length);
-    free(codepoints);
     lua_pushstring(L, text);
     UnloadUTF8(text);
     return 1;
@@ -323,11 +320,10 @@ int lua_CodepointToUTF8(lua_State *L) {
 
 int lua_TextCopy(lua_State *L) {
     const char *src = luaL_checkstring(L, 1);
-    char *dst = malloc(strlen(src) + 1);
+    char * dst = (char *)lua_newuserdatauv(L, (size_t)(strlen(src) + 1) + 1, 0);
     int bytesCopied = TextCopy(dst, src);
     lua_pushstring(L, dst);
     lua_pushinteger(L, bytesCopied);
-    free(dst);
     return 2;
 }
 
@@ -426,7 +422,7 @@ int lua_TextJoin(lua_State *L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     const char *delimiter = luaL_checkstring(L, 2);
     int count = (int)lua_rawlen(L, 1);
-    char **textList = (char **)malloc(sizeof(char *) * count);
+    char ** textList = (char **)lua_newuserdatauv(L, (size_t)(sizeof(char *) * count) + 1, 0);
 
     for (int i = 0; i < count; i++) {
         lua_rawgeti(L, 1, i + 1);
@@ -435,7 +431,6 @@ int lua_TextJoin(lua_State *L) {
     }
 
     lua_pushstring(L, TextJoin(textList, count, delimiter));
-    free(textList);
     return 1;
 }
 
@@ -461,7 +456,7 @@ int lua_TextAppend(lua_State *L) {
     // Allocate buffer for appending
     size_t textLen = strlen(text);
     size_t appendLen = strlen(append);
-    char *buffer = malloc(textLen + appendLen + 1);
+    char * buffer = (char *)lua_newuserdatauv(L, (size_t)(textLen + appendLen + 1) + 1, 0);
     if (!buffer) {
         return luaL_error(L, "Memory allocation failed for TextAppend");
     }
@@ -471,7 +466,6 @@ int lua_TextAppend(lua_State *L) {
 
     lua_pushstring(L, buffer);
     lua_pushinteger(L, position);
-    free(buffer);
     return 2;
 }
 
@@ -554,7 +548,7 @@ int lua_MeasureTextCodepoints(lua_State *L) {
     Font *font = luaL_checkudata(L, 1, "Font");
     luaL_checktype(L, 2, LUA_TTABLE);
     int length = (int)lua_rawlen(L, 2);
-    int *codepoints = (int *)malloc(sizeof(int) * length);
+    int * codepoints = (int *)lua_newuserdatauv(L, (size_t)(sizeof(int) * length) + 1, 0);
     for (int i = 0; i < length; i++) {
         lua_rawgeti(L, 2, i + 1);
         codepoints[i] = luaL_checkinteger(L, -1);
@@ -563,7 +557,6 @@ int lua_MeasureTextCodepoints(lua_State *L) {
     float fontSize = (float)luaL_checknumber(L, 3);
     float spacing  = (float)luaL_checknumber(L, 4);
     Vector2 size = MeasureTextCodepoints(*font, codepoints, length, fontSize, spacing);
-    free(codepoints);
     push_vector2_to_table(L, size);
     return 1;
 }

@@ -13,6 +13,7 @@ int lua_LoadImage(lua_State *L) {
 int lua_UnloadImage(lua_State *L) {
     Image *image = luaL_checkudata(L, 1, "Image");
     UnloadImage(*image);
+    memset(image, 0, sizeof(*image));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -37,6 +38,7 @@ int lua_LoadTextureFromImage(lua_State *L) {
 int lua_UnloadTexture(lua_State *L) {
     Texture2D *texture = luaL_checkudata(L, 1, "Texture2D");
     UnloadTexture(*texture);
+    memset(texture, 0, sizeof(*texture));  // prevent use-after-free if reused
     return 0;
 }
 
@@ -438,14 +440,13 @@ int lua_ImageKernelConvolution(lua_State *L) {
     Image *image = luaL_checkudata(L, 1, "Image");
     luaL_checktype(L, 2, LUA_TTABLE);
     int kernelSize = luaL_len(L, 2);
-    float *kernel = malloc(kernelSize * sizeof(float));
+    float * kernel = (float *)lua_newuserdatauv(L, (size_t)(kernelSize * sizeof(float)) + 1, 0);
     for (int i = 0; i < kernelSize; i++) {
         lua_rawgeti(L, 2, i + 1);
         kernel[i] = luaL_checknumber(L, -1);
         lua_pop(L, 1);
     }
     ImageKernelConvolution(image, kernel, kernelSize);
-    free(kernel);
     return 0;
 }
 
@@ -717,7 +718,7 @@ int lua_ImageDrawTriangleLines(lua_State *L) {
 int lua_ImageDrawTriangleFan(lua_State *L) {
     Image *dst = luaL_checkudata(L, 1, "Image");
     int count = luaL_len(L, 2);
-    Vector2 *points = malloc(count * sizeof(Vector2));
+    Vector2 * points = (Vector2 *)lua_newuserdatauv(L, (size_t)(count * sizeof(Vector2)) + 1, 0);
     for (int i = 0; i < count; i++) {
         lua_rawgeti(L, 2, i + 1);
         points[i] = get_vector2_from_table(L, -1);
@@ -725,14 +726,13 @@ int lua_ImageDrawTriangleFan(lua_State *L) {
     }
     Color color = get_color_from_table(L, 3);
     ImageDrawTriangleFan(dst, points, count, color);
-    free(points);
     return 0;
 }
 
 int lua_ImageDrawTriangleStrip(lua_State *L) {
     Image *dst = luaL_checkudata(L, 1, "Image");
     int count = luaL_len(L, 2);
-    Vector2 *points = malloc(count * sizeof(Vector2));
+    Vector2 * points = (Vector2 *)lua_newuserdatauv(L, (size_t)(count * sizeof(Vector2)) + 1, 0);
     for (int i = 0; i < count; i++) {
         lua_rawgeti(L, 2, i + 1);
         points[i] = get_vector2_from_table(L, -1);
@@ -740,7 +740,6 @@ int lua_ImageDrawTriangleStrip(lua_State *L) {
     }
     Color color = get_color_from_table(L, 3);
     ImageDrawTriangleStrip(dst, points, count, color);
-    free(points);
     return 0;
 }
 
@@ -802,6 +801,7 @@ int lua_IsRenderTextureValid(lua_State *L) {
 int lua_UnloadRenderTexture(lua_State *L) {
     RenderTexture2D *renderTexture = luaL_checkudata(L, 1, "RenderTexture2D");
     UnloadRenderTexture(*renderTexture);
+    memset(renderTexture, 0, sizeof(*renderTexture));  // prevent use-after-free if reused
     return 0;
 }
 
