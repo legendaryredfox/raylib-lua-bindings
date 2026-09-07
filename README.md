@@ -1,6 +1,6 @@
 ![logo](images/logo.png)
 
-# Raylib-Lua Bindings (WIP)
+# Raylib-Lua Bindings
 
 This project provides bindings for **Raylib** (a simple and easy-to-use game development library) to be used with **Lua**, a powerful, efficient, lightweight scripting language. With this binding, you can use Raylib's functionalities directly from Lua scripts, enabling rapid development of games and graphical applications.
 
@@ -16,13 +16,13 @@ This project provides bindings for **Raylib** (a simple and easy-to-use game dev
 
 Before building this project, ensure you have the following software installed:
 
-### On Linux: (Work still in progress)
+### On Linux:
 
 1. **GCC**: C compiler used for compiling the bindings.
 2. **Make**: A tool to automate the build process.
 3. **libX11** development headers (usually `libx11-dev`).
 
-Raylib 6.0 and Lua 5.5.0 are **vendored** as static libraries — no system installation required.
+Raylib 6.0 and Lua 5.5.0 are **vendored** as static libraries — no system installation required. `make` builds `raylib.so` and the full `make test` suite passes on Linux.
 
 ### On Windows:
 
@@ -49,7 +49,13 @@ cd raylib-lua-bindings
 
 #### On Linux:
 
-I'm still working on that
+Install a C toolchain and the X11 development headers:
+
+```bash
+sudo apt install build-essential libx11-dev   # Debian/Ubuntu
+```
+
+Raylib and Lua are vendored, so nothing else is needed — `make` links them from the bundled static libraries.
 
 #### On Windows:
 
@@ -66,7 +72,7 @@ make
 
 This will generate the appropriate shared library file:
 
-**Linux: libraylib.so**
+**Linux: raylib.so**
 **Windows: raylib.dll**
 
 ### 4. Using the bindings
@@ -104,7 +110,7 @@ raylib.DrawText("hi", 10, 10, 20, RAYWHITE)           -- other calls need a tabl
 
 ### 5. Running tests
 
-The suite (237 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, and random sequences — everything that runs without an open window.
+The suite (248 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, and random sequences — everything that runs without an open window.
 
 ```bash
 make test
@@ -130,7 +136,8 @@ This will delete the compiled object files and the generated shared library (lib
 
 ### Known Issues
 
-- The project works well on Windows; Linux support is in progress and some features may not behave correctly.
+- Builds and passes the full test suite on both Linux and Windows. GPU/audio-dependent bindings (rendering, hardware textures, audio playback, input) still require a window or audio device and are verified by running example scripts rather than the headless test suite.
+- `GetTargetFPS` is exposed for API symmetry but raylib has no such function; it delegates to `GetFPS()`.
 - Audio stream processor callbacks dispatch to fixed Lua global function names, so only one processor of each type can be active at a time. **These callbacks run on raylib's internal audio thread and are not synchronized with the main Lua VM** — keep any handler minimal (a fully thread-safe design would marshal buffers to the main thread). A missing/failing handler is now handled gracefully instead of crashing.
 - Raylib objects (textures, images, sounds, fonts, models, …) are returned as userdata and must be released with the matching `Unload*`; they are **not** garbage-collected automatically. Automatic `__gc` is intentionally omitted because raylib objects share ownership (a mesh inside a model, a texture inside a material), which would make blind finalization double-free. After `Unload*`, the userdata is zeroed so accidental reuse is a safe no-op rather than a use-after-free.
 - Contributions to help resolve these issues are highly welcome.

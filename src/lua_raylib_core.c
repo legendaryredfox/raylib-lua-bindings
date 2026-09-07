@@ -227,6 +227,8 @@ int lua_SetTargetFPS(lua_State *L) {
 }
 
 int lua_GetTargetFPS(lua_State *L) {
+    // raylib has no GetTargetFPS(); this is exposed for API symmetry and
+    // delegates to GetFPS() (the current measured frame rate).
     lua_pushinteger(L, GetFPS());
     return 1;
 }
