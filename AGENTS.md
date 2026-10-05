@@ -26,9 +26,8 @@ raylib-lua-bindings/
 ├── raylib/                 # Vendored Raylib source tree
 ├── examples/
 │   └── basic_window.lua    # Minimal "Hello World" Lua script
-├── main.lua                # Audio stream processor demo (development scratch file)
-├── makefile                # Cross-platform build (Linux + Windows/MinGW)
-└── windows_working_mkf     # Snapshot of a known-working Windows makefile
+├── main.lua                # Audio streaming demo: 440 Hz tone via UpdateAudioStream
+└── makefile                # Cross-platform build (Linux + Windows/MinGW)
 ```
 
 ## Build system
@@ -239,16 +238,16 @@ LUA_CPATH="./?.so" lua tests/runner.lua
 | File | What it covers |
 |------|----------------|
 | `tests/runner.lua` | Minimal harness; loads and runs all suites; exits non-zero on failure |
-| `tests/test_text.lua` | `TextLength`, `TextIsEqual`, `TextToUpper/Lower`, `TextSubtext`, `TextReplace*`, `TextInsert*`, `TextJoin`, `TextSplit`, `TextFindIndex`, case converters, `GetCodepoint*`, `CodepointToUTF8`, `TextCopy`, `TextAppend`, and more |
+| `tests/test_text.lua` | `TextLength`, `TextIsEqual`, `TextToUpper/Lower`, `TextSubtext`, `TextReplace*`, `TextInsert*`, `TextJoin`, `TextSplit`, `TextFindIndex`, case converters, `GetCodepoint*` (incl. bounded `GetCodepointPrevious`), `CodepointToUTF8`, `TextCopy`, `TextAppend`, and more |
 | `tests/test_hashing.lua` | `ComputeCRC32`, `ComputeMD5`, `ComputeSHA1`, `ComputeSHA256` — fixed expected values |
 | `tests/test_color.lua` | `ColorToInt`, `ColorNormalize`, `ColorFromNormalized`, `ColorToHSV`, `ColorFromHSV`, `ColorTint`, `ColorAlpha`, `ColorBrightness`, `GetRandomValue`, named colours (`raylib.RAYWHITE` and globals) |
-| `tests/test_image.lua` | Image userdata round-trips: `GenImageColor`/`GenImageChecked` return userdata, `IsImageValid`, `GetImageColor`, `ImageCopy`, `ImageColorInvert`, distinct-metatable type rejection, `UnloadImage` |
+| `tests/test_image.lua` | Image userdata round-trips: `GenImageColor`/`GenImageChecked` return userdata, `IsImageValid`, `GetImageColor`, `ImageCopy`, `ImageColorInvert`, `ImageCrop` (table and four-number forms), distinct-metatable type rejection, `UnloadImage` |
 | `tests/test_filesystem.lua` | `MakeDirectory`, `IsFileNameValid`, `FileCopy`, `FileRemove`, `FileRename`, `FileMove`, `GetDirectoryFileCount` |
 | `tests/test_extra.lua` | `TextToInteger/Float`, path utilities, `Load/SaveFileData/Text`, `Compress/DecompressData`, `Encode/DecodeDataBase64`, `LoadRandomSequence`, `LoadDirectoryFiles`, `ExportDataAsCode` |
 | `tests/test_safety.lua` | Hardened array readers, zero-on-unload, Base64 round-trip, error paths that previously leaked or crashed |
 | `tests/test_audio.lua` | Audio handler validation: C-function and upvalue rejection, no-op detach (no audio device needed) |
 
-All 260 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
+All 271 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
 
 ### Known test quirks
 
@@ -265,3 +264,9 @@ All 260 checks run without a window. CPU-side image operations are covered; bind
 - `GetTargetFPS` is exposed in the Lua API but Raylib does not have that function; it currently delegates to `GetFPS()` instead.
 - `DrawCircleGradient` Lua API changed in this update: now takes `(center: Vector2, radius, inner, outer)` instead of `(centerX, centerY, radius, inner, outer)`.
 - `TextReplace`/`TextInsert` are now static-buffer returns (no allocation); use `TextReplaceAlloc`/`TextInsertAlloc` for heap-allocated results.
+- Dual-form signatures: `DrawRectangleLines`, `DrawRectangleGradientEx`, `ImageCrop` and
+  `UpdateTextureRec` take raylib's form (Rectangle table; no `lineThick`), but still accept
+  the older binding forms (four numbers for the rectangle; `DrawRectangleLines(x, y, w, h,
+  lineThick, color)`). New rectangle arguments should use `get_rectangle_arg`.
+- `GetCodepointPrevious(text [, pos])` takes an optional 1-based byte position and is
+  bounded by the start of the string (raylib's own function is not).

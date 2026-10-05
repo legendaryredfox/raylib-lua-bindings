@@ -299,10 +299,25 @@ int lua_GetCodepointNext(lua_State *L) {
     return 2;
 }
 
+// GetCodepointPrevious(text [, pos]): decodes the codepoint that ends just
+// before 1-based byte position `pos` (default #text + 1, i.e. the last one).
+// raylib's GetCodepointPrevious walks backward with no lower bound, so the
+// start of that codepoint is found here, bounded by the start of the string,
+// and decoded forward instead.
 int lua_GetCodepointPrevious(lua_State *L) {
-    const char *text = luaL_checkstring(L, 1);
+    size_t len;
+    const char *text = luaL_checklstring(L, 1, &len);
+    lua_Integer pos = luaL_optinteger(L, 2, (lua_Integer)len + 1);
+    luaL_argcheck(L, pos >= 1 && pos <= (lua_Integer)len + 1, 2, "position out of range");
+    if (pos == 1) {  // nothing before the start of the string
+        lua_pushnil(L);
+        lua_pushinteger(L, 0);
+        return 2;
+    }
+    size_t start = (size_t)pos - 2;   // 0-based index of the byte before pos
+    while (start > 0 && ((unsigned char)text[start] & 0xC0) == 0x80) start--;
     int size;
-    int codepoint = GetCodepointPrevious(text, &size);
+    int codepoint = GetCodepoint(text + start, &size);
     lua_pushinteger(L, codepoint);
     lua_pushinteger(L, size);
     return 2;

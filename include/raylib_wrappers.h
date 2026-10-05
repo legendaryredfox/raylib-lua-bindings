@@ -121,6 +121,20 @@ BoundingBox get_bounding_box_from_table(lua_State *L, int index);
 Rectangle get_rectangle_from_table(lua_State *L, int index);
 
 /**
+ * @brief Reads a Rectangle argument given either as a {x, y, width, height}
+ *        table or as four numbers at index..index+3.
+ *
+ * Lets bindings accept raylib's Rectangle form while still taking the older
+ * four-number form.
+ *
+ * @param L Lua state
+ * @param index Stack index of the table, or of the first number
+ * @param rect Receives the rectangle
+ * @return int Stack slots consumed: 1 (table) or 4 (numbers)
+ */
+int get_rectangle_arg(lua_State *L, int index, Rectangle *rect);
+
+/**
  * @brief Retrieves an NPatchInfo struct from a Lua table.
  * 
  * @param L Lua state

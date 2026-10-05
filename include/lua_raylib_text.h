@@ -628,16 +628,22 @@ int lua_GetCodepointNext(lua_State *L);
 /**
  * @brief Gets the previous codepoint in a UTF-8 string.
  * 
- * This function calls raylib's GetCodepointPrevious on the start of the given string,
- * which decodes the codepoint immediately *before* that pointer.
+ * This function decodes the codepoint that ends just before byte position `pos`, for
+ * stepping backward through text. The scan never reads before the start of the string.
  *
- * @param L A pointer to the current Lua state. Expects 1 argument:
+ * @param L A pointer to the current Lua state. Expects 1 or 2 arguments:
  *  - `const char *utf8`: A UTF-8 encoded string.
+ *  - `int pos` (optional): 1-based byte position; default `#utf8 + 1` (the last codepoint).
  *
- * @return int Always returns 2 — the codepoint (integer) and its size in bytes (integer).
+ * @return int Always returns 2 — the codepoint (integer) and its size in bytes (integer),
+ *         or `nil, 0` when `pos` is 1 (nothing precedes it).
  *
- * @warning There is no position argument, so raylib scans backward from the first byte
- *          of the Lua string, before its start. The result is not meaningful.
+ * @usage
+ * ```lua
+ * local text = "aé"
+ * local cp, size = raylib.GetCodepointPrevious(text)  -- 233, 2 ('é')
+ * cp = raylib.GetCodepointPrevious(text, #text + 1 - size)  -- 97 ('a')
+ * ```
  */
 int lua_GetCodepointPrevious(lua_State *L);
 

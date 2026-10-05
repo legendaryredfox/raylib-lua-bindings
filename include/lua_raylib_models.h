@@ -787,17 +787,17 @@ int lua_DrawBillboardRec(lua_State *L);
  *  - `Texture2D texture`: The texture to use for the billboard.
  *  - `Rectangle sourceRect`: The source rectangle of the texture to draw.
  *  - `Vector3 position`: The position in 3D space where the billboard is drawn.
+ *  - `Vector3 up`: The billboard's up direction.
  *  - `Vector2 size`: The size of the billboard.
  *  - `Vector2 origin`: The origin point of the billboard.
  *  - `float rotation`: The rotation of the billboard in degrees.
  *  - `Color tint`: The color tint to apply to the billboard.
- *  - `bool drawCenter`: If `true`, the billboard is drawn centered on the position.
- * 
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
- * raylib.DrawBillboardPro(camera, texture, {x=0, y=0, width=64, height=64}, {x=0, y=1, z=0}, {x=2, y=2}, {x=1, y=1}, 45.0, {r=255, g=255, b=255, a=255}, true)
+ * raylib.DrawBillboardPro(camera, texture, {x=0, y=0, width=64, height=64}, {x=0, y=1, z=0}, {x=0, y=1, z=0}, {x=2, y=2}, {x=1, y=1}, 45.0, {r=255, g=255, b=255, a=255})
  * print("Pro billboard drawn successfully")
  * ```
  * 

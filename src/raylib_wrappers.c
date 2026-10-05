@@ -123,6 +123,18 @@ Rectangle get_rectangle_from_table(lua_State *L, int index) {
     return rect;
 }
 
+int get_rectangle_arg(lua_State *L, int index, Rectangle *rect) {
+    if (lua_istable(L, index)) {
+        *rect = get_rectangle_from_table(L, index);
+        return 1;
+    }
+    rect->x      = (float)luaL_checknumber(L, index);
+    rect->y      = (float)luaL_checknumber(L, index + 1);
+    rect->width  = (float)luaL_checknumber(L, index + 2);
+    rect->height = (float)luaL_checknumber(L, index + 3);
+    return 4;
+}
+
 NPatchInfo get_npatchinfo_from_table(lua_State *L, int index) {
     luaL_checktype(L, index, LUA_TTABLE);
     NPatchInfo info;

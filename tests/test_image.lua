@@ -55,3 +55,12 @@ T.assert_false("Image rejected where Wave expected", (pcall(r.IsWaveValid, img))
 T.assert_true("UnloadImage accepts copy",     (pcall(r.UnloadImage, copy)))
 T.assert_true("UnloadImage accepts checked",  (pcall(r.UnloadImage, checked)))
 T.assert_true("UnloadImage accepts original", (pcall(r.UnloadImage, img)))
+
+-- ImageCrop accepts a Rectangle table or four numbers
+local crop = r.GenImageColor(64, 32, {r=0, g=0, b=0, a=255})
+r.ImageCrop(crop, {x=0, y=0, width=16, height=8})
+local c1 = r.GetImageColor(crop, 15, 7)
+T.assert_eq("ImageCrop(table) keeps pixel", c1.a, 255)
+T.assert_true("ImageCrop(table) bounds", (pcall(r.ImageCrop, crop, 0, 0, 8, 4)))
+T.assert_false("ImageCrop rejects partial rect", (pcall(r.ImageCrop, crop, 0, 0)))
+r.UnloadImage(crop)

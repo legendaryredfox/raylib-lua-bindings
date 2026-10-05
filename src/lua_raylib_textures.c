@@ -86,12 +86,8 @@ int lua_ImageCopy(lua_State *L) {
 
 int lua_ImageCrop(lua_State *L) {
     Image *image = luaL_checkudata(L, 1, "Image");
-    Rectangle cropRect = {
-        luaL_checknumber(L, 2),
-        luaL_checknumber(L, 3),
-        luaL_checknumber(L, 4),
-        luaL_checknumber(L, 5)
-    };
+    Rectangle cropRect;
+    get_rectangle_arg(L, 2, &cropRect);   // rect as a table or 4 numbers
     ImageCrop(image, cropRect);
     return 0;
 }
@@ -149,13 +145,10 @@ int lua_LoadTextureCubemap(lua_State *L) {
 
 int lua_UpdateTextureRec(lua_State *L) {
     Texture2D *texture = luaL_checkudata(L, 1, "Texture2D");
-    Rectangle rec = {
-        luaL_checknumber(L, 2),
-        luaL_checknumber(L, 3),
-        luaL_checknumber(L, 4),
-        luaL_checknumber(L, 5)
-    };
-    const void *pixels = get_data_buffer(L, 6);
+    Rectangle rec;
+    int p = 2 + get_rectangle_arg(L, 2, &rec);   // rect as a table or 4 numbers
+    const void *pixels = get_data_buffer_checked(L, p,
+        (size_t)GetPixelDataSize((int)rec.width, (int)rec.height, texture->format));
     UpdateTextureRec(*texture, rec, pixels);
     return 0;
 }

@@ -122,3 +122,18 @@ T.assert_eq("TextCopy bytes", n,   5)
 local app, pos = r.TextAppend("hello", "_world", 5)
 T.assert_eq("TextAppend result",       app, "hello_world")
 T.assert_eq("TextAppend new position", pos, 11)
+
+-- GetCodepointPrevious(text [, pos]): codepoint ending just before byte pos
+local cp, sz = r.GetCodepointPrevious("aé")
+T.assert_eq("GetCodepointPrevious last codepoint", cp, 233)
+T.assert_eq("GetCodepointPrevious last size",      sz, 2)
+cp, sz = r.GetCodepointPrevious("aé", 2)
+T.assert_eq("GetCodepointPrevious before pos 2", cp, 97)
+T.assert_eq("GetCodepointPrevious size 1",       sz, 1)
+cp, sz = r.GetCodepointPrevious("aé", 1)
+T.assert_eq("GetCodepointPrevious at start is nil", cp, nil)
+T.assert_eq("GetCodepointPrevious at start size 0", sz, 0)
+-- A string of bare continuation bytes must not scan before its start
+cp, sz = r.GetCodepointPrevious("\x80\x80")
+T.assert_true("GetCodepointPrevious bounded on invalid UTF-8", cp ~= nil and sz >= 1)
+T.assert_false("GetCodepointPrevious rejects pos past end", (pcall(r.GetCodepointPrevious, "ab", 4)))

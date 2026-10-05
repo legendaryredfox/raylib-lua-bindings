@@ -231,17 +231,17 @@ int lua_ImageCopy(lua_State *L);
  * 
  * Crops an Image object to a specified rectangle, modifying the image in place.
  * 
- * @param L A pointer to the current Lua state. Expects 5 arguments:
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
  *  - `Image image`: The Image object to crop.
- *  - `float x`, `float y`, `float width`, `float height`: The area to keep, as
- *    separate numbers (not a Rectangle table).
+ *  - `Rectangle crop`: The area to keep, as `{x, y, width, height}`. Four separate
+ *    numbers (x, y, width, height) are also accepted.
  *
  * @return int Always returns 0.
  *
  * @usage
  * ```lua
  * local image = raylib.LoadImage("resources/image.png")
- * raylib.ImageCrop(image, 0, 0, 100, 100) -- Crops a 100x100 area from top-left
+ * raylib.ImageCrop(image, { x = 0, y = 0, width = 100, height = 100 }) -- Crops a 100x100 area from top-left
  * ```
  * 
  * @note The image is modified in place, and the original size is lost.
@@ -389,7 +389,9 @@ int lua_LoadTextureCubemap(lua_State *L);
  * ```lua
  * local texture = raylib.LoadTexture("example.png")
  * local data = string.rep("\255\0\0\255", 64 * 64) -- 64x64 RGBA8 pixels as a binary string
- * raylib.UpdateTextureRec(texture, 0, 0, 64, 64, data) -- rect as x, y, width, height
+ * raylib.UpdateTextureRec(texture, { x = 0, y = 0, width = 64, height = 64 }, data)
+ * -- The rect may also be four numbers: UpdateTextureRec(texture, 0, 0, 64, 64, data).
+ * -- A data string shorter than the rect's pixel size raises an error.
  * ```
  */
 int lua_UpdateTextureRec(lua_State *L);

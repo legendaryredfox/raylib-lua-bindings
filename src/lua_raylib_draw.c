@@ -64,9 +64,15 @@ int lua_DrawRectangleLines(lua_State *L) {
     int y = luaL_checkinteger(L, 2);
     int width = luaL_checkinteger(L, 3);
     int height = luaL_checkinteger(L, 4);
-    int lineThick = luaL_checkinteger(L, 5);
-    Color color = get_color_from_table(L, 6);
-    DrawRectangleLinesEx((Rectangle){x, y, width, height}, lineThick, color);
+    // raylib form: (x, y, w, h, color). The older (x, y, w, h, lineThick, color)
+    // form is still accepted and forwards to DrawRectangleLinesEx.
+    if (lua_type(L, 5) == LUA_TNUMBER) {
+        int lineThick = luaL_checkinteger(L, 5);
+        Color color = get_color_from_table(L, 6);
+        DrawRectangleLinesEx((Rectangle){x, y, width, height}, lineThick, color);
+    } else {
+        DrawRectangleLines(x, y, width, height, get_color_from_table(L, 5));
+    }
     return 0;
 }
 
@@ -187,17 +193,13 @@ int lua_DrawRectangleGradientV(lua_State *L) {
 }
 
 int lua_DrawRectangleGradientEx(lua_State *L) {
-    Rectangle rect = {
-        luaL_checknumber(L, 1),
-        luaL_checknumber(L, 2),
-        luaL_checknumber(L, 3),
-        luaL_checknumber(L, 4)
-    };
-    Color color1 = get_color_from_table(L, 5);
-    Color color2 = get_color_from_table(L, 6);
-    Color color3 = get_color_from_table(L, 7);
-    Color color4 = get_color_from_table(L, 8);
-    DrawRectangleGradientEx(rect, color1, color2, color3, color4);
+    Rectangle rect;
+    int c = 1 + get_rectangle_arg(L, 1, &rect);   // rect as a table or 4 numbers
+    Color topLeft     = get_color_from_table(L, c);
+    Color bottomLeft  = get_color_from_table(L, c + 1);
+    Color bottomRight = get_color_from_table(L, c + 2);
+    Color topRight    = get_color_from_table(L, c + 3);
+    DrawRectangleGradientEx(rect, topLeft, bottomLeft, bottomRight, topRight);
     return 0;
 }
 

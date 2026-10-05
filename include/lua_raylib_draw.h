@@ -134,10 +134,8 @@ int lua_DrawCircle(lua_State *L);
  * @return int Always returns 0, indicating successful execution.
  * 
  * @note The parameters must be provided as follows:
- *       - `startX` (float) - X-coordinate of the start position.
- *       - `startY` (float) - Y-coordinate of the start position.
- *       - `endX` (float) - X-coordinate of the end position.
- *       - `endY` (float) - Y-coordinate of the end position.
+ *       - `startPos` (Vector2) - Start position, as `{x, y}`.
+ *       - `endPos` (Vector2) - End position, as `{x, y}`.
  *       - `thickness` (float) - Thickness of the line.
  *       - `color` (table) - Color table with `r`, `g`, `b`, and optional `a` components in the range [0, 255].
  * 
@@ -194,15 +192,16 @@ int lua_DrawEllipse(lua_State *L);
  *       - `posY` (int) - Y-coordinate of the top-left corner of the rectangle.
  *       - `width` (int) - Width of the rectangle.
  *       - `height` (int) - Height of the rectangle.
- *       - `lineThick` (int) - Outline thickness. Not in raylib's DrawRectangleLines; this
- *         binding forwards to DrawRectangleLinesEx.
  *       - `color` (table) - Color table with `r`, `g`, `b`, and optional `a` components in the range [0, 255].
+ *
+ *       The older form `(posX, posY, width, height, lineThick, color)` is still accepted
+ *       and draws with DrawRectangleLinesEx.
  *
  * @usage
  * ```lua
  * raylib.BeginDrawing()
  * raylib.ClearBackground(raylib.RAYWHITE)
- * raylib.DrawRectangleLines(50, 50, 200, 100, 1, {r=255, g=0, b=0, a=255}) -- Draws a red rectangle outline
+ * raylib.DrawRectangleLines(50, 50, 200, 100, {r=255, g=0, b=0, a=255}) -- Draws a red rectangle outline
  * raylib.EndDrawing()
  * ```
  */
@@ -505,9 +504,9 @@ int lua_DrawRectangleGradientV(lua_State *L);
  *
  * @return int Always returns 0, indicating successful execution.
  *
- * @note The parameters must be provided as follows (the rectangle as four numbers, then
- *       the corner colors in raylib 6.0 order):
- *       - `x`, `y`, `width`, `height` (number) - The rectangle.
+ * @note The parameters must be provided as follows (corner colors in raylib 6.0 order):
+ *       - `rec` (table) - The rectangle as `{x, y, width, height}`. Four separate numbers
+ *         (x, y, width, height) are also accepted in its place.
  *       - `topLeft` (table) - The color of the top-left corner.
  *       - `bottomLeft` (table) - The color of the bottom-left corner.
  *       - `bottomRight` (table) - The color of the bottom-right corner.
@@ -517,7 +516,7 @@ int lua_DrawRectangleGradientV(lua_State *L);
  * ```lua
  * raylib.BeginDrawing()
  * raylib.ClearBackground(raylib.RAYWHITE)
- * raylib.DrawRectangleGradientEx(100, 100, 200, 200,
+ * raylib.DrawRectangleGradientEx({x=100, y=100, width=200, height=200},
  *     {r=255, g=0, b=0, a=255},   -- Top-left red
  *     {r=0, g=0, b=255, a=255},   -- Bottom-left blue
  *     {r=255, g=255, b=0, a=255}, -- Bottom-right yellow
