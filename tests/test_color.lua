@@ -89,3 +89,11 @@ for _ = 1, 20 do
     T.assert_true("GetRandomValue in [0,100]", v >= 0 and v <= 100)
 end
 T.assert_true("GetRandomValue exact range [5,5]", r.GetRandomValue(5, 5) == 5)
+
+-- Named colors: module fields (raylib.RAYWHITE) and globals (RAYWHITE)
+T.assert_eq("raylib.RAYWHITE.r", r.RAYWHITE.r, 245)
+T.assert_eq("raylib.RAYWHITE.a", r.RAYWHITE.a, 255)
+T.assert_eq("raylib.BLANK.a",    r.BLANK.a,    0)
+T.assert_eq("raylib.RED.g",      r.RED.g,      41)
+T.assert_eq("global RAYWHITE.b", RAYWHITE.b,   245)
+T.assert_eq("global DARKBROWN.r", DARKBROWN.r, 76)

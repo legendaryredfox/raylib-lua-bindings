@@ -5,17 +5,23 @@ CC = gcc
 # (lua_State *L) whether or not it uses it. Override with `make CFLAGS=...`.
 CFLAGS = -Iinclude -Ilua/src -Iraylib/src -fPIC -O2 -Wall -Wextra -Wno-unused-parameter
 
+# Vendored static libraries, built from raylib/ and lua/ on first `make`
+RAYLIB_LIB = raylib/src/libraylib.a
+LUA_LIB = lua/src/liblua.a
+
 # Platform-specific settings
 ifeq ($(OS),Windows_NT)
-    LDFLAGS = -Lraylib -lraylib -Llua -llua -lgdi32 -lwinmm
+    LDFLAGS = -Lraylib/src -lraylib -Llua/src -llua -lgdi32 -lwinmm
     OUTPUT = raylib.dll
     RM = del /f /q
     EXT = .dll
+    LUA_SYSCFLAGS =
 else
-    LDFLAGS = -Lraylib -lraylib -Llua -llua -lX11 -lm -lpthread -fPIC
+    LDFLAGS = -Lraylib/src -lraylib -Llua/src -llua -lX11 -lm -lpthread -fPIC
     OUTPUT = raylib.so
     RM = rm -f
     EXT = .so
+    LUA_SYSCFLAGS = -DLUA_USE_LINUX
 endif
 
 # Directories
@@ -41,8 +47,15 @@ OBJ_FILES = $(SRC_FILES:.c=.o)
 all: $(OUTPUT)
 
 # Link object files into a shared library
-$(OUTPUT): $(OBJ_FILES)
-	$(CC) -shared -o $@ $^ $(LDFLAGS)
+$(OUTPUT): $(OBJ_FILES) $(RAYLIB_LIB) $(LUA_LIB)
+	$(CC) -shared -o $@ $(OBJ_FILES) $(LDFLAGS)
+
+# -fPIC: both archives are linked into a shared library
+$(RAYLIB_LIB):
+	$(MAKE) -C raylib/src PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=STATIC CUSTOM_CFLAGS=-fPIC
+
+$(LUA_LIB):
+	$(MAKE) -C lua/src a SYSCFLAGS="$(LUA_SYSCFLAGS)" MYCFLAGS=-fPIC
 
 # Compile source files to object files
 %.o: %.c
@@ -55,3 +68,10 @@ test: $(OUTPUT)
 # Clean build files
 clean:
 	$(RM) $(OBJ_FILES) $(OUTPUT)
+
+# Also clean the vendored raylib and Lua builds
+distclean: clean
+	$(MAKE) -C raylib/src clean
+	$(MAKE) -C lua/src clean
+
+.PHONY: all test clean distclean

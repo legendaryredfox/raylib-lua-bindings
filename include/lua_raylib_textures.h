@@ -231,16 +231,17 @@ int lua_ImageCopy(lua_State *L);
  * 
  * Crops an Image object to a specified rectangle, modifying the image in place.
  * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
+ * @param L A pointer to the current Lua state. Expects 5 arguments:
  *  - `Image image`: The Image object to crop.
- *  - `Rectangle cropRect`: The Rectangle defining the area to crop.
- * 
+ *  - `float x`, `float y`, `float width`, `float height`: The area to keep, as
+ *    separate numbers (not a Rectangle table).
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
  * local image = raylib.LoadImage("resources/image.png")
- * raylib.ImageCrop(image, { x = 0, y = 0, width = 100, height = 100 }) -- Crops a 100x100 area from top-left
+ * raylib.ImageCrop(image, 0, 0, 100, 100) -- Crops a 100x100 area from top-left
  * ```
  * 
  * @note The image is modified in place, and the original size is lost.
@@ -387,8 +388,8 @@ int lua_LoadTextureCubemap(lua_State *L);
  * **Usage:**
  * ```lua
  * local texture = raylib.LoadTexture("example.png")
- * local data = { pixel data }
- * raylib.UpdateTextureRec(texture, {x=0, y=0, width=64, height=64}, data)
+ * local data = string.rep("\255\0\0\255", 64 * 64) -- 64x64 RGBA8 pixels as a binary string
+ * raylib.UpdateTextureRec(texture, 0, 0, 64, 64, data) -- rect as x, y, width, height
  * ```
  */
 int lua_UpdateTextureRec(lua_State *L);
@@ -414,12 +415,11 @@ int lua_LoadImageRaw(lua_State *L);
  * This function loads an animated image from a file, supporting multiple frames.
  * 
  * @param L Lua state
- * @return int Always returns 1 (Image result)
- * 
+ * @return int Always returns 2 — the Image (userdata, all frames stacked vertically) and the frame count (integer)
+ *
  * **Usage:**
  * ```lua
- * local image = raylib.LoadImageAnim("example.gif")
- * local frameCount = raylib.GetImageFrameCount(image)
+ * local image, frameCount = raylib.LoadImageAnim("example.gif")
  * print("Total frames:", frameCount)
  * ```
  */
@@ -430,14 +430,13 @@ int lua_LoadImageAnim(lua_State *L);
  * 
  * This function loads an animated image from a memory buffer, supporting multiple frames.
  * 
- * @param L Lua state
- * @return int Always returns 1 (Image result)
- * 
+ * @param L Lua state. Expects (fileType, fileData, dataSize)
+ * @return int Always returns 2 — the Image (userdata, all frames stacked vertically) and the frame count (integer)
+ *
  * **Usage:**
  * ```lua
  * local data = raylib.LoadFileData("example.gif")
- * local image = raylib.LoadImageAnimFromMemory(".gif", data)
- * local frameCount = raylib.GetImageFrameCount(image)
+ * local image, frameCount = raylib.LoadImageAnimFromMemory(".gif", data, #data)
  * print("Total frames:", frameCount)
  * ```
  */
@@ -454,7 +453,7 @@ int lua_LoadImageAnimFromMemory(lua_State *L);
  * **Usage:**
  * ```lua
  * local data = raylib.LoadFileData("example.png")
- * local image = raylib.LoadImageFromMemory(".png", data)
+ * local image = raylib.LoadImageFromMemory(".png", data, #data)
  * ```
  */
 int lua_LoadImageFromMemory(lua_State *L);
@@ -519,12 +518,12 @@ int lua_IsImageValid(lua_State *L);
  * This function saves an image to a file with a specified file name and format.
  * 
  * @param L Lua state
- * @return int Always returns 0
- * 
+ * @return int Always returns 1 (boolean: true on success)
+ *
  * **Usage:**
  * ```lua
  * local image = raylib.LoadImage("example.png")
- * raylib.ExportImage(image, "exported_image.png")
+ * local ok = raylib.ExportImage(image, "exported_image.png")
  * ```
  */
 int lua_ExportImage(lua_State *L);
@@ -551,12 +550,12 @@ int lua_ExportImageToMemory(lua_State *L);
  * This function generates C code that represents the image as an array of pixel data, which can be used directly in C/C++ applications.
  * 
  * @param L Lua state
- * @return int Always returns 0
- * 
+ * @return int Always returns 1 (boolean: true on success)
+ *
  * **Usage:**
  * ```lua
  * local image = raylib.LoadImage("example.png")
- * raylib.ExportImageAsCode(image, "image_code.h")
+ * local ok = raylib.ExportImageAsCode(image, "image_code.h")
  * -- The file "image_code.h" now contains C code with the image data
  * ```
  */
@@ -588,7 +587,7 @@ int lua_GenImageColor(lua_State *L);
  * 
  * **Usage:**
  * ```lua
- * local image = raylib.GenImageGradientLinear(256, 256, raylib.BLUE, raylib.GREEN)
+ * local image = raylib.GenImageGradientLinear(256, 256, 90, raylib.BLUE, raylib.GREEN) -- direction in degrees
  * raylib.ExportImage(image, "gradient_image.png")
  * ```
  */
@@ -689,16 +688,17 @@ int lua_GenImagePerlinNoise(lua_State *L);
 int lua_GenImageCellular(lua_State *L);
 
 /**
- * @brief Generates an image with text.
- * 
- * This function creates an image with the specified text drawn on it.
+ * @brief Generates a grayscale image from text data.
+ *
+ * This function fills a width x height grayscale image with the bytes of the given text
+ * (it does not render glyphs; use ImageText for that).
  * 
  * @param L Lua state
  * @return int Always returns 1 (Image result)
  * 
  * **Usage:**
  * ```lua
- * local image = raylib.GenImageText(256, 256, "Hello World!", raylib.RED)
+ * local image = raylib.GenImageText(4, 3, "Hello World!")
  * raylib.ExportImage(image, "text_image.png")
  * ```
  */
@@ -748,7 +748,7 @@ int lua_ImageFromChannel(lua_State *L);
  * 
  * **Usage:**
  * ```lua
- * local image = raylib.ImageText(256, 256, "Hello World!", raylib.RED)
+ * local image = raylib.ImageText("Hello World!", 20, raylib.RED) -- text, fontSize, color
  * raylib.ExportImage(image, "image_text.png")
  * ```
  */
@@ -908,7 +908,7 @@ int lua_ImageBlurGaussian(lua_State *L);
  * ```lua
  * local image = raylib.LoadImage("source.png")
  * local kernel = {0, -1, 0, -1, 5, -1, 0, -1, 0} -- Sharpen kernel
- * raylib.ImageKernelConvolution(image, kernel, 3, 3)
+ * raylib.ImageKernelConvolution(image, kernel) -- kernel size is #kernel
  * raylib.ExportImage(image, "sharpened_image.png")
  * ```
  */
@@ -1130,15 +1130,15 @@ int lua_LoadImageColors(lua_State *L);
  * This function extracts a palette from the image as an array of Color values with a maximum size.
  * 
  * @param L Lua state
- * @return int Always returns 1 (table of colors)
- * 
+ * @return int Always returns 2 — the palette as a raw pointer (lightuserdata, not indexable
+ *         from Lua) and the color count (integer)
+ *
  * **Usage:**
  * ```lua
  * local image = raylib.LoadImage("source.png")
- * local palette, colorsCount = raylib.LoadImagePalette(image, 16) -- Extracts a palette with up to 16 colors
- * for i, color in ipairs(palette) do
- *     print(color.r, color.g, color.b, color.a)
- * end
+ * local palette, colorsCount = raylib.LoadImagePalette(image, 16) -- Up to 16 colors
+ * print("Palette colors:", colorsCount)
+ * raylib.UnloadImagePalette(palette)
  * ```
  */
 int lua_LoadImagePalette(lua_State *L);
@@ -1417,7 +1417,7 @@ int lua_ImageDrawRectangleRec(lua_State *L);
 /**
  * @brief Draws the outline of a rectangle in an image.
  * 
- * This function draws the outline of a rectangle at the given position (x, y) with the specified width, height, and color.
+ * This function draws the outline of a rectangle with the given line thickness and color.
  * 
  * @param L Lua state
  * @return int Always returns 0
@@ -1425,7 +1425,7 @@ int lua_ImageDrawRectangleRec(lua_State *L);
  * **Usage:**
  * ```lua
  * local image = raylib.LoadImage("source.png")
- * raylib.ImageDrawRectangleLines(image, 50, 50, 150, 100, { r = 255, g = 0, b = 0, a = 255 }) -- Draws a red rectangle outline at (50, 50) with width 150 and height 100
+ * raylib.ImageDrawRectangleLines(image, { x = 50, y = 50, width = 150, height = 100 }, 2, { r = 255, g = 0, b = 0, a = 255 }) -- 2px red outline
  * ```
  */
 int lua_ImageDrawRectangleLines(lua_State *L);
@@ -1449,7 +1449,7 @@ int lua_ImageDrawTriangle(lua_State *L);
 /**
  * @brief Draws a triangle in an image using extended parameters.
  * 
- * This function draws a filled triangle in an image using three points (Vector2) and a color with extended options for customization.
+ * This function draws a filled triangle in an image using three points (Vector2) and one color per vertex, interpolated across the triangle.
  * 
  * @param L Lua state
  * @return int Always returns 0
@@ -1457,7 +1457,8 @@ int lua_ImageDrawTriangle(lua_State *L);
  * **Usage:**
  * ```lua
  * local image = raylib.LoadImage("source.png")
- * raylib.ImageDrawTriangleEx(image, { x = 100, y = 150 }, { x = 200, y = 50 }, { x = 250, y = 150 }, { r = 0, g = 255, b = 0, a = 255 }) -- Draws a green triangle
+ * raylib.ImageDrawTriangleEx(image, { x = 100, y = 150 }, { x = 200, y = 50 }, { x = 250, y = 150 },
+ *     raylib.RED, raylib.GREEN, raylib.BLUE) -- One color per vertex
  * ```
  */
 int lua_ImageDrawTriangleEx(lua_State *L);
@@ -1514,7 +1515,7 @@ int lua_ImageDrawTriangleStrip(lua_State *L);
 /**
  * @brief Draws an image onto another image.
  * 
- * This function draws an image onto another image at a specified position and color tint.
+ * This function draws a source rectangle of one image into a destination rectangle of another, with a color tint.
  * 
  * @param L Lua state
  * @return int Always returns 0
@@ -1523,7 +1524,9 @@ int lua_ImageDrawTriangleStrip(lua_State *L);
  * ```lua
  * local targetImage = raylib.LoadImage("background.png")
  * local sourceImage = raylib.LoadImage("sprite.png")
- * raylib.ImageDraw(targetImage, sourceImage, { x = 50, y = 50 }, { r = 255, g = 255, b = 255, a = 255 }) -- Draws the source image onto the target at position (50, 50)
+ * local srcRec = { x = 0, y = 0, width = 32, height = 32 }
+ * local dstRec = { x = 50, y = 50, width = 32, height = 32 }
+ * raylib.ImageDraw(targetImage, sourceImage, srcRec, dstRec, raylib.WHITE) -- Draws the sprite at (50, 50)
  * ```
  */
 int lua_ImageDraw(lua_State *L);
@@ -1865,8 +1868,7 @@ int lua_ColorToHSV(lua_State *L);
  * 
  * **Usage:**
  * ```lua
- * local hsv = { h = 0.0, s = 1.0, v = 1.0 } -- Red color in HSV
- * local color = raylib.ColorFromHSV(hsv) -- Converts HSV to Color
+ * local color = raylib.ColorFromHSV(0.0, 1.0, 1.0) -- hue (degrees), saturation, value: red
  * print(color)
  * ```
  */
@@ -1943,7 +1945,7 @@ int lua_ColorAlpha(lua_State *L);
 /**
  * @brief Blends two Colors based on alpha blending.
  * 
- * This function blends two Colors together based on their alpha values. It performs an alpha blend between the original Color and the blend Color.
+ * This function alpha-blends `src` into `dst`, multiplied by `tint`.
  * 
  * @param L Lua state
  * @return int Always returns 1 (Color result)
@@ -1952,7 +1954,7 @@ int lua_ColorAlpha(lua_State *L);
  * ```lua
  * local color1 = raylib.RED
  * local color2 = raylib.GREEN
- * local blendedColor = raylib.ColorAlphaBlend(color1, color2) -- Blend two colors based on alpha
+ * local blendedColor = raylib.ColorAlphaBlend(color1, color2, raylib.WHITE) -- dst, src, tint
  * print(blendedColor)
  * ```
  */
@@ -2026,15 +2028,14 @@ int lua_SetPixelColor(lua_State *L);
 /**
  * @brief Gets the size of the pixel data in memory for an image or texture.
  * 
- * This function returns the size of the pixel data in memory for a given image or texture, in bytes.
+ * This function returns the size in bytes of width x height pixels in the given pixel format.
  * 
  * @param L Lua state
  * @return int Always returns 1 (integer result representing the data size in bytes)
  * 
  * **Usage:**
  * ```lua
- * local image = raylib.LoadImage("image.png")
- * local dataSize = raylib.GetPixelDataSize(image) -- Get the size of the pixel data for the image
+ * local dataSize = raylib.GetPixelDataSize(256, 256, 7) -- 7 = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8
  * print(dataSize)
  * ```
  */

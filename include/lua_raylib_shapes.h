@@ -327,9 +327,8 @@ int lua_DrawRectangleLinesEx(lua_State *L);
  * 
  * This function draws a linear spline connecting multiple points.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
- *  - `Vector2[] points`: An array of points representing the spline path.
- *  - `int pointCount`: The number of points in the array.
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `Vector2[] points`: An array of points representing the spline path. The count is `#points`.
  *  - `float thick`: The thickness of the spline line.
  *  - `Color color`: The color of the spline line.
  * 
@@ -337,7 +336,7 @@ int lua_DrawRectangleLinesEx(lua_State *L);
  * 
  * @usage
  * ```lua
- * raylib.DrawSplineLinear({ { x = 50, y = 50 }, { x = 100, y = 100 }, { x = 150, y = 50 } }, 3, 2, { r = 255, g = 0, b = 0, a = 255 }) -- Draw a red linear spline through 3 points
+ * raylib.DrawSplineLinear({ { x = 50, y = 50 }, { x = 100, y = 100 }, { x = 150, y = 50 } }, 2, { r = 255, g = 0, b = 0, a = 255 }) -- Draw a red linear spline through 3 points
  * ```
  * 
  * @note A linear spline is a simple path made by connecting points with straight line segments.
@@ -349,9 +348,8 @@ int lua_DrawSplineLinear(lua_State *L);
  * 
  * This function draws a smooth spline that passes near the given points, but not necessarily through them, using a B-Spline algorithm.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
- *  - `Vector2[] points`: An array of points representing the spline path.
- *  - `int pointCount`: The number of points in the array.
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `Vector2[] points`: An array of points representing the spline path. The count is `#points`.
  *  - `float thick`: The thickness of the spline line.
  *  - `Color color`: The color of the spline line.
  * 
@@ -359,7 +357,7 @@ int lua_DrawSplineLinear(lua_State *L);
  * 
  * @usage
  * ```lua
- * raylib.DrawSplineBasis({ { x = 50, y = 50 }, { x = 100, y = 100 }, { x = 150, y = 50 }, { x = 200, y = 100 } }, 4, 2, { r = 0, g = 255, b = 0, a = 255 }) -- Draw a green basis spline
+ * raylib.DrawSplineBasis({ { x = 50, y = 50 }, { x = 100, y = 100 }, { x = 150, y = 50 }, { x = 200, y = 100 } }, 2, { r = 0, g = 255, b = 0, a = 255 }) -- Draw a green basis spline
  * ```
  * 
  * @note A basis spline is a smooth curve that does not necessarily pass through the control points.
@@ -371,9 +369,8 @@ int lua_DrawSplineBasis(lua_State *L);
  * 
  * This function draws a smooth curve that passes through each of the control points using the Catmull-Rom algorithm.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
- *  - `Vector2[] points`: An array of points representing the spline path.
- *  - `int pointCount`: The number of points in the array.
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `Vector2[] points`: An array of points representing the spline path. The count is `#points`.
  *  - `float thick`: The thickness of the spline line.
  *  - `Color color`: The color of the spline line.
  * 
@@ -381,7 +378,7 @@ int lua_DrawSplineBasis(lua_State *L);
  * 
  * @usage
  * ```lua
- * raylib.DrawSplineCatmullRom({ { x = 50, y = 50 }, { x = 100, y = 100 }, { x = 150, y = 50 }, { x = 200, y = 100 } }, 4, 2, { r = 0, g = 0, b = 255, a = 255 }) -- Draw a blue Catmull-Rom spline
+ * raylib.DrawSplineCatmullRom({ { x = 50, y = 50 }, { x = 100, y = 100 }, { x = 150, y = 50 }, { x = 200, y = 100 } }, 2, { r = 0, g = 0, b = 255, a = 255 }) -- Draw a blue Catmull-Rom spline
  * ```
  * 
  * @note A Catmull-Rom spline is a type of interpolating spline, meaning it passes through the control points.
@@ -393,9 +390,8 @@ int lua_DrawSplineCatmullRom(lua_State *L);
  * 
  * This function draws a smooth curve that passes through the first and last points, while the second point acts as a control point that defines the curve's shape.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
- *  - `Vector2[] points`: An array of points representing the control points.
- *  - `int pointCount`: The number of points in the array (must be 3 for quadratic Bezier).
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `Vector2[] points`: An array of points representing the control points. The count is `#points`.
  *  - `float thick`: The thickness of the spline line.
  *  - `Color color`: The color of the spline line.
  * 
@@ -403,7 +399,7 @@ int lua_DrawSplineCatmullRom(lua_State *L);
  * 
  * @usage
  * ```lua
- * raylib.DrawSplineBezierQuadratic({ { x = 50, y = 50 }, { x = 125, y = 200 }, { x = 200, y = 50 } }, 3, 2, { r = 255, g = 0, b = 255, a = 255 }) -- Draw a purple quadratic Bezier spline
+ * raylib.DrawSplineBezierQuadratic({ { x = 50, y = 50 }, { x = 125, y = 200 }, { x = 200, y = 50 } }, 2, { r = 255, g = 0, b = 255, a = 255 }) -- Draw a purple quadratic Bezier spline
  * ```
  * 
  * @note A quadratic Bezier spline requires exactly 3 control points: a start point, a control point, and an end point.
@@ -415,9 +411,8 @@ int lua_DrawSplineBezierQuadratic(lua_State *L);
  * 
  * This function draws a smooth curve that passes through the first and last points, while the second and third points act as control points that define the curve's shape.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
- *  - `Vector2[] points`: An array of points representing the control points.
- *  - `int pointCount`: The number of points in the array (must be 4 for cubic Bezier).
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `Vector2[] points`: An array of points representing the control points. The count is `#points`.
  *  - `float thick`: The thickness of the spline line.
  *  - `Color color`: The color of the spline line.
  * 
@@ -425,7 +420,7 @@ int lua_DrawSplineBezierQuadratic(lua_State *L);
  * 
  * @usage
  * ```lua
- * raylib.DrawSplineBezierCubic({ { x = 50, y = 50 }, { x = 100, y = 200 }, { x = 150, y = 0 }, { x = 200, y = 50 } }, 4, 2, { r = 255, g = 165, b = 0, a = 255 }) -- Draw an orange cubic Bezier spline
+ * raylib.DrawSplineBezierCubic({ { x = 50, y = 50 }, { x = 100, y = 200 }, { x = 150, y = 0 }, { x = 200, y = 50 } }, 2, { r = 255, g = 165, b = 0, a = 255 }) -- Draw an orange cubic Bezier spline
  * ```
  * 
  * @note A cubic Bezier spline requires exactly 4 control points: a start point, two control points, and an end point.

@@ -18,36 +18,45 @@ void push_color(lua_State *L, Color color) {
     lua_pushinteger(L, color.a); lua_setfield(L, -2, "a");
 }
 
-// Function to register the colors as global constants
+static const struct { const char *name; Color color; } raylib_colors[] = {
+    { "LIGHTGRAY",  { 200, 200, 200, 255 } },
+    { "GRAY",       { 130, 130, 130, 255 } },
+    { "DARKGRAY",   { 80, 80, 80, 255 } },
+    { "YELLOW",     { 253, 249, 0, 255 } },
+    { "GOLD",       { 255, 203, 0, 255 } },
+    { "ORANGE",     { 255, 161, 0, 255 } },
+    { "PINK",       { 255, 109, 194, 255 } },
+    { "RED",        { 230, 41, 55, 255 } },
+    { "MAROON",     { 190, 33, 55, 255 } },
+    { "GREEN",      { 0, 228, 48, 255 } },
+    { "LIME",       { 0, 158, 47, 255 } },
+    { "DARKGREEN",  { 0, 117, 44, 255 } },
+    { "SKYBLUE",    { 102, 191, 255, 255 } },
+    { "BLUE",       { 0, 121, 241, 255 } },
+    { "DARKBLUE",   { 0, 82, 172, 255 } },
+    { "PURPLE",     { 200, 122, 255, 255 } },
+    { "VIOLET",     { 135, 60, 190, 255 } },
+    { "DARKPURPLE", { 112, 31, 126, 255 } },
+    { "BEIGE",      { 211, 176, 131, 255 } },
+    { "BROWN",      { 127, 106, 79, 255 } },
+    { "DARKBROWN",  { 76, 63, 47, 255 } },
+
+    { "WHITE",      { 255, 255, 255, 255 } },
+    { "BLACK",      { 0, 0, 0, 255 } },
+    { "BLANK",      { 0, 0, 0, 0 } },
+    { "MAGENTA",    { 255, 0, 255, 255 } },
+    { "RAYWHITE",   { 245, 245, 245, 255 } },
+};
+
+// Registers the named colors on the module table at the top of the stack
+// (raylib.RAYWHITE) and as globals (RAYWHITE) for existing scripts.
 void register_raylib_colors(lua_State *L) {
-
-    push_color(L, (Color){ 200, 200, 200, 255 }); lua_setglobal(L, "LIGHTGRAY");
-    push_color(L, (Color){ 130, 130, 130, 255 }); lua_setglobal(L, "GRAY");
-    push_color(L, (Color){ 80, 80, 80, 255 }); lua_setglobal(L, "DARKGRAY");
-    push_color(L, (Color){ 253, 249, 0, 255 }); lua_setglobal(L, "YELLOW");
-    push_color(L, (Color){ 255, 203, 0, 255 }); lua_setglobal(L, "GOLD");
-    push_color(L, (Color){ 255, 161, 0, 255 }); lua_setglobal(L, "ORANGE");
-    push_color(L, (Color){ 255, 109, 194, 255 }); lua_setglobal(L, "PINK");
-    push_color(L, (Color){ 230, 41, 55, 255 }); lua_setglobal(L, "RED");
-    push_color(L, (Color){ 190, 33, 55, 255 }); lua_setglobal(L, "MAROON");
-    push_color(L, (Color){ 0, 228, 48, 255 }); lua_setglobal(L, "GREEN");
-    push_color(L, (Color){ 0, 158, 47, 255 }); lua_setglobal(L, "LIME");
-    push_color(L, (Color){ 0, 117, 44, 255 }); lua_setglobal(L, "DARKGREEN");
-    push_color(L, (Color){ 102, 191, 255, 255 }); lua_setglobal(L, "SKYBLUE");
-    push_color(L, (Color){ 0, 121, 241, 255 }); lua_setglobal(L, "BLUE");
-    push_color(L, (Color){ 0, 82, 172, 255 }); lua_setglobal(L, "DARKBLUE");
-    push_color(L, (Color){ 200, 122, 255, 255 }); lua_setglobal(L, "PURPLE");
-    push_color(L, (Color){ 135, 60, 190, 255 }); lua_setglobal(L, "VIOLET");
-    push_color(L, (Color){ 112, 31, 126, 255 }); lua_setglobal(L, "DARKPURPLE");
-    push_color(L, (Color){ 211, 176, 131, 255 }); lua_setglobal(L, "BEIGE");
-    push_color(L, (Color){ 127, 106, 79, 255 }); lua_setglobal(L, "BROWN");
-    push_color(L, (Color){ 76, 63, 47, 255 }); lua_setglobal(L, "DARKBROWN");
-
-    push_color(L, (Color){ 255, 255, 255, 255 }); lua_setglobal(L, "WHITE");
-    push_color(L, (Color){ 0, 0, 0, 255 }); lua_setglobal(L, "BLACK");
-    push_color(L, (Color){ 0, 0, 0, 0 }); lua_setglobal(L, "BLANK");
-    push_color(L, (Color){ 255, 0, 255, 255 }); lua_setglobal(L, "MAGENTA");
-    push_color(L, (Color){ 245, 245, 245, 255 }); lua_setglobal(L, "RAYWHITE");
+    for (size_t i = 0; i < sizeof(raylib_colors)/sizeof(raylib_colors[0]); i++) {
+        push_color(L, raylib_colors[i].color);
+        lua_pushvalue(L, -1);
+        lua_setfield(L, -3, raylib_colors[i].name);
+        lua_setglobal(L, raylib_colors[i].name);
+    }
 }
 
 // Register bindings

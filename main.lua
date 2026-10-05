@@ -1,10 +1,9 @@
 -- Audio streaming demo: generate a 440 Hz tone in Lua and feed it to an
 -- AudioStream as 16-bit signed stereo PCM. This exercises UpdateAudioStream
--- with a Lua binary string (the supported way to pass sample data).
+-- with a Lua binary string, generated on the main thread.
 --
--- Note: AttachAudioStreamProcessor is intentionally not used here — its callback
--- receives a raw buffer pointer rather than an indexable sample table, so it
--- cannot process audio from pure Lua (see README "Known Issues").
+-- To generate samples on the audio thread instead, use SetAudioStreamCallback
+-- (see include/lua_raylib_audio.h).
 local raylib = require("raylib")
 
 local SAMPLE_RATE = 44100

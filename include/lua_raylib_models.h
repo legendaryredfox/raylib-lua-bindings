@@ -28,22 +28,20 @@
 int lua_LoadModel(lua_State *L);
 
 /**
- * @brief Draws a model with default parameters.
- * 
- * This function draws a 3D model using its default position, scale, and rotation.
- * 
- * @param L A pointer to the current Lua state. Expects 1 argument:
+ * @brief Draws a model at a position with a uniform scale and tint.
+ *
+ * @param L A pointer to the current Lua state. Expects 4 arguments:
  *  - `Model model`: The model to be drawn.
- * 
+ *  - `Vector3 position`: The position to draw the model.
+ *  - `float scale`: Uniform scale factor.
+ *  - `Color tint`: Color multiplied with the model's materials.
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
- * raylib.DrawModel(model)
- * print("Model drawn successfully")
+ * raylib.DrawModel(model, { x = 0, y = 0, z = 0 }, 1.0, raylib.WHITE)
  * ```
- * 
- * @note This function uses the default shader and standard draw parameters.
  */
 int lua_DrawModel(lua_State *L);
 
@@ -52,20 +50,22 @@ int lua_DrawModel(lua_State *L);
  * 
  * This function draws a 3D model with extended options for position, rotation, and scaling.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
+ * @param L A pointer to the current Lua state. Expects 6 arguments:
  *  - `Model model`: The model to be drawn.
  *  - `Vector3 position`: The position to draw the model.
  *  - `Vector3 rotationAxis`: The axis to rotate the model around.
  *  - `float rotationAngle`: The angle to rotate the model in degrees.
- * 
+ *  - `Vector3 scale`: Per-axis scale.
+ *  - `Color tint`: Color multiplied with the model's materials.
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
  * local position = { x = 0, y = 0, z = 0 }
  * local axis = { x = 0, y = 1, z = 0 }
- * raylib.DrawModelEx(model, position, axis, 45)
- * print("Model drawn with extended parameters")
+ * local scale = { x = 1, y = 1, z = 1 }
+ * raylib.DrawModelEx(model, position, axis, 45, scale, raylib.WHITE)
  * ```
  * 
  * @note This function allows you to customize the draw position, rotation, and orientation of the model.
@@ -101,22 +101,20 @@ int lua_UnloadModel(lua_State *L);
 int lua_UpdateModelAnimation(lua_State *L);
 
 /**
- * @brief Draws a mesh with default parameters.
- * 
- * This function draws a 3D mesh using its default position, scale, and rotation.
- * 
- * @param L A pointer to the current Lua state. Expects 1 argument:
+ * @brief Draws a mesh with a material and a transform.
+ *
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
  *  - `Mesh mesh`: The mesh to be drawn.
- * 
+ *  - `Material material`: The material (userdata) to draw it with.
+ *  - `Matrix transform`: Model transform as a table with fields `m0`..`m15`.
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
- * raylib.DrawMesh(mesh)
- * print("Mesh drawn successfully")
+ * local material = raylib.LoadMaterialDefault()
+ * raylib.DrawMesh(mesh, material, transform)
  * ```
- * 
- * @note This function uses the default shader and standard draw parameters.
  */
 int lua_DrawMesh(lua_State *L);
 
@@ -188,8 +186,8 @@ int lua_GenMeshSphere(lua_State *L);
  * @brief Generates a plane mesh.
  * 
  * This function generates a 3D plane mesh with the given width, length, and subdivisions.
- * 
- * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *
+ * @param L A pointer to the current Lua state. Expects 4 arguments:
  *  - `float width`: The width of the plane.
  *  - `float length`: The length of the plane.
  *  - `int resX`: The number of subdivisions on the X-axis.
@@ -302,17 +300,16 @@ int lua_DrawTriangle3D(lua_State *L);
  * 
  * This function draws a 3D triangle strip using an array of vertices and a specific color.
  * 
- * @param L A pointer to the current Lua state. Expects 3 arguments:
- *  - `Vector3[] points`: An array of points defining the triangle strip.
- *  - `int pointCount`: The number of points in the array.
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `Vector3[] points`: An array of points defining the triangle strip (count is `#points`).
  *  - `Color color`: The color of the triangle strip.
- * 
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
  * local points = {{x=0, y=1, z=0}, {x=1, y=0, z=0}, {x=2, y=1, z=0}, {x=3, y=0, z=0}}
- * raylib.DrawTriangleStrip3D(points, 4, {r=0, g=255, b=255, a=255})
+ * raylib.DrawTriangleStrip3D(points, {r=0, g=255, b=255, a=255})
  * print("3D triangle strip drawn successfully")
  * ```
  * 
@@ -326,9 +323,7 @@ int lua_DrawTriangleStrip3D(lua_State *L);
  * This function draws a 3D cube at a given position, with a specific width, height, depth, and color.
  * 
  * @param L A pointer to the current Lua state. Expects 5 arguments:
- *  - `float posX`: The X position of the cube.
- *  - `float posY`: The Y position of the cube.
- *  - `float posZ`: The Z position of the cube.
+ *  - `Vector3 position`: The position of the cube's center.
  *  - `float width`: The width of the cube.
  *  - `float height`: The height of the cube.
  *  - `float depth`: The depth of the cube.
@@ -338,7 +333,7 @@ int lua_DrawTriangleStrip3D(lua_State *L);
  * 
  * @usage
  * ```lua
- * raylib.DrawCube(0, 0, 0, 2, 2, 2, {r=255, g=0, b=0, a=255})
+ * raylib.DrawCube({x=0, y=0, z=0}, 2, 2, 2, {r=255, g=0, b=0, a=255})
  * print("3D cube drawn successfully")
  * ```
  * 
@@ -374,9 +369,7 @@ int lua_DrawCubeV(lua_State *L);
  * This function draws the wireframe of a 3D cube at a given position, with a specific width, height, depth, and color.
  * 
  * @param L A pointer to the current Lua state. Expects 5 arguments:
- *  - `float posX`: The X position of the cube.
- *  - `float posY`: The Y position of the cube.
- *  - `float posZ`: The Z position of the cube.
+ *  - `Vector3 position`: The position of the cube's center.
  *  - `float width`: The width of the cube.
  *  - `float height`: The height of the cube.
  *  - `float depth`: The depth of the cube.
@@ -386,7 +379,7 @@ int lua_DrawCubeV(lua_State *L);
  * 
  * @usage
  * ```lua
- * raylib.DrawCubeWires(0, 0, 0, 2, 2, 2, {r=255, g=255, b=0, a=255})
+ * raylib.DrawCubeWires({x=0, y=0, z=0}, 2, 2, 2, {r=255, g=255, b=0, a=255})
  * print("3D cube wireframe drawn successfully")
  * ```
  * 
@@ -422,9 +415,7 @@ int lua_DrawCubeWiresV(lua_State *L);
  * This function draws the wireframe of a 3D sphere at a given position, with a specific radius, number of rings, slices, and color.
  * 
  * @param L A pointer to the current Lua state. Expects 5 arguments:
- *  - `float centerX`: The X position of the sphere's center.
- *  - `float centerY`: The Y position of the sphere's center.
- *  - `float centerZ`: The Z position of the sphere's center.
+ *  - `Vector3 centerPos`: The position of the sphere's center.
  *  - `float radius`: The radius of the sphere.
  *  - `int rings`: The number of rings in the sphere.
  *  - `int slices`: The number of slices in the sphere.
@@ -434,7 +425,7 @@ int lua_DrawCubeWiresV(lua_State *L);
  * 
  * @usage
  * ```lua
- * raylib.DrawSphereWires(0, 0, 0, 2, 16, 16, {r=0, g=0, b=255, a=255})
+ * raylib.DrawSphereWires({x=0, y=0, z=0}, 2, 16, 16, {r=0, g=0, b=255, a=255})
  * print("3D sphere wireframe drawn successfully")
  * ```
  * 
@@ -448,20 +439,18 @@ int lua_DrawSphereWires(lua_State *L);
  * This function draws a 3D cylinder at a given position, with a specific radius, height, and color.
  * 
  * @param L A pointer to the current Lua state. Expects 6 arguments:
- *  - `float positionX`: The X position of the cylinder's base.
- *  - `float positionY`: The Y position of the cylinder's base.
- *  - `float positionZ`: The Z position of the cylinder's base.
+ *  - `Vector3 position`: The position of the cylinder's base.
  *  - `float radiusTop`: The radius of the top of the cylinder.
  *  - `float radiusBottom`: The radius of the bottom of the cylinder.
  *  - `float height`: The height of the cylinder.
  *  - `int slices`: The number of slices in the cylinder.
  *  - `Color color`: The color of the cylinder.
- * 
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
- * raylib.DrawCylinder(0, 0, 0, 1, 1, 3, 16, {r=255, g=0, b=255, a=255})
+ * raylib.DrawCylinder({x=0, y=0, z=0}, 1, 1, 3, 16, {r=255, g=0, b=255, a=255})
  * print("3D cylinder drawn successfully")
  * ```
  * 
@@ -473,8 +462,8 @@ int lua_DrawCylinder(lua_State *L);
  * @brief Draws a cylinder with extended parameters.
  * 
  * This function draws a 3D cylinder with specified positions, radii, height, slices, and color.
- * 
- * @param L A pointer to the current Lua state. Expects 7 arguments:
+ *
+ * @param L A pointer to the current Lua state. Expects 6 arguments:
  *  - `Vector3 startPos`: The position of the bottom base of the cylinder (X, Y, Z).
  *  - `Vector3 endPos`: The position of the top base of the cylinder (X, Y, Z).
  *  - `float startRadius`: The radius of the bottom base.
@@ -500,19 +489,18 @@ int lua_DrawCylinderEx(lua_State *L);
  * This function draws the wireframe of a 3D cylinder with specified position, radius, height, and color.
  * 
  * @param L A pointer to the current Lua state. Expects 6 arguments:
- *  - `float positionX`: The X position of the cylinder's base.
- *  - `float positionY`: The Y position of the cylinder's base.
- *  - `float positionZ`: The Z position of the cylinder's base.
- *  - `float radius`: The radius of the cylinder.
+ *  - `Vector3 position`: The position of the cylinder's base.
+ *  - `float radiusTop`: The radius of the top of the cylinder.
+ *  - `float radiusBottom`: The radius of the bottom of the cylinder.
  *  - `float height`: The height of the cylinder.
  *  - `int slices`: The number of slices in the cylinder.
  *  - `Color color`: The color of the wireframe.
- * 
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
- * raylib.DrawCylinderWires(0, 0, 0, 1, 3, 16, {r=255, g=0, b=0, a=255})
+ * raylib.DrawCylinderWires({x=0, y=0, z=0}, 1, 1, 3, 16, {r=255, g=0, b=0, a=255})
  * print("3D cylinder wireframe drawn successfully")
  * ```
  * 
@@ -524,8 +512,8 @@ int lua_DrawCylinderWires(lua_State *L);
  * @brief Draws the wireframe of a cylinder with extended parameters.
  * 
  * This function draws the wireframe of a 3D cylinder with specified positions, radii, height, slices, and color.
- * 
- * @param L A pointer to the current Lua state. Expects 7 arguments:
+ *
+ * @param L A pointer to the current Lua state. Expects 6 arguments:
  *  - `Vector3 startPos`: The position of the bottom base of the cylinder (X, Y, Z).
  *  - `Vector3 endPos`: The position of the top base of the cylinder (X, Y, Z).
  *  - `float startRadius`: The radius of the bottom base.
@@ -550,18 +538,19 @@ int lua_DrawCylinderWiresEx(lua_State *L);
  * 
  * This function draws a 3D capsule between two points with a specified radius and color.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
+ * @param L A pointer to the current Lua state. Expects 6 arguments:
  *  - `Vector3 startPos`: The position of one end of the capsule (X, Y, Z).
  *  - `Vector3 endPos`: The position of the other end of the capsule (X, Y, Z).
  *  - `float radius`: The radius of the capsule.
  *  - `int slices`: The number of sides (slices) of the capsule.
+ *  - `int rings`: The number of rings in each hemispherical end.
  *  - `Color color`: The color of the capsule.
- * 
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
- * raylib.DrawCapsule({x=0, y=0, z=0}, {x=0, y=5, z=0}, 1.0, 16, {r=255, g=0, b=255, a=255})
+ * raylib.DrawCapsule({x=0, y=0, z=0}, {x=0, y=5, z=0}, 1.0, 16, 8, {r=255, g=0, b=255, a=255})
  * print("3D capsule drawn successfully")
  * ```
  * 
@@ -574,18 +563,19 @@ int lua_DrawCapsule(lua_State *L);
  * 
  * This function draws the wireframe of a 3D capsule between two points with a specified radius, slices, and color.
  * 
- * @param L A pointer to the current Lua state. Expects 5 arguments:
+ * @param L A pointer to the current Lua state. Expects 6 arguments:
  *  - `Vector3 startPos`: The position of one end of the capsule (X, Y, Z).
  *  - `Vector3 endPos`: The position of the other end of the capsule (X, Y, Z).
  *  - `float radius`: The radius of the capsule.
  *  - `int slices`: The number of sides (slices) of the capsule.
+ *  - `int rings`: The number of rings in each hemispherical end.
  *  - `Color color`: The color of the wireframe.
- * 
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
- * raylib.DrawCapsuleWires({x=0, y=0, z=0}, {x=0, y=5, z=0}, 1.0, 16, {r=0, g=255, b=255, a=255})
+ * raylib.DrawCapsuleWires({x=0, y=0, z=0}, {x=0, y=5, z=0}, 1.0, 16, 8, {r=0, g=255, b=255, a=255})
  * print("3D capsule wireframe drawn successfully")
  * ```
  * 
@@ -820,14 +810,15 @@ int lua_DrawBillboardPro(lua_State *L);
  * 
  * This function uploads mesh data to the GPU, enabling faster rendering.
  * 
- * @param L A pointer to the current Lua state. Expects 1 argument:
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
  *  - `Mesh mesh`: The mesh to upload to the GPU.
- * 
+ *  - `bool dynamic`: true if the buffers will be updated later (optional, default false).
+ *
  * @return int Always returns 0.
- * 
+ *
  * @usage
  * ```lua
- * raylib.UploadMesh(mesh)
+ * raylib.UploadMesh(mesh, false)
  * print("Mesh uploaded to GPU successfully")
  * ```
  * 
@@ -908,7 +899,7 @@ int lua_GenMeshTangents(lua_State *L);
  *  - `Mesh mesh`: The mesh to export.
  *  - `string filename`: The path where the mesh will be saved.
  * 
- * @return int Always returns 0.
+ * @return int Always returns 1 (boolean: true on success).
  * 
  * @usage
  * ```lua
@@ -929,7 +920,7 @@ int lua_ExportMesh(lua_State *L);
  *  - `Mesh mesh`: The mesh to export.
  *  - `string filename`: The path where the C code will be saved.
  * 
- * @return int Always returns 0.
+ * @return int Always returns 1 (boolean: true on success).
  * 
  * @usage
  * ```lua
@@ -967,15 +958,16 @@ int lua_GenMeshPoly(lua_State *L);
  * 
  * This function generates a mesh representing a hemisphere.
  * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
  *  - `float radius`: The radius of the hemisphere.
  *  - `int rings`: The number of horizontal slices in the hemisphere.
- * 
+ *  - `int slices`: The number of vertical divisions of the hemisphere.
+ *
  * @return int Always returns 1 (Mesh result).
- * 
+ *
  * @usage
  * ```lua
- * local hemisphereMesh = raylib.GenMeshHemiSphere(2.0, 16)
+ * local hemisphereMesh = raylib.GenMeshHemiSphere(2.0, 16, 16)
  * print("Generated hemisphere mesh")
  * ```
  * 
@@ -988,21 +980,18 @@ int lua_GenMeshHemiSphere(lua_State *L);
  * 
  * This function generates a mesh representing a cylinder.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
  *  - `float radius`: The radius of the base of the cylinder.
  *  - `float height`: The height of the cylinder.
- *  - `int slices`: The number of vertical divisions of the cylinder.
- *  - `int stacks`: The number of horizontal layers of the cylinder.
- * 
+ *  - `int slices`: The number of radial divisions of the cylinder.
+ *
  * @return int Always returns 1 (Mesh result).
- * 
+ *
  * @usage
  * ```lua
- * local cylinderMesh = raylib.GenMeshCylinder(1.0, 3.0, 16, 4)
+ * local cylinderMesh = raylib.GenMeshCylinder(1.0, 3.0, 16)
  * print("Generated cylinder mesh")
  * ```
- * 
- * @note This function generates a 3D mesh for cylindrical shapes. The slices determine the radial division, while stacks determine the vertical division.
  */
 int lua_GenMeshCylinder(lua_State *L);
 
@@ -1011,21 +1000,18 @@ int lua_GenMeshCylinder(lua_State *L);
  * 
  * This function generates a mesh representing a 3D cone shape.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
  *  - `float radius`: The radius of the base of the cone.
  *  - `float height`: The height of the cone.
- *  - `int slices`: The number of vertical divisions of the cone.
- *  - `int stacks`: The number of horizontal layers of the cone.
- * 
+ *  - `int slices`: The number of radial divisions of the cone.
+ *
  * @return int Always returns 1 (Mesh result).
- * 
+ *
  * @usage
  * ```lua
- * local coneMesh = raylib.GenMeshCone(1.0, 3.0, 16, 4)
+ * local coneMesh = raylib.GenMeshCone(1.0, 3.0, 16)
  * print("Generated cone mesh")
  * ```
- * 
- * @note This function generates a 3D mesh for conical shapes. The slices determine the radial division, while stacks determine the vertical division.
  */
 int lua_GenMeshCone(lua_State *L);
 
@@ -1056,8 +1042,8 @@ int lua_GenMeshTorus(lua_State *L);
  * @brief Generates a knot mesh.
  * 
  * This function generates a mesh representing a 3D knot shape.
- * 
- * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *
+ * @param L A pointer to the current Lua state. Expects 4 arguments:
  *  - `float radius`: The radius of the knot.
  *  - `float size`: The thickness of the knot.
  *  - `int radialSegments`: The number of radial segments.
@@ -1317,15 +1303,16 @@ int lua_UnloadModelAnimations(lua_State *L);
  * 
  * This function verifies if the given model animation is valid.
  * 
- * @param L A pointer to the current Lua state. Expects 1 argument:
- *  - `ModelAnimation animation`: The model animation to validate.
- * 
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
+ *  - `Model model`: The model the animation is meant for.
+ *  - `ModelAnimation animation`: The model animation to validate against the model's skeleton.
+ *
  * @return int Always returns 1 (boolean result).
- * 
+ *
  * @usage
  * ```lua
  * local animations = raylib.LoadModelAnimations("animations.iqm")
- * local isValid = raylib.IsModelAnimationValid(animations[1])
+ * local isValid = raylib.IsModelAnimationValid(model, animations[1])
  * print("Is animation valid?", isValid)
  * ```
  * 
@@ -1461,9 +1448,10 @@ int lua_GetRayCollisionBox(lua_State *L);
  * 
  * This function checks if a ray intersects with a mesh and provides detailed collision information.
  * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
  *  - `Ray ray`: The ray to check for collision.
  *  - `Mesh mesh`: The mesh to check for collision.
+ *  - `Matrix transform`: The mesh's transform as a table with fields `m0`..`m15`.
  * 
  * @return int Always returns 1 (RayCollision result).
  * 
@@ -1471,7 +1459,7 @@ int lua_GetRayCollisionBox(lua_State *L);
  * ```lua
  * local ray = { position = {x = 0, y = 0, z = 0}, direction = {x = 1, y = 1, z = 1} }
  * local mesh = raylib.LoadMesh("path/to/mesh.obj")
- * local collision = raylib.GetRayCollisionMesh(ray, mesh)
+ * local collision = raylib.GetRayCollisionMesh(ray, mesh, transform)
  * print("Ray collision point:", collision.point)
  * print("Did ray hit mesh?", collision.hit)
  * ```

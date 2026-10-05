@@ -48,17 +48,16 @@ int lua_LoadFont(lua_State *L);
  * 
  * This function loads a font from a file with specific parameters like font size and character range.
  * 
- * @param L A pointer to the current Lua state. Expects 4 arguments:
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
  *  - `string fileName`: The path to the font file to load.
  *  - `int fontSize`: The size of the font to load.
- *  - `int* charValues`: An array of characters to load.
- *  - `int charCount`: The number of characters in the charValues array.
- * 
+ *  - `int[]|nil codepoints`: Table of codepoints to load, or nil for the default set.
+ *
  * @return int Always returns 1 (Font result) — the loaded font object.
- * 
+ *
  * @usage
  * ```lua
- * local font = raylib.LoadFontEx("resources/arial.ttf", 32, nil, 0)
+ * local font = raylib.LoadFontEx("resources/arial.ttf", 32, nil)
  * print(font) -- Prints information about the loaded font
  * ```
  * 
@@ -71,16 +70,17 @@ int lua_LoadFontEx(lua_State *L);
  * 
  * This function loads a font from an image file where characters are defined in a grid.
  * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
  *  - `Image image`: The image containing the characters of the font.
  *  - `Color key`: The color key used for transparency.
- * 
+ *  - `int firstChar`: The codepoint of the first character in the image (usually 32).
+ *
  * @return int Always returns 1 (Font result) — the loaded font object.
- * 
+ *
  * @usage
  * ```lua
  * local image = raylib.LoadImage("resources/font_image.png")
- * local font = raylib.LoadFontFromImage(image, raylib.Color.BLACK)
+ * local font = raylib.LoadFontFromImage(image, raylib.MAGENTA, 32)
  * print(font) -- Prints information about the loaded font
  * ```
  * 
@@ -164,7 +164,7 @@ int lua_UnloadFont(lua_State *L);
  *  - `Font font`: The font object to export.
  *  - `string fileName`: The path where the C source file will be saved.
  * 
- * @return int Always returns 0.
+ * @return int Always returns 1 (boolean: true on success).
  * 
  * @usage
  * ```lua
@@ -231,7 +231,7 @@ int lua_DrawText(lua_State *L);
  * 
  * This function draws text with more control over positioning and scaling.
  * 
- * @param L A pointer to the current Lua state. Expects 5 arguments:
+ * @param L A pointer to the current Lua state. Expects 6 arguments:
  *  - `Font font`: The font to be used for the text.
  *  - `string text`: The text to be drawn.
  *  - `Vector2 position`: The position where the text will be drawn.
@@ -260,7 +260,7 @@ int lua_DrawTextEx(lua_State *L);
  * 
  * This function allows for more precise control of text alignment, rotation, and spacing.
  * 
- * @param L A pointer to the current Lua state. Expects 7 arguments:
+ * @param L A pointer to the current Lua state. Expects 8 arguments:
  *  - `Font font`: The font to be used for the text.
  *  - `string text`: The text to be drawn.
  *  - `Vector2 position`: The position where the text will be drawn.
@@ -291,7 +291,7 @@ int lua_DrawTextPro(lua_State *L);
  * 
  * This function draws a single Unicode codepoint on the screen at the specified position.
  * 
- * @param L A pointer to the current Lua state. Expects 6 arguments:
+ * @param L A pointer to the current Lua state. Expects 5 arguments:
  *  - `Font font`: The font to be used for the text.
  *  - `int codepoint`: The Unicode codepoint to be drawn.
  *  - `Vector2 position`: The position where the text will be drawn.
@@ -368,7 +368,7 @@ int lua_SetTextLineSpacing(lua_State *L);
  * 
  * This function returns the width of a text string when drawn with a given font size.
  * 
- * @param L A pointer to the current Lua state. Expects 3 arguments:
+ * @param L A pointer to the current Lua state. Expects 2 arguments:
  *  - `string text`: The text to be measured.
  *  - `int fontSize`: The font size to measure the text at.
  * 
@@ -585,19 +585,17 @@ int lua_GetCodepointCount(lua_State *L);
 /**
  * @brief Gets a codepoint from a UTF-8 string.
  * 
- * This function extracts a specific Unicode codepoint from a UTF-8 encoded string.
- * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
+ * This function decodes the first Unicode codepoint of a UTF-8 encoded string.
+ *
+ * @param L A pointer to the current Lua state. Expects 1 argument:
  *  - `const char *utf8`: A UTF-8 encoded string.
- *  - `int index`: The position (index) of the codepoint to extract (starting from 1).
- * 
- * @return int Always returns 1 (integer result) — The Unicode codepoint at the specified index.
- * 
+ *
+ * @return int Always returns 2 — the codepoint (integer) and its size in bytes (integer).
+ *
  * @usage
  * ```lua
- * local utf8String = "ABC"
- * local codepoint = raylib.GetCodepoint(utf8String, 2)
- * print("Codepoint at index 2: ", codepoint) -- Outputs: 66 (for 'B')
+ * local codepoint, size = raylib.GetCodepoint("éA")
+ * print(codepoint, size) -- Outputs: 233  2
  * ```
  * 
  * @note This function extracts a single Unicode codepoint, not a byte. For multi-byte characters, it returns the codepoint, not the UTF-8 byte sequence.
@@ -607,44 +605,39 @@ int lua_GetCodepoint(lua_State *L);
 /**
  * @brief Gets the next codepoint in a UTF-8 string.
  * 
- * This function returns the next Unicode codepoint in a UTF-8 string, given the current position.
- * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
+ * This function decodes the codepoint at the start of a UTF-8 string, as raylib's
+ * GetCodepointNext does when stepping forward through text.
+ *
+ * @param L A pointer to the current Lua state. Expects 1 argument:
  *  - `const char *utf8`: A UTF-8 encoded string.
- *  - `int position`: The current position (byte index) in the string (starting from 1).
- * 
- * @return int Always returns 1 (integer result) — The Unicode codepoint at the next position.
- * 
+ *
+ * @return int Always returns 2 — the codepoint (integer) and its size in bytes (integer).
+ *
  * @usage
  * ```lua
- * local utf8String = "ABC"
- * local nextCodepoint = raylib.GetCodepointNext(utf8String, 1)
- * print("Next codepoint after index 1: ", nextCodepoint) -- Outputs: 66 (for 'B')
+ * local text, i = "ABC", 1
+ * while i <= #text do
+ *     local codepoint, size = raylib.GetCodepointNext(text:sub(i))
+ *     print(codepoint) -- 65, 66, 67
+ *     i = i + size
+ * end
  * ```
- * 
- * @note This function moves forward by one codepoint in a UTF-8 string. Multi-byte characters are counted as one codepoint.
  */
 int lua_GetCodepointNext(lua_State *L);
 
 /**
  * @brief Gets the previous codepoint in a UTF-8 string.
  * 
- * This function returns the previous Unicode codepoint in a UTF-8 string, given the current position.
- * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
+ * This function calls raylib's GetCodepointPrevious on the start of the given string,
+ * which decodes the codepoint immediately *before* that pointer.
+ *
+ * @param L A pointer to the current Lua state. Expects 1 argument:
  *  - `const char *utf8`: A UTF-8 encoded string.
- *  - `int position`: The current position (byte index) in the string (starting from 1).
- * 
- * @return int Always returns 1 (integer result) — The Unicode codepoint at the previous position.
- * 
- * @usage
- * ```lua
- * local utf8String = "ABC"
- * local prevCodepoint = raylib.GetCodepointPrevious(utf8String, 3)
- * print("Previous codepoint before index 3: ", prevCodepoint) -- Outputs: 66 (for 'B')
- * ```
- * 
- * @note This function moves backward by one codepoint in a UTF-8 string. Multi-byte characters are counted as one codepoint.
+ *
+ * @return int Always returns 2 — the codepoint (integer) and its size in bytes (integer).
+ *
+ * @warning There is no position argument, so raylib scans backward from the first byte
+ *          of the Lua string, before its start. The result is not meaningful.
  */
 int lua_GetCodepointPrevious(lua_State *L);
 
@@ -656,12 +649,12 @@ int lua_GetCodepointPrevious(lua_State *L);
  * @param L A pointer to the current Lua state. Expects 1 argument:
  *  - `int codepoint`: The Unicode codepoint to convert.
  * 
- * @return int Always returns 1 (string result) — The UTF-8 encoded string representing the codepoint.
- * 
+ * @return int Always returns 2 — the UTF-8 string (string) and its size in bytes (integer).
+ *
  * @usage
  * ```lua
- * local utf8Char = raylib.CodepointToUTF8(65) -- Codepoint for 'A'
- * print(utf8Char) -- Outputs: A
+ * local utf8Char, size = raylib.CodepointToUTF8(65) -- Codepoint for 'A'
+ * print(utf8Char, size) -- Outputs: A  1
  * ```
  * 
  * @note This function can handle any valid Unicode codepoint, including multi-byte characters.
@@ -671,21 +664,18 @@ int lua_CodepointToUTF8(lua_State *L);
 /**
  * @brief Copies text from one string to another.
  * 
- * Copies a text string to another text buffer.
- * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
- *  - `const char *destination`: The destination string where the text will be copied.
+ * Copies a text string into a new buffer with raylib's TextCopy.
+ *
+ * @param L A pointer to the current Lua state. Expects 1 argument:
  *  - `const char *source`: The source string to copy from.
- * 
- * @return int Always returns 1 (boolean result) — `true` if the copy was successful, `false` otherwise.
- * 
+ *
+ * @return int Always returns 2 — the copied string (string) and the number of bytes copied (integer).
+ *
  * @usage
  * ```lua
- * local success = raylib.TextCopy("destination", "source")
- * print(success) -- Outputs: true
+ * local copy, bytes = raylib.TextCopy("source")
+ * print(copy, bytes) -- Outputs: source  6
  * ```
- * 
- * @note This function is generally used for text manipulation and does not modify Lua strings directly.
  */
 int lua_TextCopy(lua_State *L);
 
@@ -868,22 +858,22 @@ int lua_TextSplit(lua_State *L);
 /**
  * @brief Appends text to a string.
  * 
- * Appends a string to another string.
- * 
- * @param L A pointer to the current Lua state. Expects 2 arguments:
- *  - `char *text`: The original text string (modifiable).
+ * Writes `append` into a copy of `text` at byte offset `position` (raylib's TextAppend).
+ *
+ * @param L A pointer to the current Lua state. Expects 3 arguments:
+ *  - `const char *text`: The original text string.
  *  - `const char *append`: The text string to append.
- * 
- * @return int Always returns 0.
- * 
+ *  - `int position`: Byte offset (0-based) where `append` is written, usually `#text`.
+ *
+ * @return int Always returns 2 — the new string (string) and the advanced position (integer).
+ *
  * @usage
  * ```lua
- * local text = "Hello"
- * raylib.TextAppend(text, ", World!")
- * print(text) -- Outputs: Hello, World!
+ * local text, pos = raylib.TextAppend("Hello", ", World!", 5)
+ * print(text, pos) -- Outputs: Hello, World!  13
  * ```
- * 
- * @note The original text must be modifiable. This function works on mutable C strings.
+ *
+ * @note Lua strings are immutable; the result is a new string.
  */
 int lua_TextAppend(lua_State *L);
 

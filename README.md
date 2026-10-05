@@ -25,26 +25,21 @@ Before building this project, ensure you have the following software installed:
 2. **Make**: A tool to automate the build process.
 3. **libX11** development headers (usually `libx11-dev`).
 
-Raylib 6.0 and Lua 5.5.0 are **vendored** as static libraries — no system installation required. `make` builds `raylib.so` and the full `make test` suite passes on Linux.
+Raylib 6.0 and Lua 5.5.0 sources are **vendored** in `raylib/` and `lua/` — no system installation required. The first `make` compiles them into static libraries, then builds `raylib.so`.
 
 ### On Windows:
 
 1. **GCC (MinGW)**: C compiler used for compiling the bindings.
 2. **Make**: A tool to automate the build process.
 
-> **Note**: Windows users must supply a Lua 5.5.0 `lua.lib` (the vendored one is for Lua 5.4) and a Raylib 6.0 import library.
-
-### Additional Libraries (for both platforms):
-
-- **Raylib** development files
-- **Lua** development files
+Raylib and Lua are built from the vendored sources here too; there is nothing else to download.
 
 ## Installation
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/raylib-lua-bindings.git
+git clone https://github.com/legendaryredfox/raylib-lua-bindings.git
 cd raylib-lua-bindings
 ```
 
@@ -58,12 +53,11 @@ Install a C toolchain and the X11 development headers:
 sudo apt install build-essential libx11-dev   # Debian/Ubuntu
 ```
 
-Raylib and Lua are vendored, so nothing else is needed — `make` links them from the bundled static libraries.
+Raylib and Lua are vendored, so nothing else is needed — `make` builds them from the bundled sources.
 
 #### On Windows:
 
-Download and install MinGW (GCC for Windows).
-Download Raylib and Lua (make sure to install the development headers).
+Download and install MinGW (GCC for Windows). Raylib and Lua are vendored, so nothing else is needed.
 
 ### 3. Build the project
 
@@ -73,7 +67,7 @@ Run the following command to compile and create the shared library:
 make
 ```
 
-This will generate the appropriate shared library file:
+The first run also compiles the vendored `raylib/src/libraylib.a` and `lua/src/liblua.a` (use `make -j8` to speed it up). This will generate the appropriate shared library file:
 
 **Linux: raylib.so**
 **Windows: raylib.dll**
@@ -100,12 +94,14 @@ end
 raylib.CloseWindow()
 ```
 
-Colors are passed as a named constant or a `{r,g,b,a}` table. A packed 32-bit
-integer (`0xRRGGBBAA`) is *additionally* accepted by `ClearBackground` and
+Colors are passed as a named constant or a `{r,g,b,a}` table. Named constants
+exist both on the module (`raylib.RAYWHITE`) and as globals (`RAYWHITE`). A packed
+32-bit integer (`0xRRGGBBAA`) is *additionally* accepted by `ClearBackground` and
 `DrawRectangle`; every other function expects a table or named constant:
 
 ```lua
-raylib.ClearBackground(RAYWHITE)                      -- named constant (a table)
+raylib.ClearBackground(raylib.RAYWHITE)               -- named constant on the module
+raylib.ClearBackground(RAYWHITE)                      -- same constant as a global
 raylib.ClearBackground({r=245, g=245, b=245, a=255})  -- explicit table
 raylib.ClearBackground(0xF5F5F5FF)                    -- packed int (ClearBackground/DrawRectangle only)
 raylib.DrawText("hi", 10, 10, 20, RAYWHITE)           -- other calls need a table/constant
@@ -113,7 +109,7 @@ raylib.DrawText("hi", 10, 10, 20, RAYWHITE)           -- other calls need a tabl
 
 ### 5. Running tests
 
-The suite (248 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, and random sequences — everything that runs without an open window.
+The suite (260 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities and named colors, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, random sequences, and audio-handler validation — everything that runs without an open window or audio device.
 
 ```bash
 make test
@@ -129,19 +125,20 @@ To remove the object files and shared library:
 make clean
 ```
 
-This will delete the compiled object files and the generated shared library (libraylib.so or raylib.dll).
+This will delete the compiled object files and the generated shared library (raylib.so or raylib.dll).
 
 | Make target | Effect |
 |-------------|--------|
-| `make` | Compile all sources, link `raylib.so` / `raylib.dll` |
+| `make` | Build vendored raylib/Lua if needed, compile all sources, link `raylib.so` / `raylib.dll` |
 | `make test` | Run the Lua unit test suite |
 | `make clean` | Remove object files and the shared library |
+| `make distclean` | `clean`, plus the vendored raylib and Lua builds |
 
 ### Known Issues
 
 - Builds and passes the full test suite on both Linux and Windows. GPU/audio-dependent bindings (rendering, hardware textures, audio playback, input) still require a window or audio device and are verified by running example scripts rather than the headless test suite.
 - `GetTargetFPS` is exposed for API symmetry but raylib has no such function; it delegates to `GetFPS()`.
-- Audio stream processor callbacks dispatch to fixed Lua global function names, so only one processor of each type can be active at a time. **These callbacks run on raylib's internal audio thread and are not synchronized with the main Lua VM** — keep any handler minimal (a fully thread-safe design would marshal buffers to the main thread). A missing/failing handler is now handled gracefully instead of crashing.
+- Audio handlers (`AttachAudioStreamProcessor`, `AttachAudioMixedProcessor`, `SetAudioStreamCallback`) run on raylib's audio thread, each in its own private Lua state. They cannot capture locals (upvalues) and do not see the script's globals or the raylib module; keep handler state in the handler's own globals. Up to 16 handlers can be attached at once. A handler that raises an error is disabled and its message is printed to stderr.
 - Raylib objects (textures, images, sounds, fonts, models, …) are returned as userdata and must be released with the matching `Unload*`; they are **not** garbage-collected automatically. Automatic `__gc` is intentionally omitted because raylib objects share ownership (a mesh inside a model, a texture inside a material), which would make blind finalization double-free. After `Unload*`, the userdata is zeroed so accidental reuse is a safe no-op rather than a use-after-free.
 - Contributions to help resolve these issues are highly welcome.
 

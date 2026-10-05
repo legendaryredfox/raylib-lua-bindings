@@ -5,10 +5,6 @@
 
 extern lua_State *globalLuaState;
 
-void audioStreamProcessorWrapper(void *buffer, unsigned int frames);
-void audioMixedProcessorWrapper(void *buffer, unsigned int frames);
-void audioStreamCallbackWrapper(void *buffer, unsigned int frames);
-
 /**
  * @brief Loads a sound from a file into memory.
  * 
@@ -474,23 +470,24 @@ int lua_LoadWaveFromMemory(lua_State *L);
 /**
  * @brief Loads a sound alias.
  * 
- * This function loads a sound alias, which allows referencing a sound 
- * by an alternative identifier. It provides a way to link an existing 
- * sound resource to a new name or identifier.
- * 
+ * This function creates a new Sound that shares the sample data of an existing
+ * Sound, so the same effect can play several times at once without reloading it.
+ *
  * @param L A pointer to the current Lua state. This allows access to the Lua stack and other Lua-related operations.
- * 
+ *
  * @return int Always returns 1, pushing a Sound userdata onto the Lua stack.
- * 
+ *
  * @note The parameters must be provided as follows:
- *       - `alias` (string) - The alias name to associate with the sound.
- *       - `fileName` (string) - The path to the sound file to be loaded.
- * 
+ *       - `source` (Sound) - The sound whose sample data the alias shares.
+ *
  * @usage
  * ```lua
- * local sound = raylib.LoadSoundAlias("explosion", "resources/explosion.wav")
- * raylib.PlaySound(sound)
+ * local sound = raylib.LoadSound("resources/explosion.wav")
+ * local alias = raylib.LoadSoundAlias(sound)
+ * raylib.PlaySound(alias)
  * ```
+ *
+ * @warning Unload the alias with UnloadSoundAlias before unloading the source sound.
  */
 int lua_LoadSoundAlias(lua_State *L);
 
@@ -576,12 +573,12 @@ int lua_UnloadWave(lua_State *L);
  * @return int Always returns 0.
  * 
  * @note The parameter must be provided as follows:
- *       - `alias` (string) - The name of the sound alias to unload.
- * 
+ *       - `alias` (Sound) - The alias returned by LoadSoundAlias.
+ *
  * @usage
  * ```lua
- * raylib.LoadSoundAlias("explosion", "resources/explosion.wav")
- * raylib.UnloadSoundAlias("explosion")
+ * local alias = raylib.LoadSoundAlias(sound)
+ * raylib.UnloadSoundAlias(alias)
  * ```
  */
 int lua_UnloadSoundAlias(lua_State *L);
@@ -594,7 +591,7 @@ int lua_UnloadSoundAlias(lua_State *L);
  * 
  * @param L A pointer to the current Lua state. This allows access to the Lua stack and other Lua-related operations.
  * 
- * @return int Always returns 0.
+ * @return int Always returns 1 (boolean: true on success).
  * 
  * @note The parameters must be provided as follows:
  *       - `wave` (Wave) - The Wave object to export.
@@ -617,7 +614,7 @@ int lua_ExportWave(lua_State *L);
  * 
  * @param L A pointer to the current Lua state. This allows access to the Lua stack and other Lua-related operations.
  * 
- * @return int Always returns 0.
+ * @return int Always returns 1 (boolean: true on success).
  * 
  * @note The parameters must be provided as follows:
  *       - `wave` (Wave) - The Wave object to export as code.
@@ -1334,19 +1331,29 @@ int lua_SetAudioStreamBufferSizeDefault(lua_State *L);
  * @return int Always returns 0, with no values pushed to the Lua stack.
  * 
  * @note The parameters must be provided as follows:
- *       - `stream` (AudioStream) - The audio stream to which the callback will be attached.
- *       - `callback` (function) - A Lua function that will be called to provide audio samples for the stream.
- * 
+ *       - `stream` (AudioStream) - A loaded audio stream (sample size 8, 16 or 32).
+ *       - `callback` (function|nil) - Called as `callback(samples, frames, channels)` on the
+ *         audio thread; it must fill `samples[1..#samples]` in the stream's own format
+ *         (8-bit: 0..255, 16-bit: -32768..32767, 32-bit: float). `nil` removes the callback.
+ *
  * @usage
  * ```lua
  * local stream = raylib.LoadAudioStream(44100, 16, 2)
- * raylib.SetAudioStreamCallback(stream, function()
- *     -- Custom audio processing logic here
+ * raylib.SetAudioStreamCallback(stream, function(samples, frames, channels)
+ *     phase = phase or 0                       -- state lives in the handler's own globals
+ *     for f = 0, frames - 1 do
+ *         local s = math.floor(math.sin(phase) * 8000)
+ *         phase = phase + 2 * math.pi * 440 / 44100
+ *         samples[f*channels + 1] = s
+ *         samples[f*channels + 2] = s
+ *     end
  * end)
- * print("Custom audio stream callback set.")
+ * raylib.PlayAudioStream(stream)
  * ```
- * 
- * @warning The callback function must be lightweight and efficient to avoid introducing latency into the stream.
+ *
+ * @warning The handler runs in a separate Lua state on the audio thread: it cannot capture
+ *          locals (upvalues) and does not see the script's globals or the raylib module.
+ *          If it raises an error it is disabled and the stream outputs silence.
  */
 int lua_SetAudioStreamCallback(lua_State *L);
 
@@ -1362,19 +1369,21 @@ int lua_SetAudioStreamCallback(lua_State *L);
  * 
  * @note The parameters must be provided as follows:
  *       - `stream` (AudioStream) - The audio stream to which the processor will be attached.
- *       - `processor` (function) - A Lua function that processes audio samples in real time.
- * 
+ *       - `processor` (function) - Called as `processor(samples, frames, channels)` on the audio
+ *         thread; `samples[1..#samples]` are stereo floats (channels is always 2), edited in place.
+ *
  * @usage
  * ```lua
  * local stream = raylib.LoadAudioStream(44100, 16, 2)
- * raylib.AttachAudioStreamProcessor(stream, function(samples)
- *     -- Apply an effect to the audio samples
- *     return samples
- * end)
- * print("Audio stream processor attached.")
+ * local function halve(samples, frames, channels)
+ *     for i = 1, #samples do samples[i] = samples[i] * 0.5 end
+ * end
+ * raylib.AttachAudioStreamProcessor(stream, halve)
  * ```
- * 
- * @warning Processor functions must be fast and efficient to avoid audio glitches or latency issues.
+ *
+ * @warning The processor runs in a separate Lua state on the audio thread: it cannot capture
+ *          locals (upvalues) and does not see the script's globals. If it raises an error it is
+ *          disabled. At most 16 processors/callbacks can be attached at once.
  */
 int lua_AttachAudioStreamProcessor(lua_State *L);
 
@@ -1390,8 +1399,8 @@ int lua_AttachAudioStreamProcessor(lua_State *L);
  * 
  * @note The parameters must be provided as follows:
  *       - `stream` (AudioStream) - The audio stream from which the processor will be detached.
- *       - `processor` (function) - The specific Lua processor function to detach.
- * 
+ *       - `processor` (function) - The same function value that was passed to AttachAudioStreamProcessor.
+ *
  * @usage
  * ```lua
  * local stream = raylib.LoadAudioStream(44100, 16, 2)
@@ -1399,8 +1408,9 @@ int lua_AttachAudioStreamProcessor(lua_State *L);
  * raylib.DetachAudioStreamProcessor(stream, customProcessor)
  * print("Processor detached from audio stream.")
  * ```
- * 
+ *
  * @warning If the specified processor is not attached to the stream, this function will have no effect.
+ *          UnloadAudioStream detaches any processors and callback still attached to the stream.
  */
 int lua_DetachAudioStreamProcessor(lua_State *L);
 
@@ -1416,18 +1426,24 @@ int lua_DetachAudioStreamProcessor(lua_State *L);
  * @return int Always returns 0, with no values pushed to the Lua stack.
  * 
  * @note The parameters must be provided as follows:
- *       - `processor` (function) - A Lua function that processes the mixed audio data.
- * 
+ *       - `processor` (function) - Called as `processor(samples, frames, channels)` on the audio
+ *         thread; `samples[1..#samples]` are the mixed stereo floats, edited in place.
+ *
  * @usage
  * ```lua
- * raylib.AttachAudioMixedProcessor(function(samples)
- *     -- Apply a low-pass filter to the mixed audio
- *     return samples
- * end)
- * print("Processor attached to mixed audio.")
+ * local function lowpass(samples, frames, channels)
+ *     prevL, prevR = prevL or 0, prevR or 0     -- state lives in the handler's own globals
+ *     for f = 0, frames - 1 do
+ *         prevL = prevL + 0.1 * (samples[f*2 + 1] - prevL); samples[f*2 + 1] = prevL
+ *         prevR = prevR + 0.1 * (samples[f*2 + 2] - prevR); samples[f*2 + 2] = prevR
+ *     end
+ * end
+ * raylib.AttachAudioMixedProcessor(lowpass)
  * ```
- * 
- * @warning The processor function must be efficient to avoid audio latency or glitches in the final mixed output.
+ *
+ * @warning The processor runs in a separate Lua state on the audio thread: it cannot capture
+ *          locals (upvalues) and does not see the script's globals. If it raises an error it is
+ *          disabled.
  */
 int lua_AttachAudioMixedProcessor(lua_State *L);
 
@@ -1442,7 +1458,7 @@ int lua_AttachAudioMixedProcessor(lua_State *L);
  * @return int Always returns 0, with no values pushed to the Lua stack.
  * 
  * @note The parameters must be provided as follows:
- *       - `processor` (function) - The Lua processor function to be detached from the mixed audio.
+ *       - `processor` (function) - The same function value that was passed to AttachAudioMixedProcessor.
  * 
  * @usage
  * ```lua

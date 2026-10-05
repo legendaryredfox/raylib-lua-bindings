@@ -22,7 +22,7 @@ raylib-lua-bindings/
 │   ├── lua_raylib_extra.c  # Added bindings: render modes, camera, shaders, input, filesystem, data utils
 │   └── raylib_wrappers.c   # Shared C helpers: struct ↔ Lua table conversion
 ├── include/                # Header for every src/ file + vendored raylib.h / lua headers
-├── lua/                    # Vendored Lua 5.5.0 source tree (Windows .lib files are still 5.4)
+├── lua/                    # Vendored Lua 5.5.0 source tree
 ├── raylib/                 # Vendored Raylib source tree
 ├── examples/
 │   └── basic_window.lua    # Minimal "Hello World" Lua script
@@ -37,35 +37,36 @@ The project uses a plain GNU `makefile`.
 
 | Target | Effect |
 |--------|--------|
-| `make` | Compile all `src/*.c` to `.o`, link into `raylib.so` / `raylib.dll` |
+| `make` | Build vendored raylib/Lua if missing, compile all `src/*.c` to `.o`, link into `raylib.so` / `raylib.dll` |
 | `make test` | Run Lua unit test suite (`tests/runner.lua`) |
 | `make clean` | Remove object files and the shared library |
+| `make distclean` | `clean`, plus `make -C raylib/src clean` and `make -C lua/src clean` |
 
 Compiler: **GCC** (Linux native, MinGW on Windows).
 
 Key flags:
 - `-fPIC` — required for shared libraries on Linux.
 - `-Iinclude -Ilua/src -Iraylib/src` — include paths for vendored headers.
-- Linux link: `-Lraylib -lraylib -Llua -llua -lX11 -lm -lpthread` — uses vendored static libs.
-- Windows link: `-Lraylib -lraylib -Llua -llua -lgdi32 -lwinmm`
+- Linux link: `-Lraylib/src -lraylib -Llua/src -llua -lX11 -lm -lpthread` — uses vendored static libs.
+- Windows link: `-Lraylib/src -lraylib -Llua/src -llua -lgdi32 -lwinmm`
 
-Both Raylib and Lua are linked from **vendored static libraries** (`raylib/libraylib.a`, `lua/liblua.a`), so no system installation is required.
-
-> **Status**: works reliably on Windows. Linux support is in progress; some features may not work correctly.
+Both static libraries (`raylib/src/libraylib.a`, `lua/src/liblua.a`) are **built from the vendored sources** by the makefile on first `make` (with `-fPIC`), so no system installation is required. No `.a`/`.lib` files are committed (`*.a` is gitignored).
 
 ## Architecture
 
 ### Module entry point (`src/lua_raylib.c`)
 
 `luaopen_raylib` is the single Lua C module entry point. It:
-1. Sets `globalLuaState = L` so that audio callbacks can reach the Lua state.
+1. Sets `globalLuaState = L` so the main-thread file I/O and trace-log callbacks
+   in `lua_raylib_extra.c` can reach the Lua state. (Audio handlers never use it;
+   see Audio handlers below.)
 2. Calls `register_raylib_metatables` to create one named metatable per userdata
    type (`Image`, `Texture2D`, `Sound`, `Model`, …). These must exist before any
    binding runs — `luaL_setmetatable` / `luaL_checkudata` rely on them to tag and
    type-check objects. (Without them, `setmetatable` attaches a nil metatable and
    every `checkudata` rejects its argument.)
 3. Registers all wrapped functions via a `luaL_Reg` table.
-4. Calls `register_raylib_colors` to push Raylib's named colour constants (e.g. `RAYWHITE`, `RED`) as Lua globals.
+4. Calls `register_raylib_colors` to push Raylib's named colour constants (e.g. `RAYWHITE`, `RED`) onto the module table (`raylib.RAYWHITE`) and as Lua globals.
 
 ### Binding pattern
 
@@ -129,15 +130,29 @@ Colours can be passed to API functions in two ways:
 The `check_color` helper in `lua_raylib_draw.c` transparently accepts both forms,
 so callers of `ClearBackground` and `DrawRectangle` can use either.
 
-Named colour globals (`RAYWHITE`, `RED`, …) are `{r,g,b,a}` tables pushed by
-`register_raylib_colors` in `lua_raylib.c`.
+Named colours (`RAYWHITE`, `RED`, …) are `{r,g,b,a}` tables pushed by
+`register_raylib_colors` in `lua_raylib.c` from its `raylib_colors[]` table, both as
+module fields (`raylib.RED`) and as globals (`RED`).
 
-### Audio callbacks (`src/lua_raylib_audio.c`)
+### Audio handlers (`src/lua_raylib_audio.c`)
 
-Audio stream processors and mixed processors bridge Raylib's C callback system to
-Lua. The module stores a `globalLuaState` pointer (set once in `luaopen_raylib`)
-and uses fixed Lua global function names (`audioStreamProcessorWrapper`,
-`audioMixedProcessorWrapper`, `audioStreamCallbackWrapper`) as the callback targets.
+`AttachAudioStreamProcessor`, `AttachAudioMixedProcessor` and `SetAudioStreamCallback`
+take a Lua function that raylib calls on its **audio thread**. The script's
+`lua_State` must never run there, so each handler is copied (`lua_dump` + load) into
+its own private `lua_State` in one of 16 slots (`audioSlots[]`). raylib callbacks get
+no user data, so each slot has its own C trampoline (`audioTrampolines[]`).
+
+- Handlers are called as `handler(samples, frames, channels)`. `samples` is an
+  `AudioSampleBuffer` userdata, indexable `1..#samples` and valid only during the call.
+  Processors get stereo floats; stream callbacks get the stream's own format (8/16/32-bit).
+- Handlers may not capture upvalues other than `_ENV` (rejected at attach time) and do
+  not see the script's globals; they keep state in their own globals.
+- Detach by passing the same function value; slots are matched by function and stream.
+- raylib holds `AUDIO.System.lock` while calling handlers, and Attach/Detach/
+  `SetAudioStreamCallback` take the same lock, so a slot's state is closed only after
+  raylib has stopped calling it. `UnloadAudioStream` releases the stream's slots.
+- A handler error disables that slot and prints to stderr (not `TraceLog`, which could
+  re-enter the script state through a Lua trace-log callback).
 
 ## Memory ownership rules
 
@@ -226,12 +241,14 @@ LUA_CPATH="./?.so" lua tests/runner.lua
 | `tests/runner.lua` | Minimal harness; loads and runs all suites; exits non-zero on failure |
 | `tests/test_text.lua` | `TextLength`, `TextIsEqual`, `TextToUpper/Lower`, `TextSubtext`, `TextReplace*`, `TextInsert*`, `TextJoin`, `TextSplit`, `TextFindIndex`, case converters, `GetCodepoint*`, `CodepointToUTF8`, `TextCopy`, `TextAppend`, and more |
 | `tests/test_hashing.lua` | `ComputeCRC32`, `ComputeMD5`, `ComputeSHA1`, `ComputeSHA256` — fixed expected values |
-| `tests/test_color.lua` | `ColorToInt`, `ColorNormalize`, `ColorFromNormalized`, `ColorToHSV`, `ColorFromHSV`, `ColorTint`, `ColorAlpha`, `ColorBrightness`, `GetRandomValue` |
+| `tests/test_color.lua` | `ColorToInt`, `ColorNormalize`, `ColorFromNormalized`, `ColorToHSV`, `ColorFromHSV`, `ColorTint`, `ColorAlpha`, `ColorBrightness`, `GetRandomValue`, named colours (`raylib.RAYWHITE` and globals) |
 | `tests/test_image.lua` | Image userdata round-trips: `GenImageColor`/`GenImageChecked` return userdata, `IsImageValid`, `GetImageColor`, `ImageCopy`, `ImageColorInvert`, distinct-metatable type rejection, `UnloadImage` |
 | `tests/test_filesystem.lua` | `MakeDirectory`, `IsFileNameValid`, `FileCopy`, `FileRemove`, `FileRename`, `FileMove`, `GetDirectoryFileCount` |
 | `tests/test_extra.lua` | `TextToInteger/Float`, path utilities, `Load/SaveFileData/Text`, `Compress/DecompressData`, `Encode/DecodeDataBase64`, `LoadRandomSequence`, `LoadDirectoryFiles`, `ExportDataAsCode` |
+| `tests/test_safety.lua` | Hardened array readers, zero-on-unload, Base64 round-trip, error paths that previously leaked or crashed |
+| `tests/test_audio.lua` | Audio handler validation: C-function and upvalue rejection, no-op detach (no audio device needed) |
 
-All 237 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
+All 260 checks run without a window. CPU-side image operations are covered; bindings that need a GL context or audio device (rendering, hardware textures, audio playback, input) are not — those are verified by running example scripts.
 
 ### Known test quirks
 
@@ -241,12 +258,10 @@ All 237 checks run without a window. CPU-side image operations are covered; bind
 
 ## Known limitations / open issues
 
-- Linux support is incomplete; some bindings may behave incorrectly or crash.
-- Audio stream processor callbacks store a single global `lua_State*` and dispatch
-  to fixed-name Lua globals — only one processor of each type can be active at a time.
+- Audio handlers run in isolated Lua states: no upvalues, no access to the script's
+  globals or the raylib module, at most 16 attached at once.
 - GPU/audio-dependent bindings (rendering, hardware textures, audio playback, input) require a window or audio device and are verified by running example scripts; everything window-free is covered by the `tests/` suite (see Testing).
-- The library ships with vendored **Raylib 6.0** and **Lua 5.5.0** static libraries; keeping these up to date requires re-downloading and rebuilding the vendored sources.
+- The library ships with vendored **Raylib 6.0** and **Lua 5.5.0** sources; updating them means replacing `raylib/` / `lua/` and running `make distclean && make`.
 - `GetTargetFPS` is exposed in the Lua API but Raylib does not have that function; it currently delegates to `GetFPS()` instead.
-- Windows pre-built Lua libs (`lua/lua.lib`, `lua/lua54.lib`) are still for Lua 5.4; Windows users must rebuild against Lua 5.5.0.
 - `DrawCircleGradient` Lua API changed in this update: now takes `(center: Vector2, radius, inner, outer)` instead of `(centerX, centerY, radius, inner, outer)`.
 - `TextReplace`/`TextInsert` are now static-buffer returns (no allocation); use `TextReplaceAlloc`/`TextInsertAlloc` for heap-allocated results.

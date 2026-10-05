@@ -194,13 +194,15 @@ int lua_DrawEllipse(lua_State *L);
  *       - `posY` (int) - Y-coordinate of the top-left corner of the rectangle.
  *       - `width` (int) - Width of the rectangle.
  *       - `height` (int) - Height of the rectangle.
+ *       - `lineThick` (int) - Outline thickness. Not in raylib's DrawRectangleLines; this
+ *         binding forwards to DrawRectangleLinesEx.
  *       - `color` (table) - Color table with `r`, `g`, `b`, and optional `a` components in the range [0, 255].
- * 
+ *
  * @usage
  * ```lua
  * raylib.BeginDrawing()
  * raylib.ClearBackground(raylib.RAYWHITE)
- * raylib.DrawRectangleLines(50, 50, 200, 100, {r=255, g=0, b=0, a=255}) -- Draws a red rectangle outline
+ * raylib.DrawRectangleLines(50, 50, 200, 100, 1, {r=255, g=0, b=0, a=255}) -- Draws a red rectangle outline
  * raylib.EndDrawing()
  * ```
  */
@@ -496,30 +498,30 @@ int lua_DrawRectangleGradientV(lua_State *L);
  * @brief Draws a rectangle with an extended gradient fill.
  * 
  * This function draws a rectangle with a gradient that allows control over the colors of each 
- * vertex. The gradient is applied diagonally, and it supports different colors at each of the 
- * four corners (top-left, top-right, bottom-left, bottom-right). It is useful for more complex 
- * gradient effects, custom UIs, and artistic effects.
- * 
+ * vertex. It supports different colors at each of the four corners. It is useful for more
+ * complex gradient effects, custom UIs, and artistic effects.
+ *
  * @param L A pointer to the current Lua state. This allows access to the Lua stack and other Lua-related operations.
- * 
+ *
  * @return int Always returns 0, indicating successful execution.
- * 
- * @note The parameters must be provided as follows:
- *       - `rec` (table) - A table representing the rectangle as `{x, y, width, height}`.
- *       - `topLeft` (table) - The color of the top-left corner, as a table with `r`, `g`, `b`, and optional `a` components.
- *       - `topRight` (table) - The color of the top-right corner, as a table with `r`, `g`, `b`, and optional `a` components.
- *       - `bottomLeft` (table) - The color of the bottom-left corner, as a table with `r`, `g`, `b`, and optional `a` components.
- *       - `bottomRight` (table) - The color of the bottom-right corner, as a table with `r`, `g`, `b`, and optional `a` components.
- * 
+ *
+ * @note The parameters must be provided as follows (the rectangle as four numbers, then
+ *       the corner colors in raylib 6.0 order):
+ *       - `x`, `y`, `width`, `height` (number) - The rectangle.
+ *       - `topLeft` (table) - The color of the top-left corner.
+ *       - `bottomLeft` (table) - The color of the bottom-left corner.
+ *       - `bottomRight` (table) - The color of the bottom-right corner.
+ *       - `topRight` (table) - The color of the top-right corner.
+ *
  * @usage
  * ```lua
  * raylib.BeginDrawing()
  * raylib.ClearBackground(raylib.RAYWHITE)
- * raylib.DrawRectangleGradientEx({x=100, y=100, width=200, height=200}, 
- *     {r=255, g=0, b=0, a=255}, -- Top-left red
- *     {r=0, g=255, b=0, a=255}, -- Top-right green
- *     {r=0, g=0, b=255, a=255}, -- Bottom-left blue
- *     {r=255, g=255, b=0, a=255} -- Bottom-right yellow
+ * raylib.DrawRectangleGradientEx(100, 100, 200, 200,
+ *     {r=255, g=0, b=0, a=255},   -- Top-left red
+ *     {r=0, g=0, b=255, a=255},   -- Bottom-left blue
+ *     {r=255, g=255, b=0, a=255}, -- Bottom-right yellow
+ *     {r=0, g=255, b=0, a=255}    -- Top-right green
  * )
  * raylib.EndDrawing()
  * ```
@@ -538,8 +540,7 @@ int lua_DrawRectangleGradientEx(lua_State *L);
  * @return int Always returns 0, indicating successful execution.
  * 
  * @note The parameters must be provided as follows:
- *       - `centerX` (int) - The x-coordinate of the center of the circle.
- *       - `centerY` (int) - The y-coordinate of the center of the circle.
+ *       - `center` (Vector2) - The center of the circle, as `{x, y}`.
  *       - `radius` (float) - The radius of the circle.
  *       - `innerColor` (table) - The color at the center of the circle, as a table with `r`, `g`, `b`, and optional `a` components.
  *       - `outerColor` (table) - The color at the edge of the circle, as a table with `r`, `g`, `b`, and optional `a` components.
@@ -548,7 +549,7 @@ int lua_DrawRectangleGradientEx(lua_State *L);
  * ```lua
  * raylib.BeginDrawing()
  * raylib.ClearBackground(raylib.RAYWHITE)
- * raylib.DrawCircleGradient(400, 300, 100, {r=255, g=0, b=0, a=255}, {r=0, g=0, b=255, a=255}) -- Red to blue radial gradient
+ * raylib.DrawCircleGradient({x=400, y=300}, 100, {r=255, g=0, b=0, a=255}, {r=0, g=0, b=255, a=255}) -- Red to blue radial gradient
  * raylib.EndDrawing()
  * ```
  */

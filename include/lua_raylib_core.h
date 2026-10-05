@@ -135,23 +135,19 @@ int lua_SetWindowIcon(lua_State *L);
 /**
  * @brief Captures a screenshot of the current window.
  * 
- * This function takes a screenshot of the current window and saves it to an image file 
- * in the working directory. The filename is automatically generated based on the 
- * current date and time.
- * 
- * @param L A pointer to the current Lua state. This allows access to the Lua stack and other Lua-related operations.
- * 
+ * This function takes a screenshot of the current window and saves it as a PNG
+ * in the working directory under the given file name.
+ *
+ * @param L A pointer to the current Lua state. Expects 1 argument:
+ *  - `string fileName`: The file name to save to (e.g. "screenshot.png").
+ *
  * @return int Always returns 0, with no values pushed to the Lua stack.
- * 
+ *
  * @usage
  * ```lua
- * raylib.TakeScreenshot()
- * print("Screenshot captured successfully.")
+ * raylib.TakeScreenshot("screenshot.png")
  * ```
- * 
- * @note The screenshot is saved in the current working directory as `screenshotYYYYMMDD_HHMMSS.png`, 
- * where `YYYYMMDD_HHMMSS` represents the date and time of the capture.
- * 
+ *
  * @warning If the application does not have write permissions to the current directory, 
  * the screenshot may fail to be saved.
  */
@@ -847,21 +843,19 @@ int lua_GetRandomValue(lua_State *L);
 int lua_SetTargetFPS(lua_State *L);
 
 /**
- * @brief Gets the currently set target frames per second (FPS).
- * 
- * This function returns the target FPS previously set with `SetTargetFPS`.
- * 
+ * @brief Returns the current measured FPS (alias of GetFPS).
+ *
+ * raylib has no GetTargetFPS(); this binding exists for API symmetry and returns
+ * GetFPS(), the measured frame rate, not the value passed to `SetTargetFPS`.
+ *
  * @param L A pointer to the current Lua state. No arguments are required.
- * 
- * @return int Always returns 1 (integer result) representing the target FPS.
- * 
+ *
+ * @return int Always returns 1 (integer result): the measured FPS.
+ *
  * @usage
  * ```lua
- * local targetFPS = raylib.GetTargetFPS()
- * print("Current target FPS:", targetFPS)
+ * local fps = raylib.GetTargetFPS() -- same as raylib.GetFPS()
  * ```
- * 
- * @note If no FPS has been explicitly set, this function may return the default FPS.
  */
 int lua_GetTargetFPS(lua_State *L);
 

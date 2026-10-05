@@ -50,3 +50,6 @@ raylib.dll
 last_session.txt
 IMPLEMENT.md
 .claude
+
+# Vendored static libraries are built from source by the makefile
+*.a

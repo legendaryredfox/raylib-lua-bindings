@@ -343,7 +343,7 @@ int lua_TextLength(lua_State *L) {
 int lua_TextFormat(lua_State *L) {
     // Raylib's variadic C TextFormat cannot be forwarded Lua varargs safely, so
     // delegate to Lua's own string.format, which shares printf-style specifiers
-    // (%d, %s, %f, ...). Previously this returned the format string unchanged.
+    // (%d, %s, %f, ...).
     int nargs = lua_gettop(L);
     luaL_checkstring(L, 1);
     lua_getglobal(L, "string");
