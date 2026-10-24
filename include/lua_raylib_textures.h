@@ -340,7 +340,7 @@ int lua_ImageColorBrightness(lua_State *L);
  * **Usage:**
  * ```lua
  * local image = raylib.LoadImage("example.png")
- * raylib.ImageColorContrast(image, 1.5) -- Increase contrast
+ * raylib.ImageColorContrast(image, 50) -- Increase contrast (integer, -100..100)
  * ```
  */
 int lua_ImageColorContrast(lua_State *L);
@@ -1428,9 +1428,26 @@ int lua_ImageDrawRectangleRec(lua_State *L);
  * ```lua
  * local image = raylib.LoadImage("source.png")
  * raylib.ImageDrawRectangleLines(image, { x = 50, y = 50, width = 150, height = 100 }, 2, { r = 255, g = 0, b = 0, a = 255 }) -- 2px red outline
+ * raylib.ImageDrawRectangleLines(image, 50, 50, 150, 100, raylib.RED) -- Raylib 6.2 form: 1px outline
  * ```
  */
 int lua_ImageDrawRectangleLines(lua_State *L);
+
+/**
+ * @brief Draws the outline of a rectangle in an image with a line thickness.
+ *
+ * Raylib 6.2 name for the rectangle-table form of `ImageDrawRectangleLines`.
+ *
+ * @param L Lua state
+ * @return int Always returns 0
+ *
+ * **Usage:**
+ * ```lua
+ * local image = raylib.LoadImage("source.png")
+ * raylib.ImageDrawRectangleLinesEx(image, { x = 50, y = 50, width = 150, height = 100 }, 2, raylib.RED)
+ * ```
+ */
+int lua_ImageDrawRectangleLinesEx(lua_State *L);
 
 /**
  * @brief Draws a triangle in an image using three points.
@@ -1449,7 +1466,8 @@ int lua_ImageDrawRectangleLines(lua_State *L);
 int lua_ImageDrawTriangle(lua_State *L);
 
 /**
- * @brief Draws a triangle in an image using extended parameters.
+ * @brief Draws a triangle in an image with a color per vertex (raylib 6.2 `ImageDrawTriangleGradient`).
+ * `ImageDrawTriangleEx` is kept as an alias.
  * 
  * This function draws a filled triangle in an image using three points (Vector2) and one color per vertex, interpolated across the triangle.
  * 
@@ -1459,11 +1477,11 @@ int lua_ImageDrawTriangle(lua_State *L);
  * **Usage:**
  * ```lua
  * local image = raylib.LoadImage("source.png")
- * raylib.ImageDrawTriangleEx(image, { x = 100, y = 150 }, { x = 200, y = 50 }, { x = 250, y = 150 },
+ * raylib.ImageDrawTriangleGradient(image, { x = 100, y = 150 }, { x = 200, y = 50 }, { x = 250, y = 150 },
  *     raylib.RED, raylib.GREEN, raylib.BLUE) -- One color per vertex
  * ```
  */
-int lua_ImageDrawTriangleEx(lua_State *L);
+int lua_ImageDrawTriangleGradient(lua_State *L);
 /**
  * @brief Draws the outline of a triangle in an image.
  * 

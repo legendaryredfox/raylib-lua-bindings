@@ -252,12 +252,12 @@ int lua_GetSplinePointCatmullRom(lua_State *L) {
     return 1;
 }
 
-int lua_GetSplinePointBezierQuad(lua_State *L) {
+int lua_GetSplinePointBezierQuadratic(lua_State *L) {
     Vector2 p1 = get_vector2_from_table(L, 1);
     Vector2 c2 = get_vector2_from_table(L, 2);
     Vector2 p3 = get_vector2_from_table(L, 3);
     float t = luaL_checknumber(L, 4);
-    Vector2 point = GetSplinePointBezierQuad(p1, c2, p3, t);
+    Vector2 point = GetSplinePointBezierQuadratic(p1, c2, p3, t);
     push_vector2_to_table(L, point);
     return 1;
 }

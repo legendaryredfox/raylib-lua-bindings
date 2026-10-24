@@ -22,9 +22,9 @@ local fh = assert(io.open(src, "w"))
 fh:write("hello raylib")
 fh:close()
 
--- FileCopy returns 1 on success (bool-as-int; Raylib 6.0 convention)
+-- FileCopy returns 0 on success (Raylib 6.2; 6.0 returned 1)
 local copy_rc = r.FileCopy(src, dst)
-T.assert_eq("FileCopy returns 1 on success", copy_rc, 1)
+T.assert_eq("FileCopy returns 0 on success", copy_rc, 0)
 local dfh = io.open(dst, "r")
 T.assert_true("FileCopy destination exists", dfh ~= nil)
 if dfh then
@@ -44,20 +44,18 @@ T.assert_eq  ("FileRename returns 0",    ren_rc, 0)
 T.assert_true("FileRename new exists",   io.open(renamed, "r") ~= nil)
 T.assert_true("FileRename old gone",     io.open(dst,     "r") == nil)
 
--- FileMove: internally calls FileCopy then FileRemove.
--- In Raylib 6.0, FileMove treats FileCopy's success return (1) as failure,
--- so it always returns -1 even when the copy succeeds.
--- We verify the destination was created despite the wrong return code.
+-- FileMove: internally calls FileCopy then FileRemove. Returns 0 on success
+-- since Raylib 6.2 (6.0 always returned -1 even though the file was moved).
 local moved   = tmpdir .. "/moved.txt"
 local move_rc = r.FileMove(renamed, moved)
-T.assert_eq  ("FileMove returns -1 (Raylib 6.0 bug)", move_rc, -1)
-T.assert_true("FileMove dest exists despite wrong rc",  io.open(moved, "r") ~= nil)
+T.assert_eq  ("FileMove returns 0 on success", move_rc, 0)
+T.assert_true("FileMove dest exists",           io.open(moved, "r") ~= nil)
+T.assert_true("FileMove source gone",           io.open(renamed, "r") == nil)
 
 -- GetDirectoryFileCount: tmpdir should contain exactly 'moved.txt' now
 local fc = r.GetDirectoryFileCount(tmpdir)
 T.assert_true("GetDirectoryFileCount >= 1", fc >= 1)
 
--- Cleanup (FileMove leaves both src and dst on the Raylib 6.0 bug path)
+-- Cleanup
 os.remove(moved)
-os.remove(renamed)
 os.execute("rmdir " .. tmpdir)

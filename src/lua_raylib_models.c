@@ -255,10 +255,10 @@ int lua_DrawCapsule(lua_State *L) {
     Vector3 startPos = get_vector3_from_table(L, 1);
     Vector3 endPos = get_vector3_from_table(L, 2);
     float radius = luaL_checknumber(L, 3);
-    int slices = luaL_checkinteger(L, 4);
-    int rings = luaL_checkinteger(L, 5);
+    int rings = luaL_checkinteger(L, 4);    // raylib 6.2 order: rings, then slices
+    int slices = luaL_checkinteger(L, 5);
     Color color = get_color_from_table(L, 6);
-    DrawCapsule(startPos, endPos, radius, slices, rings, color);
+    DrawCapsule(startPos, endPos, radius, rings, slices, color);
     return 0;
 }
 
@@ -266,10 +266,10 @@ int lua_DrawCapsuleWires(lua_State *L) {
     Vector3 startPos = get_vector3_from_table(L, 1);
     Vector3 endPos = get_vector3_from_table(L, 2);
     float radius = luaL_checknumber(L, 3);
-    int slices = luaL_checkinteger(L, 4);
-    int rings = luaL_checkinteger(L, 5);
+    int rings = luaL_checkinteger(L, 4);    // raylib 6.2 order: rings, then slices
+    int slices = luaL_checkinteger(L, 5);
     Color color = get_color_from_table(L, 6);
-    DrawCapsuleWires(startPos, endPos, radius, slices, rings, color);
+    DrawCapsuleWires(startPos, endPos, radius, rings, slices, color);
     return 0;
 }
 

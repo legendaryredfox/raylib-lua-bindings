@@ -542,15 +542,15 @@ int lua_DrawCylinderWiresEx(lua_State *L);
  *  - `Vector3 startPos`: The position of one end of the capsule (X, Y, Z).
  *  - `Vector3 endPos`: The position of the other end of the capsule (X, Y, Z).
  *  - `float radius`: The radius of the capsule.
+ *  - `int rings`: The number of rings in each hemispherical end (raylib 6.2 order: rings before slices).
  *  - `int slices`: The number of sides (slices) of the capsule.
- *  - `int rings`: The number of rings in each hemispherical end.
  *  - `Color color`: The color of the capsule.
  *
  * @return int Always returns 0.
  *
  * @usage
  * ```lua
- * raylib.DrawCapsule({x=0, y=0, z=0}, {x=0, y=5, z=0}, 1.0, 16, 8, {r=255, g=0, b=255, a=255})
+ * raylib.DrawCapsule({x=0, y=0, z=0}, {x=0, y=5, z=0}, 1.0, 8, 16, {r=255, g=0, b=255, a=255})
  * print("3D capsule drawn successfully")
  * ```
  * 
@@ -567,15 +567,15 @@ int lua_DrawCapsule(lua_State *L);
  *  - `Vector3 startPos`: The position of one end of the capsule (X, Y, Z).
  *  - `Vector3 endPos`: The position of the other end of the capsule (X, Y, Z).
  *  - `float radius`: The radius of the capsule.
+ *  - `int rings`: The number of rings in each hemispherical end (raylib 6.2 order: rings before slices).
  *  - `int slices`: The number of sides (slices) of the capsule.
- *  - `int rings`: The number of rings in each hemispherical end.
  *  - `Color color`: The color of the wireframe.
  *
  * @return int Always returns 0.
  *
  * @usage
  * ```lua
- * raylib.DrawCapsuleWires({x=0, y=0, z=0}, {x=0, y=5, z=0}, 1.0, 16, 8, {r=0, g=255, b=255, a=255})
+ * raylib.DrawCapsuleWires({x=0, y=0, z=0}, {x=0, y=5, z=0}, 1.0, 8, 16, {r=0, g=255, b=255, a=255})
  * print("3D capsule wireframe drawn successfully")
  * ```
  * 

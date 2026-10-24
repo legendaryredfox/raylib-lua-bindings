@@ -524,7 +524,7 @@ static int lua_GetDirectoryPath(lua_State *L)      { lua_pushstring(L, GetDirect
 static int lua_GetPrevDirectoryPath(lua_State *L)  { lua_pushstring(L, GetPrevDirectoryPath(luaL_checkstring(L, 1)));  return 1; }
 static int lua_GetWorkingDirectory(lua_State *L)   { (void)L; lua_pushstring(L, GetWorkingDirectory());     return 1; }
 static int lua_GetApplicationDirectory(lua_State *L){ (void)L; lua_pushstring(L, GetApplicationDirectory()); return 1; }
-static int lua_ChangeDirectory(lua_State *L)       { lua_pushboolean(L, ChangeDirectory(luaL_checkstring(L, 1)));      return 1; }
+static int lua_ChangeDirectory(lua_State *L)       { lua_pushboolean(L, ChangeDirectory(luaL_checkstring(L, 1)) == 0); return 1;   /* raylib 6.2 returns int, 0 = ok */ }
 static int lua_GetFileLength(lua_State *L)         { lua_pushinteger(L, GetFileLength(luaL_checkstring(L, 1)));        return 1; }
 static int lua_GetFileModTime(lua_State *L)        { lua_pushinteger(L, (lua_Integer)GetFileModTime(luaL_checkstring(L, 1))); return 1; }
 
@@ -545,7 +545,7 @@ static int lua_SaveFileData(lua_State *L) {
     const char *fileName = luaL_checkstring(L, 1);
     size_t dataSize;
     const char *data = luaL_checklstring(L, 2, &dataSize);
-    lua_pushboolean(L, SaveFileData(fileName, (void *)data, (int)dataSize));
+    lua_pushboolean(L, SaveFileData(fileName, data, (int)dataSize));
     return 1;
 }
 
@@ -917,7 +917,7 @@ static char *load_file_text_trampoline(const char *fileName) {
     return buf;
 }
 
-static bool save_file_data_trampoline(const char *fileName, void *data, int dataSize) {
+static bool save_file_data_trampoline(const char *fileName, const void *data, int dataSize) {
     lua_State *L = globalLuaState;
     if (L == NULL || saveFileDataRef == LUA_NOREF) return false;
     lua_rawgeti(L, LUA_REGISTRYINDEX, saveFileDataRef);

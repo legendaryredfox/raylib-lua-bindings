@@ -120,7 +120,7 @@ int lua_ImageColorBrightness(lua_State *L) {
 
 int lua_ImageColorContrast(lua_State *L) {
     Image *image = luaL_checkudata(L, 1, "Image");
-    float contrast = luaL_checknumber(L, 2);
+    int contrast = (int)luaL_checkinteger(L, 2);   // raylib 6.2: int in [-100, 100]
     ImageColorContrast(image, contrast);
     return 0;
 }
@@ -669,10 +669,29 @@ int lua_ImageDrawRectangleRec(lua_State *L) {
 
 int lua_ImageDrawRectangleLines(lua_State *L) {
     Image *dst = luaL_checkudata(L, 1, "Image");
+    if (lua_istable(L, 2)) {
+        // (image, rec, thick, color): pre-6.2 form, now ImageDrawRectangleLinesEx
+        Rectangle rec = get_rectangle_from_table(L, 2);
+        int thick = luaL_checkinteger(L, 3);
+        Color color = get_color_from_table(L, 4);
+        ImageDrawRectangleLinesEx(dst, rec, thick, color);
+    } else {
+        int posX = luaL_checkinteger(L, 2);
+        int posY = luaL_checkinteger(L, 3);
+        int width = luaL_checkinteger(L, 4);
+        int height = luaL_checkinteger(L, 5);
+        Color color = get_color_from_table(L, 6);
+        ImageDrawRectangleLines(dst, posX, posY, width, height, color);
+    }
+    return 0;
+}
+
+int lua_ImageDrawRectangleLinesEx(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
     Rectangle rec = get_rectangle_from_table(L, 2);
     int thick = luaL_checkinteger(L, 3);
     Color color = get_color_from_table(L, 4);
-    ImageDrawRectangleLines(dst, rec, thick, color);
+    ImageDrawRectangleLinesEx(dst, rec, thick, color);
     return 0;
 }
 
@@ -686,7 +705,7 @@ int lua_ImageDrawTriangle(lua_State *L) {
     return 0;
 }
 
-int lua_ImageDrawTriangleEx(lua_State *L) {
+int lua_ImageDrawTriangleGradient(lua_State *L) {
     Image *dst = luaL_checkudata(L, 1, "Image");
     Vector2 v1 = get_vector2_from_table(L, 2);
     Vector2 v2 = get_vector2_from_table(L, 3);
@@ -694,7 +713,7 @@ int lua_ImageDrawTriangleEx(lua_State *L) {
     Color c1 = get_color_from_table(L, 5);
     Color c2 = get_color_from_table(L, 6);
     Color c3 = get_color_from_table(L, 7);
-    ImageDrawTriangleEx(dst, v1, v2, v3, c1, c2, c3);
+    ImageDrawTriangleGradient(dst, v1, v2, v3, c1, c2, c3);
     return 0;
 }
 
@@ -742,7 +761,7 @@ int lua_ImageDraw(lua_State *L) {
     Rectangle srcRec = get_rectangle_from_table(L, 3);
     Rectangle dstRec = get_rectangle_from_table(L, 4);
     Color tint = get_color_from_table(L, 5);
-    ImageDraw(dst, *src, srcRec, dstRec, tint);
+    ImageDrawImagePro(dst, *src, srcRec, dstRec, (Vector2){ 0.0f, 0.0f }, 0.0f, tint);
     return 0;
 }
 

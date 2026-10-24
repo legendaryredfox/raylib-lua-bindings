@@ -628,13 +628,13 @@ int lua_GetSplinePointCatmullRom(lua_State *L);
  * 
  * @usage
  * ```lua
- * local point = raylib.GetSplinePointBezierQuad({ x = 50, y = 50 }, { x = 100, y = 150 }, { x = 150, y = 50 }, 0.5)
+ * local point = raylib.GetSplinePointBezierQuadratic({ x = 50, y = 50 }, { x = 100, y = 150 }, { x = 150, y = 50 }, 0.5)
  * print(point.x, point.y) -- Prints the interpolated position
  * ```
  * 
  * @note The value of `t` should be between 0.0 and 1.0.
  */
-int lua_GetSplinePointBezierQuad(lua_State *L);
+int lua_GetSplinePointBezierQuadratic(lua_State *L);
 
 /**
  * @brief Gets a point on a cubic Bezier spline.
