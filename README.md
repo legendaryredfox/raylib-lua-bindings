@@ -9,7 +9,7 @@ This project provides bindings for **Raylib** (a simple and easy-to-use game dev
 
 ## Features
 
-- **Complete raylib 6.0 API coverage** — every public `RLAPI` function in `raylib.h` is bound (606 callables exposed via `require("raylib")`)
+- **Complete raylib 6.2 API coverage** — every public `RLAPI` function in `raylib.h` is bound (628 callables exposed via `require("raylib")`, including a few compatibility aliases)
 - **Simple, idiomatic Lua bindings** spanning **drawing**, **audio**, **textures**, **models**, **shaders**, **3D/2D cameras** & coordinate transforms, render-to-texture / blend / scissor modes, **gamepad/gesture/touch input**, **filesystem & data utilities**, VR, and automation events
 - Colors as `{r,g,b,a}` tables or named constants (`RED`, `RAYWHITE`, …); `ClearBackground` and `DrawRectangle` additionally accept a packed `0xRRGGBBAA` integer
 - Autocomplete available for VSCode: https://marketplace.visualstudio.com/items?itemName=LegendaryRedfox.raylib-lua-bindings-autocomplete
@@ -25,7 +25,7 @@ Before building this project, ensure you have the following software installed:
 2. **Make**: A tool to automate the build process.
 3. **libX11** development headers (usually `libx11-dev`).
 
-Raylib 6.0 and Lua 5.5.0 sources are **vendored** in `raylib/` and `lua/` — no system installation required. The first `make` compiles them into static libraries, then builds `raylib.so`.
+Raylib 6.2 and Lua 5.5.1 sources are **vendored** in `raylib/` and `lua/` — no system installation required. The first `make` compiles them into static libraries, then builds `raylib.so`.
 
 ### On Windows:
 
@@ -109,7 +109,7 @@ raylib.DrawText("hi", 10, 10, 20, RAYWHITE)           -- other calls need a tabl
 
 ### 5. Running tests
 
-The suite (271 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities and named colors, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, random sequences, and audio-handler validation — everything that runs without an open window or audio device.
+The suite (313 checks) covers text utilities and parsing, hashing (CRC32/MD5/SHA1/SHA256), color utilities and named colors, CPU-side image operations (generate/inspect/copy/transform), filesystem & path helpers, data (de)compression and base64, random sequences, and audio-handler validation — everything that runs without an open window or audio device.
 
 ```bash
 make test
@@ -137,6 +137,13 @@ This will delete the compiled object files and the generated shared library (ray
 ### Known Issues
 
 - Builds and passes the full test suite on both Linux and Windows. GPU/audio-dependent bindings (rendering, hardware textures, audio playback, input) still require a window or audio device and are verified by running example scripts rather than the headless test suite.
+- **Raylib 6.2 migration notes** (changes that can affect scripts written for 6.0):
+  - `DrawCapsule` / `DrawCapsuleWires` take `(rings, slices)` — the order was `(slices, rings)` in 6.0.
+  - `ImageColorContrast` takes an integer (`-100..100`).
+  - `FileCopy` and `FileMove` return `0` on success (6.0: `1` and `-1`). `ChangeDirectory` still returns a boolean.
+  - `ImageDrawRectangleLines` accepts both `(image, rec, thick, color)` and the new `(image, x, y, width, height, color)`; `ImageDrawRectangleLinesEx` is the rectangle form.
+  - `ImageDraw` (rectangle form) still works; the new `ImageDrawImage`, `ImageDrawImageEx`, `ImageDrawImagePro` and `ImageDrawImageRec` mirror `DrawTexture*`.
+  - `GetSplinePointBezierQuad` is now `GetSplinePointBezierQuadratic` (old name kept as an alias); `ImageDrawTriangleEx` is now `ImageDrawTriangleGradient` (old name kept as an alias).
 - `GetTargetFPS` is exposed for API symmetry but raylib has no such function; it delegates to `GetFPS()`.
 - Audio handlers (`AttachAudioStreamProcessor`, `AttachAudioMixedProcessor`, `SetAudioStreamCallback`) run on raylib's audio thread, each in its own private Lua state. They cannot capture locals (upvalues) and do not see the script's globals or the raylib module; keep handler state in the handler's own globals. Up to 16 handlers can be attached at once. A handler that raises an error is disabled and its message is printed to stderr.
 - Raylib objects (textures, images, sounds, fonts, models, …) are returned as userdata and must be released with the matching `Unload*`; they are **not** garbage-collected automatically. Automatic `__gc` is intentionally omitted because raylib objects share ownership (a mesh inside a model, a texture inside a material), which would make blind finalization double-free. After `Unload*`, the userdata is zeroed so accidental reuse is a safe no-op rather than a use-after-free.
