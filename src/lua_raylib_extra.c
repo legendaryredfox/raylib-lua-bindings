@@ -1142,6 +1142,18 @@ static int lua_DrawTriangleLinesEx(lua_State *L) {
     return 0;
 }
 
+// Not a raylib function: RenderTexture2D is a userdata here, so scripts need a way
+// to reach its color attachment to draw it. Returns a Texture2D userdata that
+// *shares* the GL texture with the render texture: release it with
+// UnloadRenderTexture(rt) only, never UnloadTexture() on the returned value.
+static int lua_GetRenderTextureTexture(lua_State *L) {
+    RenderTexture2D *rt = luaL_checkudata(L, 1, "RenderTexture2D");
+    Texture2D *tex = lua_newuserdata(L, sizeof(Texture2D));
+    *tex = rt->texture;
+    luaL_setmetatable(L, "Texture2D");
+    return 1;
+}
+
 static int lua_LoadRenderTextureEx(lua_State *L) {
     int width = (int)luaL_checkinteger(L, 1);
     int height = (int)luaL_checkinteger(L, 2);
@@ -1350,7 +1362,7 @@ static const luaL_Reg extra_functions[] = {
     {"DrawCircleLinesEx", lua_DrawCircleLinesEx}, {"DrawCircleSectorLinesEx", lua_DrawCircleSectorLinesEx},
     {"DrawEllipseLinesEx", lua_DrawEllipseLinesEx}, {"DrawRingLinesEx", lua_DrawRingLinesEx},
     {"DrawTriangleGradient", lua_DrawTriangleGradient}, {"DrawTriangleLinesEx", lua_DrawTriangleLinesEx},
-    {"LoadRenderTextureEx", lua_LoadRenderTextureEx},
+    {"LoadRenderTextureEx", lua_LoadRenderTextureEx}, {"GetRenderTextureTexture", lua_GetRenderTextureTexture},
     {"ImageDrawCircleGradient", lua_ImageDrawCircleGradient}, {"ImageDrawImage", lua_ImageDrawImage},
     {"ImageDrawImageEx", lua_ImageDrawImageEx}, {"ImageDrawImagePro", lua_ImageDrawImagePro},
     {"ImageDrawImageRec", lua_ImageDrawImageRec}, {"ImageDrawLineStrip", lua_ImageDrawLineStrip},

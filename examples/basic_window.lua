@@ -12,6 +12,10 @@ raylib.InitWindow(screenWidth, screenHeight, "raylib [core] example - basic wind
 raylib.SetTargetFPS(60)  -- Set our game to run at 60 frames-per-second
 ----------------------------------------------------------------------------------------
 
+-- EXAMPLE_FRAMES=N exits after N frames (used for automated runs)
+local max_frames = tonumber(os.getenv("EXAMPLE_FRAMES"))
+local frame = 0
+
 -- Main game loop
 while not raylib.WindowShouldClose() do  -- Detect window close button or ESC key
     -- Update
@@ -21,6 +25,8 @@ while not raylib.WindowShouldClose() do  -- Detect window close button or ESC ke
     raylib.DrawText("Hello Raylib + Lua!", 100, 150, 20, BLACK)
     raylib.EndDrawing()
     ------------------------------------------------------------------------------------
+    frame = frame + 1
+    if max_frames and frame >= max_frames then break end
 end
 
 -- De-Initialization

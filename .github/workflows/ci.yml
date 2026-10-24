@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential xvfb \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            libgl1-mesa-dev libgl1-mesa-dri
+
+      - name: Build module
+        run: make
+
+      # The tests run through a `lua` interpreter: link the vendored 5.5.1 one against
+      # the -fPIC liblua.a that `make` just built (building it first would leave a
+      # non-PIC archive and break the module link).
+      - name: Build vendored Lua interpreter
+        run: |
+          make -C lua/src lua SYSCFLAGS="-DLUA_USE_LINUX" SYSLIBS="-Wl,-E -ldl" MYCFLAGS=-fPIC
+          echo "$GITHUB_WORKSPACE/lua/src" >> "$GITHUB_PATH"
+
+      - name: Headless tests
+        run: make test
+
+      - name: Windowed tests (Xvfb)
+        run: make test-gl
+
+      - name: Examples (Xvfb)
+        run: make examples
+
+      - name: Generated files are up to date
+        run: |
+          python3 tools/gen_constants.py
+          python3 tools/gen_raymath.py
+          git diff --exit-code -- src/lua_raylib_constants.c src/lua_raylib_math.c

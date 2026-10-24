@@ -52,10 +52,16 @@ local suite_files = {
     "tests/test_raylib62.lua",
     "tests/test_constants.lua",
     "tests/test_math.lua",
+    "tests/test_close.lua",
     "tests/test_extra.lua",
     "tests/test_safety.lua",
     "tests/test_audio.lua",
 }
+
+-- Windowed suites need a GL context; `make test-gl` runs them under xvfb-run.
+if os.getenv("RAYLIB_TEST_GL") then
+    suite_files = { "tests/gl/test_gl.lua" }
+end
 
 for _, path in ipairs(suite_files) do
     local chunk, load_err = loadfile(path)

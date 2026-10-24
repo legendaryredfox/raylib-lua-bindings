@@ -564,6 +564,30 @@ static void register_raylib_metatables(lua_State *L) {
     }
 }
 
+// Wires `local x <close> = raylib.LoadX(...)` to the matching Unload*: sets __close on
+// each resource metatable to that module function. The Unload* functions zero the
+// userdata, so closing a value that was already unloaded by hand is a safe no-op.
+// Expects the module table on top of the stack.
+static void register_close_metamethods(lua_State *L) {
+    static const char *const pairs[][2] = {
+        {"AudioStream", "UnloadAudioStream"}, {"Font", "UnloadFont"}, {"Image", "UnloadImage"},
+        {"Material", "UnloadMaterial"}, {"Mesh", "UnloadMesh"}, {"Model", "UnloadModel"},
+        {"ModelAnimation", "UnloadModelAnimation"}, {"Music", "UnloadMusicStream"},
+        {"RenderTexture2D", "UnloadRenderTexture"}, {"Shader", "UnloadShader"},
+        {"Sound", "UnloadSound"}, {"Texture2D", "UnloadTexture"},
+        {"TextureCubemap", "UnloadTexture"}, {"Wave", "UnloadWave"},
+        {"AutomationEventList", "UnloadAutomationEventList"},
+        {"VrStereoConfig", "UnloadVrStereoConfig"}, {NULL, NULL}
+    };
+    for (int i = 0; pairs[i][0] != NULL; i++) {
+        if (lua_getfield(L, -1, pairs[i][1]) != LUA_TFUNCTION) { lua_pop(L, 1); continue; }
+        luaL_getmetatable(L, pairs[i][0]);
+        lua_pushvalue(L, -2);
+        lua_setfield(L, -2, "__close");
+        lua_pop(L, 2);   // metatable + function
+    }
+}
+
 // Defined in lua_raylib_extra.c — adds the extra bindings (mode pairs, camera,
 // shaders, input, filesystem, …) onto the module table at the top of the stack.
 void register_extra(lua_State *L);
@@ -579,6 +603,7 @@ int luaopen_raylib(lua_State *L) {
     register_extra(L);
     register_raylib_constants(L);
     register_raylib_math(L);
+    register_close_metamethods(L);
     register_raylib_colors(L);
     return 1;
 }

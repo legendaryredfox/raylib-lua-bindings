@@ -67,6 +67,19 @@ $(LUA_LIB):
 test: $(OUTPUT)
 	LUA_CPATH="./?.so" lua tests/runner.lua
 
+# Windowed tests and examples run headless under Xvfb (no window appears on screen)
+XVFB = xvfb-run -a -s "-screen 0 1280x720x24"
+
+test-gl: $(OUTPUT)
+	RAYLIB_TEST_GL=1 LUA_CPATH="./?.so" $(XVFB) lua tests/runner.lua
+
+# Run every example for a few frames (EXAMPLE_FRAMES makes them exit by themselves)
+examples: $(OUTPUT)
+	@for f in examples/*.lua; do \
+		echo "== $$f"; \
+		EXAMPLE_FRAMES=10 LUA_CPATH="./?.so" $(XVFB) lua $$f > /dev/null || exit 1; \
+	done
+
 # Clean build files
 clean:
 	$(RM) $(OBJ_FILES) $(OUTPUT)
@@ -76,4 +89,4 @@ distclean: clean
 	$(MAKE) -C raylib/src clean
 	$(MAKE) -C lua/src clean
 
-.PHONY: all test clean distclean
+.PHONY: all test test-gl examples clean distclean
