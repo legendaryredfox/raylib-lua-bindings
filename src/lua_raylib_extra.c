@@ -1073,6 +1073,175 @@ static int lua_UnloadFontData(lua_State *L) {
 // Registration
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Added in raylib 6.2: path queries, line-thickness shape variants, gradient
+// triangle, LoadRenderTextureEx, and the ImageDraw* family
+// ---------------------------------------------------------------------------
+
+static int lua_IsFileHidden(lua_State *L)    { lua_pushboolean(L, IsFileHidden(luaL_checkstring(L, 1)));    return 1; }
+static int lua_IsPathAbsolute(lua_State *L)  { lua_pushboolean(L, IsPathAbsolute(luaL_checkstring(L, 1)));  return 1; }
+static int lua_IsPathDirectory(lua_State *L) { lua_pushboolean(L, IsPathDirectory(luaL_checkstring(L, 1))); return 1; }
+
+static int lua_DrawCircleLinesEx(lua_State *L) {
+    Vector2 center = get_vector2_from_table(L, 1);
+    float radius = (float)luaL_checknumber(L, 2);
+    float thick = (float)luaL_checknumber(L, 3);
+    DrawCircleLinesEx(center, radius, thick, get_color_from_table(L, 4));
+    return 0;
+}
+
+static int lua_DrawCircleSectorLinesEx(lua_State *L) {
+    Vector2 center = get_vector2_from_table(L, 1);
+    float radius = (float)luaL_checknumber(L, 2);
+    float startAngle = (float)luaL_checknumber(L, 3);
+    float endAngle = (float)luaL_checknumber(L, 4);
+    int segments = (int)luaL_checkinteger(L, 5);
+    float thick = (float)luaL_checknumber(L, 6);
+    DrawCircleSectorLinesEx(center, radius, startAngle, endAngle, segments, thick, get_color_from_table(L, 7));
+    return 0;
+}
+
+static int lua_DrawEllipseLinesEx(lua_State *L) {
+    Vector2 center = get_vector2_from_table(L, 1);
+    float radiusH = (float)luaL_checknumber(L, 2);
+    float radiusV = (float)luaL_checknumber(L, 3);
+    float thick = (float)luaL_checknumber(L, 4);
+    DrawEllipseLinesEx(center, radiusH, radiusV, thick, get_color_from_table(L, 5));
+    return 0;
+}
+
+static int lua_DrawRingLinesEx(lua_State *L) {
+    Vector2 center = get_vector2_from_table(L, 1);
+    float innerRadius = (float)luaL_checknumber(L, 2);
+    float outerRadius = (float)luaL_checknumber(L, 3);
+    float startAngle = (float)luaL_checknumber(L, 4);
+    float endAngle = (float)luaL_checknumber(L, 5);
+    int segments = (int)luaL_checkinteger(L, 6);
+    float thick = (float)luaL_checknumber(L, 7);
+    DrawRingLinesEx(center, innerRadius, outerRadius, startAngle, endAngle, segments, thick, get_color_from_table(L, 8));
+    return 0;
+}
+
+static int lua_DrawTriangleGradient(lua_State *L) {
+    Vector2 v1 = get_vector2_from_table(L, 1);
+    Vector2 v2 = get_vector2_from_table(L, 2);
+    Vector2 v3 = get_vector2_from_table(L, 3);
+    Color c1 = get_color_from_table(L, 4);
+    Color c2 = get_color_from_table(L, 5);
+    Color c3 = get_color_from_table(L, 6);
+    DrawTriangleGradient(v1, v2, v3, c1, c2, c3);
+    return 0;
+}
+
+static int lua_DrawTriangleLinesEx(lua_State *L) {
+    Vector2 v1 = get_vector2_from_table(L, 1);
+    Vector2 v2 = get_vector2_from_table(L, 2);
+    Vector2 v3 = get_vector2_from_table(L, 3);
+    float thick = (float)luaL_checknumber(L, 4);
+    DrawTriangleLinesEx(v1, v2, v3, thick, get_color_from_table(L, 5));
+    return 0;
+}
+
+static int lua_LoadRenderTextureEx(lua_State *L) {
+    int width = (int)luaL_checkinteger(L, 1);
+    int height = (int)luaL_checkinteger(L, 2);
+    int format = (int)luaL_checkinteger(L, 3);
+    RenderTexture2D *p = lua_newuserdata(L, sizeof(RenderTexture2D));
+    *p = LoadRenderTextureEx(width, height, format);
+    luaL_setmetatable(L, "RenderTexture2D");
+    return 1;
+}
+
+static int lua_ImageDrawCircleGradient(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    Vector2 center = get_vector2_from_table(L, 2);
+    float radius = (float)luaL_checknumber(L, 3);
+    Color inner = get_color_from_table(L, 4);
+    Color outer = get_color_from_table(L, 5);
+    ImageDrawCircleGradient(dst, center, radius, inner, outer);
+    return 0;
+}
+
+static int lua_ImageDrawImage(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    Image *src = luaL_checkudata(L, 2, "Image");
+    int posX = (int)luaL_checkinteger(L, 3);
+    int posY = (int)luaL_checkinteger(L, 4);
+    ImageDrawImage(dst, *src, posX, posY, get_color_from_table(L, 5));
+    return 0;
+}
+
+static int lua_ImageDrawImageEx(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    Image *src = luaL_checkudata(L, 2, "Image");
+    Vector2 position = get_vector2_from_table(L, 3);
+    float rotation = (float)luaL_checknumber(L, 4);
+    float scale = (float)luaL_checknumber(L, 5);
+    ImageDrawImageEx(dst, *src, position, rotation, scale, get_color_from_table(L, 6));
+    return 0;
+}
+
+static int lua_ImageDrawImagePro(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    Image *src = luaL_checkudata(L, 2, "Image");
+    Rectangle srcRec = get_rectangle_from_table(L, 3);
+    Rectangle dstRec = get_rectangle_from_table(L, 4);
+    Vector2 origin = get_vector2_from_table(L, 5);
+    float rotation = (float)luaL_checknumber(L, 6);
+    ImageDrawImagePro(dst, *src, srcRec, dstRec, origin, rotation, get_color_from_table(L, 7));
+    return 0;
+}
+
+static int lua_ImageDrawImageRec(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    Image *src = luaL_checkudata(L, 2, "Image");
+    Rectangle srcRec = get_rectangle_from_table(L, 3);
+    Vector2 position = get_vector2_from_table(L, 4);
+    ImageDrawImageRec(dst, *src, srcRec, position, get_color_from_table(L, 5));
+    return 0;
+}
+
+static int lua_ImageDrawLineStrip(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    int pointCount = (int)luaL_len(L, 2);
+    Vector2 *points = get_vector2_array_from_table(L, 2);   // Lua-managed, do not free
+    ImageDrawLineStrip(dst, points, pointCount, get_color_from_table(L, 3));
+    return 0;
+}
+
+static int lua_ImageDrawRectangleGradientEx(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    Rectangle rec = get_rectangle_from_table(L, 2);
+    Color c1 = get_color_from_table(L, 3);
+    Color c2 = get_color_from_table(L, 4);
+    Color c3 = get_color_from_table(L, 5);
+    Color c4 = get_color_from_table(L, 6);
+    ImageDrawRectangleGradientEx(dst, rec, c1, c2, c3, c4);
+    return 0;
+}
+
+static int lua_ImageDrawRectanglePro(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    Rectangle rec = get_rectangle_from_table(L, 2);
+    Vector2 origin = get_vector2_from_table(L, 3);
+    float rotation = (float)luaL_checknumber(L, 4);
+    ImageDrawRectanglePro(dst, rec, origin, rotation, get_color_from_table(L, 5));
+    return 0;
+}
+
+static int lua_ImageDrawTextPro(lua_State *L) {
+    Image *dst = luaL_checkudata(L, 1, "Image");
+    Font *font = luaL_checkudata(L, 2, "Font");
+    const char *text = luaL_checkstring(L, 3);
+    Vector2 position = get_vector2_from_table(L, 4);
+    Vector2 origin = get_vector2_from_table(L, 5);
+    float rotation = (float)luaL_checknumber(L, 6);
+    float fontSize = (float)luaL_checknumber(L, 7);
+    float spacing = (float)luaL_checknumber(L, 8);
+    ImageDrawTextPro(dst, *font, text, position, origin, rotation, fontSize, spacing, get_color_from_table(L, 9));
+    return 0;
+}
+
 static const luaL_Reg extra_functions[] = {
     // Mode pairs
     {"BeginMode2D", lua_BeginMode2D}, {"EndMode2D", lua_EndMode2D},
@@ -1176,6 +1345,17 @@ static const luaL_Reg extra_functions[] = {
     {"LoadFontData", lua_LoadFontData}, {"GenImageFontAtlas", lua_GenImageFontAtlas}, {"UnloadFontData", lua_UnloadFontData},
     // Drag-and-drop
     {"IsFileDropped", lua_IsFileDropped}, {"LoadDroppedFiles", lua_LoadDroppedFiles}, {"UnloadDroppedFiles", lua_UnloadDroppedFiles},
+    // Raylib 6.2 additions
+    {"IsFileHidden", lua_IsFileHidden}, {"IsPathAbsolute", lua_IsPathAbsolute}, {"IsPathDirectory", lua_IsPathDirectory},
+    {"DrawCircleLinesEx", lua_DrawCircleLinesEx}, {"DrawCircleSectorLinesEx", lua_DrawCircleSectorLinesEx},
+    {"DrawEllipseLinesEx", lua_DrawEllipseLinesEx}, {"DrawRingLinesEx", lua_DrawRingLinesEx},
+    {"DrawTriangleGradient", lua_DrawTriangleGradient}, {"DrawTriangleLinesEx", lua_DrawTriangleLinesEx},
+    {"LoadRenderTextureEx", lua_LoadRenderTextureEx},
+    {"ImageDrawCircleGradient", lua_ImageDrawCircleGradient}, {"ImageDrawImage", lua_ImageDrawImage},
+    {"ImageDrawImageEx", lua_ImageDrawImageEx}, {"ImageDrawImagePro", lua_ImageDrawImagePro},
+    {"ImageDrawImageRec", lua_ImageDrawImageRec}, {"ImageDrawLineStrip", lua_ImageDrawLineStrip},
+    {"ImageDrawRectangleGradientEx", lua_ImageDrawRectangleGradientEx},
+    {"ImageDrawRectanglePro", lua_ImageDrawRectanglePro}, {"ImageDrawTextPro", lua_ImageDrawTextPro},
     {NULL, NULL}
 };
 
