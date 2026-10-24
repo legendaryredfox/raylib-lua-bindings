@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Generate src/lua_raylib_rlgl.c from raylib/src/rlgl.h.
+
+Every rlgl function whose parameters and result are plain numbers, booleans,
+strings or Matrix tables is wrapped automatically and exposed with its rlgl
+name (raylib.rlPushMatrix, raylib.rlBegin, ...). Functions that take or return
+pointers/buffers are handwritten in src/lua_raylib_rlgl_buffers.c (MANUAL below);
+the rest are deliberately unsupported (UNSUPPORTED below). The script fails if a
+function is in none of the three groups, so a raylib upgrade cannot silently
+leave one out.
+
+Usage (from the repo root):  python3 tools/gen_rlgl.py
+"""
+import re
+import sys
+from pathlib import Path
+
+HEADER = Path("raylib/src/rlgl.h")
+MANUAL_SRC = Path("src/lua_raylib_rlgl_buffers.c")
+OUT = Path("src/lua_raylib_rlgl.c")
+
+# Handwritten in src/lua_raylib_rlgl_buffers.c (pointer / buffer / struct arguments)
+MANUAL = {
+    "rlMultMatrixf", "rlLoadRenderBatch", "rlUnloadRenderBatch", "rlDrawRenderBatch",
+    "rlSetRenderBatchActive", "rlLoadVertexBuffer", "rlLoadVertexBufferElement",
+    "rlUpdateVertexBuffer", "rlUpdateVertexBufferElements", "rlSetVertexAttributeDefault",
+    "rlDrawVertexArrayElements", "rlDrawVertexArrayElementsInstanced", "rlLoadTexture",
+    "rlLoadTextureCubemap", "rlUpdateTexture", "rlGetGlTextureFormats", "rlGenTextureMipmaps",
+    "rlReadTexturePixels", "rlReadScreenPixels", "rlCopyFramebuffer", "rlSetUniform",
+    "rlSetUniformMatrices", "rlLoadShaderBuffer", "rlUpdateShaderBuffer", "rlReadShaderBuffer",
+}
+
+# Not exposed, with the reason (also written into the generated file)
+UNSUPPORTED = {
+    "rlglInit": "GL context setup is owned by InitWindow()",
+    "rlglClose": "GL context teardown is owned by CloseWindow()",
+    "rlLoadExtensions": "takes a raw C loader function pointer",
+    "rlGetProcAddress": "returns a raw C function pointer",
+    "rlGetShaderLocsDefault": "returns a raw int* into raylib's state",
+    "rlSetShader": "keeps the int* locs pointer; use BeginShaderMode(shader)",
+    "rlEnableStatePointer": "keeps a client-memory pointer that outlives the call",
+}
+
+text = HEADER.read_text().split("#if defined(RLGL_IMPLEMENTATION)")[0]
+
+INT_PARAMS = {"int": "(int)luaL_checkinteger(L, {i})"}
+GETTERS = {
+    "int": "(int)luaL_checkinteger(L, {i})",
+    "unsigned int": "rl_check_uint(L, {i})",
+    "unsigned char": "rl_check_ubyte(L, {i})",
+    "float": "(float)luaL_checknumber(L, {i})",
+    "double": "luaL_checknumber(L, {i})",
+    "bool": "rl_check_bool(L, {i})",
+    "const char *": "luaL_checkstring(L, {i})",
+    "Matrix": "get_matrix_from_table(L, {i})",
+}
+PUSHERS = {
+    "int": "lua_pushinteger(L, {e});",
+    "unsigned int": "lua_pushinteger(L, (lua_Integer){e});",
+    "float": "lua_pushnumber(L, {e});",
+    "double": "lua_pushnumber(L, {e});",
+    "bool": "lua_pushboolean(L, {e});",
+    "Matrix": "push_matrix_to_table(L, {e});",
+}
+
+funcs = []   # generated wrappers
+seen = set()
+for m in re.finditer(r"^RLAPI\s+(.+?)\b(rl\w+)\(([^)]*)\)\s*;", text, flags=re.M):
+    ret, name, params = m.group(1).strip().replace("  ", " "), m.group(2), m.group(3).strip()
+    seen.add(name)
+    if name in MANUAL or name in UNSUPPORTED:
+        continue
+    plist = [] if params in ("", "void") else [p.strip() for p in params.split(",")]
+    decls, args = [], []
+    for i, p in enumerate(plist, start=1):
+        ptype, pname = p.rsplit(None, 1)
+        if pname.startswith("*"):
+            ptype, pname = ptype + " *", pname[1:]
+        ptype = ptype.replace("  ", " ")
+        if ptype not in GETTERS:
+            sys.exit(f"{name}: unsupported parameter type '{ptype}' (add it to MANUAL or UNSUPPORTED)")
+        decls.append(f"    {ptype} {pname} = {GETTERS[ptype].format(i=i)};")
+        args.append(pname)
+    call = f"{name}({', '.join(args)})"
+    if ret == "void":
+        body = decls + [f"    {call};", "    return 0;"]
+    elif ret == "const char *":
+        body = decls + [f"    const char *s = {call};", "    if (s) lua_pushstring(L, s); else lua_pushnil(L);", "    return 1;"]
+    elif ret in PUSHERS:
+        body = decls + ["    " + PUSHERS[ret].format(e=call), "    return 1;"]
+    else:
+        sys.exit(f"{name}: unsupported return type '{ret}' (add it to MANUAL or UNSUPPORTED)")
+    funcs.append((name, body))
+
+missing = (MANUAL | set(UNSUPPORTED)) - seen
+if missing:
+    sys.exit(f"listed but not in rlgl.h: {sorted(missing)}")
+manual_src = MANUAL_SRC.read_text() if MANUAL_SRC.exists() else ""
+not_registered = [n for n in sorted(MANUAL) if f'{{"{n}"' not in manual_src]
+if not_registered:
+    sys.exit(f"MANUAL functions missing from {MANUAL_SRC}: {not_registered}")
+
+wrappers = "\n".join(f"static int rlw_{n}(lua_State *L) {{\n" + "\n".join(b) + "\n}\n" for n, b in funcs)
+reg = "\n".join(f'    {{"{n}", rlw_{n}}},' for n, _ in funcs)
+unsupported = "\n".join(f"//   {n}: {why}" for n, why in sorted(UNSUPPORTED.items()))
+OUT.write_text(f"""// lua_raylib_rlgl.c
+//
+// GENERATED by tools/gen_rlgl.py from raylib/src/rlgl.h -- do not edit.
+// Exposes the scalar/string/Matrix rlgl functions under their rlgl names. The ones
+// that take buffers are in lua_raylib_rlgl_buffers.c. Not exposed:
+{unsupported}
+//
+// rlgl talks to OpenGL directly: call these only between InitWindow() and CloseWindow().
+
+#include <limits.h>
+#include "raylib.h"
+#include "rlgl.h"
+#include <lua.h>
+#include <lauxlib.h>
+#include "raylib_wrappers.h"
+
+static unsigned int rl_check_uint(lua_State *L, int arg) {{
+    lua_Integer v = luaL_checkinteger(L, arg);
+    luaL_argcheck(L, v >= 0 && v <= (lua_Integer)UINT_MAX, arg, "value out of range for an unsigned int");
+    return (unsigned int)v;
+}}
+
+static unsigned char rl_check_ubyte(lua_State *L, int arg) {{
+    lua_Integer v = luaL_checkinteger(L, arg);
+    luaL_argcheck(L, v >= 0 && v <= 255, arg, "value must be in 0..255");
+    return (unsigned char)v;
+}}
+
+static bool rl_check_bool(lua_State *L, int arg) {{
+    luaL_checkany(L, arg);
+    return lua_toboolean(L, arg) != 0;
+}}
+
+{wrappers}
+static const luaL_Reg rlgl_functions[] = {{
+{reg}
+    {{NULL, NULL}}
+}};
+
+// Handwritten part (src/lua_raylib_rlgl_buffers.c)
+void register_raylib_rlgl_buffers(lua_State *L);
+
+// Adds the rlgl functions onto the module table currently on top of the stack.
+void register_raylib_rlgl(lua_State *L) {{
+    luaL_setfuncs(L, rlgl_functions, 0);
+    register_raylib_rlgl_buffers(L);
+}}
+""")
+print(f"{len(funcs)} generated, {len(MANUAL)} manual, {len(UNSUPPORTED)} unsupported -> {OUT}", file=sys.stderr)

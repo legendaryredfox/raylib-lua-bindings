@@ -42,4 +42,5 @@ jobs:
         run: |
           python3 tools/gen_constants.py
           python3 tools/gen_raymath.py
-          git diff --exit-code -- src/lua_raylib_constants.c src/lua_raylib_math.c
+          python3 tools/gen_rlgl.py
+          git diff --exit-code -- src/lua_raylib_constants.c src/lua_raylib_math.c src/lua_raylib_rlgl.c
