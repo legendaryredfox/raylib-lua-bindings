@@ -53,3 +53,4 @@ IMPLEMENT.md
 
 # Vendored static libraries are built from source by the makefile
 *.a
+__pycache__/

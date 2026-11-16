@@ -26,6 +26,17 @@ do
     T.assert_true("LoadRenderTextureEx valid", r.IsRenderTextureValid(rt))
 end
 
+-- DrawRectangleRounded takes a Rectangle table or four numbers
+do
+    local ok_rec = pcall(function()
+        r.BeginDrawing()
+        r.DrawRectangleRounded({x = 4, y = 4, width = 20, height = 20}, 0.3, 8, r.RED)
+        r.DrawRectangleRounded(4, 4, 20, 20, 0.3, 8, r.RED)
+        r.EndDrawing()
+    end)
+    T.assert_true("DrawRectangleRounded accepts table and number forms", ok_rec)
+end
+
 -- Draw*Ex variants run without error inside a frame
 local ok = pcall(function()
     r.BeginDrawing()

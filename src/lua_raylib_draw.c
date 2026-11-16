@@ -88,15 +88,11 @@ int lua_DrawRectangleGradient(lua_State *L) {
 }
 
 int lua_DrawRectangleRounded(lua_State *L) {
-    Rectangle rect = {
-        luaL_checknumber(L, 1),
-        luaL_checknumber(L, 2),
-        luaL_checknumber(L, 3),
-        luaL_checknumber(L, 4),
-    };
-    float roundness = luaL_checknumber(L, 5);
-    int segments = luaL_checkinteger(L, 6);
-    Color color = get_color_from_table(L, 7);
+    Rectangle rect;
+    int c = 1 + get_rectangle_arg(L, 1, &rect);   // rect as a table or 4 numbers
+    float roundness = (float)luaL_checknumber(L, c);
+    int segments = (int)luaL_checkinteger(L, c + 1);
+    Color color = get_color_from_table(L, c + 2);
     DrawRectangleRounded(rect, roundness, segments, color);
     return 0;
 }

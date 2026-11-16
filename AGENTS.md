@@ -49,6 +49,7 @@ Tests (`tests/test_*.lua`, ~430 checks, no window needed) cover text, hashing, c
 2. Implement it in the matching `src/lua_raylib_*.c`, following the rules above.
 3. Register it in `raylib_functions` (`src/lua_raylib.c`) or `extra_functions[]` (`_extra.c`).
 4. `make && make test`. Add a test when the binding works without a window.
+5. Type it for LuaLS: `types/raylib.lua` is **generated** by `tools/gen_types.py` from `raylib.h`/`raymath.h`/`rlgl.h` plus the registered names; never hand-edit. Array+count pairs collapse to one table, `int *` out-params are dropped. If the Lua signature differs from the C header (extra results, integer-only args, optional args, Lua-only functions), add it to `OVERRIDES` / `OPTIONAL` / `OVERLOADS` / `LUA_ONLY` in the generator after checking the C wrapper; it fails if a registered function has no signature. Check with `lua-language-server --check . --configpath .luarc.json --checklevel Warning` (binary under `server/bin/` of the `sumneko.lua` VS Code extension); it must report nothing. Keep the `LegendaryRedfox.raylib-lua-bindings-autocomplete` extension definitions in sync.
 
 ## Quirks and API notes
 
@@ -63,6 +64,6 @@ Tests (`tests/test_*.lua`, ~430 checks, no window needed) cover text, hashing, c
 - `ColorAlpha(color, f)` replaces alpha with `255*f`.
 - `GetTargetFPS` doesn't exist in Raylib; it delegates to `GetFPS()`.
 - `DrawCircleGradient(center: Vector2, radius, inner, outer)`.
-- Dual-form signatures: `DrawRectangleLines`, `DrawRectangleGradientEx`, `ImageCrop`, `UpdateTextureRec` take raylib's Rectangle form and still accept the older four-number forms.
+- Dual-form signatures: `DrawRectangleGradientEx`, `DrawRectangleRounded`, `ImageCrop`, `UpdateTextureRec` take raylib's Rectangle form and still accept the older four-number forms. `DrawRectangleLines` keeps `(x, y, w, h, color)` and also accepts `(x, y, w, h, lineThick, color)`.
 - `GetCodepointPrevious(text [, pos])`: optional 1-based byte position, bounded by string start.
 - VSCode autocomplete extension: `LegendaryRedfox.raylib-lua-bindings-autocomplete`.
